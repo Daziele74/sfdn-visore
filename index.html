@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SFDN Visore v0.5ABCC</title>
+<title>SFDN Visore v0.5D</title>
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--ink:#1d2330;--mut:#667085;--acc:#1f6feb;--ok:#1a7f37;--bad:#cf222e;--line:#d0d7de}
 *{box-sizing:border-box}
@@ -28,7 +28,7 @@ pre{white-space:pre-wrap;background:#f6f8fa;border:1px solid var(--line);border-
 </style>
 </head>
 <body>
-<header><h1>SFDN &middot; Visore <small>v0.5ABC (reticoli, calibrazione colori)</small></h1></header>
+<header><h1>SFDN &middot; Visore <small>v0.5D (Prova tasti; reticoli archiviati)</small></h1></header>
 <main>
  <div class="card">
   <h2>1. Controlli automatici</h2>
@@ -66,7 +66,7 @@ pre{white-space:pre-wrap;background:#f6f8fa;border:1px solid var(--line);border-
   <p><b>Calibrazione colori rosso/verde</b> (menu 12 nel visore)<br>Usa la calibrazione <select id="calUse"><option value="sub">s&igrave;, quella del soggetto (media dei due metodi)</option><option value="man">s&igrave;, solo metodo manuale (flicker)</option><option value="auto">s&igrave;, solo metodo automatico (rivalit&agrave;)</option><option value="val">valore scritto a mano</option><option value="off">no (rosso e verde pieni)</option></select>
    &nbsp; valore a mano (guadagno del verde, 0,05-1) <input type="number" id="calVal" value="0.4" min="0.05" max="1" step="0.01" style="width:80px;font-size:18px"> &middot; <span id="calInfo" class="hint"></span><br>
    Dicoptica B: lo stimolo <select id="dbMode"><option value="exp">compare per poco e poi rispondi sul primo percetto (predefinito)</option><option value="long">resta finch&eacute; rispondi</option></select> durata <input type="number" id="dbExp" value="0.8" min="0.2" max="3" step="0.1" style="width:70px;font-size:18px"> s</p>
-  <p><b>Reticoli (menu 13-16, sperimentali)</b><br>
+  <p style="display:none"><b>Reticoli (archiviati: voci 13-16 tolte dal menu nella v0.5D)</b><br>
    Disco (gradi) <input type="number" id="grSize" value="4" min="1" max="10" step="0.5" style="width:70px;font-size:18px"> &middot; frequenza (cicli/grado) <input type="number" id="grCpd" value="1.5" min="0.5" max="3" step="0.1" style="width:70px;font-size:18px"> &middot; contrasto (%) <input type="number" id="grCon" value="100" min="10" max="100" step="5" style="width:70px;font-size:18px"><br>
    Test: blocco (s) <input type="number" id="grBlock" value="40" min="20" max="120" step="5" style="width:70px;font-size:18px"> &middot; pausa (s) <input type="number" id="grPause" value="20" min="5" max="60" step="5" style="width:70px;font-size:18px"> &middot; colori: usa l'impostazione "Palline" (colorate = rosso/verde, bianche = una riga bianca per occhio)<br>
    Esercizio: cambio ogni (s) <input type="number" id="grSwap" value="2" min="1" max="20" step="0.5" style="width:70px;font-size:18px"> &middot; durata (min) <input type="number" id="grDur" value="3" min="0.5" max="20" step="0.5" style="width:70px;font-size:18px"> &middot; parte con il rosso a <select id="grStart"><option value="OD">OD</option><option value="OS">OS</option></select> &middot; contrasto <select id="grLadder"><option value="off">fisso</option><option value="on">a gradini (scala)</option></select><br>
@@ -102,8 +102,9 @@ pre{white-space:pre-wrap;background:#f6f8fa;border:1px solid var(--line);border-
   <h3>Riepilogo test 9 (tutte le esecuzioni del riepilogo)</h3>
   <pre id="t9sum" class="mut">nessun test 9 ancora</pre>
   <p>Nel riepilogo e nella mail includi: <select id="sumScope"><option value="scheda">questa scheda soggetto (se attiva)</option><option value="sess">solo questa apertura della pagina</option><option value="all">tutte le prove salvate di questo soggetto</option></select> <span class="hint">(soggetto scritto nelle impostazioni del riquadro 3)</span></p>
-  <p><button class="primary" id="btnMail">Invia i risultati per email</button> <button id="btnCopy">Copia il riepilogo</button> <button id="btnDl">Scarica i risultati (.json)</button> <button id="btnClr">Cancella i risultati salvati</button></p>
-  <p class="hint">Indirizzo: <input id="mailTo" value="otticastefanucci@gmail.com" style="font-size:18px;padding:6px;width:320px"> &middot; &laquo;Invia&raquo; apre Gmail nel browser con la mail gi&agrave; scritta: controlla e premi <b>Invia</b> (serve internet e l'accesso a Gmail). <span id="mailMsg"></span></p>
+  <p><button class="primary" id="btnMail">Invia i risultati per email</button> <button id="btnCopy">Copia il riepilogo</button> <button id="btnDl">Scarica i risultati (.json)</button> <button id="btnClr">Cancella le prove salvate</button> <button id="btnReset">Azzera soggetto, soglia e calibrazione</button></p>
+  <p class="hint"><b>Cancella le prove salvate</b> toglie solo l&rsquo;elenco delle prove. <b>Restano</b>: soggetto, schede soggetto, soglia stereo, calibrazione colori e impostazioni. <b>Azzera soggetto, soglia e calibrazione</b> toglie il nome del soggetto e la soglia stereo e la calibrazione colori <b>di quel soggetto</b>; <b>restano</b> le prove salvate, le schede soggetto e le altre impostazioni.</p>
+  <p class="hint">Indirizzo: <input id="mailTo" value="" placeholder="scrivi qui l'indirizzo" style="font-size:18px;padding:6px;width:320px"> <b>da scrivere una volta per browser</b> (resta salvato su questo dispositivo, non &egrave; scritto nel programma) &middot; &laquo;Invia&raquo; apre Gmail nel browser con la mail gi&agrave; scritta: controlla e premi <b>Invia</b> (serve internet e l'accesso a Gmail). <span id="mailMsg"></span></p>
  </div>
 
  <div class="card">
@@ -124,7 +125,7 @@ DB.visite=(DB.visite||0)+1;
 var STORE=true; try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){ STORE=false; }
 var SESS=Date.now();   // identifica questa apertura della pagina
 var BG_NAME={dots:'parete a punti',black:'nero',meadow:'prato con alberi'};
-var SET={dCol:'col',dRed:'OD',mailTo:'otticastefanucci@gmail.com',cues:'off',thrMode:'auto',thrMan:300,factor:3,nearPct:20,subj:'',thr:null,thrDate:'',thrMap:null,sumScope:'sess',hands:'off',lock:'on',bg:'dots',a4n:12,shape:'sphere',headWarn:3,headBad:6,thrPolicy:'rel',thrBad:null,v:'',schedaId:'',calUse:'sub',calVal:0.4,calMap:{},dbMode:'exp',dbExp:0.8,grSize:4,grCpd:1.5,grCon:100,grBlock:40,grPause:20,grSwap:2,grDur:3,grLadder:'off',grStart:'OD',grDrift:0.2,grRot:1,grFb:'both',menuAll:'off',a4ord:'lat',a4cnt:0}; try{ var _s=JSON.parse(localStorage.getItem(KEY+'_imp')||'null'); if(_s) for(var _k in _s) SET[_k]=_s[_k]; }catch(e){}
+var SET={dCol:'col',dRed:'OD',mailTo:'',cues:'off',thrMode:'auto',thrMan:300,factor:3,nearPct:20,subj:'',thr:null,thrDate:'',thrMap:null,sumScope:'sess',hands:'off',lock:'on',bg:'dots',a4n:12,shape:'sphere',headWarn:3,headBad:6,thrPolicy:'rel',thrBad:null,v:'',schedaId:'',calUse:'sub',calVal:0.4,calMap:{},dbMode:'exp',dbExp:0.8,grSize:4,grCpd:1.5,grCon:100,grBlock:40,grPause:20,grSwap:2,grDur:3,grLadder:'off',grStart:'OD',grDrift:0.2,grRot:1,grFb:'both',menuAll:'off',a4ord:'lat',a4cnt:0}; try{ var _s=JSON.parse(localStorage.getItem(KEY+'_imp')||'null'); if(_s) for(var _k in _s) SET[_k]=_s[_k]; }catch(e){}
 if(SET.v!=='0.5'){ SET.hands='off'; SET.v='0.5'; }   // v0.5: mani spente di default
 if(!SET.thrBad) SET.thrBad={};
 if(!SET.calMap) SET.calMap={};
@@ -204,15 +205,16 @@ renderRes();
 $('btnDl').onclick=function(){ var b=new Blob([JSON.stringify({info:INFO,db:DB},null,1)],{type:'application/json'}); var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='SFDN_test_visore_risultati.json'; document.body.appendChild(a); a.click(); setTimeout(function(){ a.remove(); },500); };
 // dettaglio compatto per la mail (profondita' prova per prova)
 function mailBody(){
-  var t='Risultati SFDN Visore v0.5ABCC - '+(SET.subj?'soggetto '+SET.subj+' - ':'')+new Date().toLocaleString('it-IT')+'\n\n'+renderSum()+'\n';
+  var t='Risultati SFDN Visore v0.5D - '+(SET.subj?'soggetto '+SET.subj+' - ':'')+new Date().toLocaleString('it-IT')+'\n\n'+renderSum()+'\n';
   sumProve().slice(-6).forEach(function(p){ if((p.nome==='Profondità'||p.nome==='Soglia stereo')&&p.dati&&p.dati.prove){ t+='\n'+p.nome+' prova per prova (disparità in secondi d\'arco, G=giusta, S=sbagliata): '+p.dati.prove.map(function(x){ return x.disparita_arcsec+(x.giusta?'G':'S'); }).join(' ')+'\n'; } });
   var DPv=sumProve().slice(-6), isT9=function(p){ return /^t9[ABCDS]$/.test(p.tid||''); };
   DPv.filter(isT9).concat(DPv.filter(function(p){ return !isT9(p); })).forEach(function(p){ if(p.dati&&p.dati.dettaglio) t+='\n'+p.nome+' - dettaglio:\n'+p.dati.dettaglio+'\n'; });
   return t.length>4800?t.slice(0,4800)+'\n[...]':t;
 }
 $('btnMail').onclick=function(){
-  SET.mailTo=$('mailTo').value.trim()||'otticastefanucci@gmail.com'; saveSET();
-  var url='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(SET.mailTo)+'&su='+encodeURIComponent('SFDN Visore v0.5ABCC - risultati'+(SET.subj?' - '+SET.subj:''))+'&body='+encodeURIComponent(mailBody());
+  SET.mailTo=$('mailTo').value.trim(); saveSET();
+  if(SET.mailTo.indexOf('@')<1){ $('mailMsg').innerHTML='<b style="color:#cf222e">Scrivi prima l&rsquo;indirizzo email di destinazione nel campo qui sopra (basta una volta per browser).</b>'; return; }
+  var url='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(SET.mailTo)+'&su='+encodeURIComponent('SFDN Visore v0.5D - risultati'+(SET.subj?' - '+SET.subj:''))+'&body='+encodeURIComponent(mailBody());
   var w=window.open(url,'_blank'); if(!w) location.href=url;
   $('mailMsg').innerHTML='Se Gmail non si apre: <a href="mailto:'+esc(SET.mailTo)+'?subject='+encodeURIComponent('SFDN Test Visore - risultati')+'&body='+encodeURIComponent(mailBody())+'">prova con l\'app di posta</a> oppure usa &laquo;Copia il riepilogo&raquo;.';
 };
@@ -242,8 +244,12 @@ $('schOk').onclick=function(){ var nome=$('schNome').value.trim(); if(!nome){ $(
 $('btnCloseScheda').onclick=function(){ SET.schedaId=''; saveSET(); renderScheda(); renderRes(); };
 $('btnOpenScheda').onclick=function(){ var id=$('schList').value, r=DB.schede.filter(function(x){ return x.id===id; }); if(r.length) useScheda(r[0]); };
 renderScheda();
-$('btnClr').onclick=function(){ if(!confirm('Cancellare i risultati salvati?')) return; DB.prove=[]; saveDB(); renderRes(); };
-var TESTS=[['t1','1 Separazione occhi'],['t2','2 Profondità rapida'],['t3','3 Soglia stereo'],['t4','4 Palline'],['t5','5 Palline dicoptiche'],['t6','6 Prato: la più vicina'],['t7','7 Prato: in ordine'],['t8','8 Prato: davanti all’albero'],['t9A','9A Si avvicina: solo disparità'],['t9B','9B Si avvicina: solo ingrandimento'],['t9C','9C Si avvicina: disparità + ingrandimento'],['t9D','9D Si avvicina: conflitto'],['t9S','9 Si avvicina: sequenza completa'],['t10','10 Dicoptica A: coppie'],['t11','11 Dicoptica B: sovrapposte'],['t12','12 Calibrazione colori'],['t13','13 Reticoli test'],['t14','14 Reticoli esercizio'],['t15','15 Reticolo a scorrimento'],['t16','16 Reticoli rotazione']];
+$('btnClr').onclick=function(){ if(!confirm('Cancellare le prove salvate?\n\nRestano: soggetto, schede soggetto, soglia stereo, calibrazione colori e impostazioni.')) return; DB.prove=[]; saveDB(); renderRes(); };
+$('btnReset').onclick=function(){ var j=SET.subj||'', nome=j||'(senza nome)';
+  if(!confirm('Azzerare soggetto, soglia e calibrazione?\n\nSoggetto: '+nome+'\nVengono tolti: il nome del soggetto, la sua soglia stereo e la sua calibrazione colori.\nRestano: le prove salvate, le schede soggetto e le altre impostazioni.')) return;
+  if(SET.thrMap) delete SET.thrMap[j]; if(SET.thrBad) delete SET.thrBad[j]; if(SET.calMap) delete SET.calMap[j]; SET.thr=null; SET.thrDate=''; SET.subj=''; $('subj').value='';
+  saveSET(); syncThrUI(); calInfoUpd(); renderRes(); };
+var TESTS=[['t1','1 Separazione occhi'],['t2','2 Profondità rapida'],['t3','3 Soglia stereo'],['t4','4 Palline'],['t5','5 Palline dicoptiche'],['t6','6 Prato: la più vicina'],['t7','7 Prato: in ordine'],['t8','8 Prato: davanti all’albero'],['t9A','9A Si avvicina: solo disparità'],['t9B','9B Si avvicina: solo ingrandimento'],['t9C','9C Si avvicina: disparità + ingrandimento'],['t9D','9D Si avvicina: conflitto'],['t9S','9 Si avvicina: sequenza completa'],['t10','10 Dicoptica A: coppie'],['t11','11 Dicoptica B: sovrapposte'],['t12','12 Calibrazione colori']];
 function tidOf(n){ var m; if(n==='Separazione occhi') return 't1'; if(n==='Profondità') return 't2'; if(n==='Soglia stereo') return 't3'; if(n==='Palline') return 't4'; if(n==='Palline dicoptiche') return 't5'; if(n==='Prato: la più vicina') return 't6'; if(n==='Prato: in ordine') return 't7'; if(n==='Prato: davanti all’albero') return 't8'; if(n==='Prato: si avvicina') return 't9old'; if(n.indexOf('Si avvicina: 4 condizioni')===0) return 't9S'; m=/^Si avvicina: ([A-D])\./.exec(n); if(m) return 't9'+m[1]; if(n.indexOf('Dicoptica A')===0) return 't10'; if(n.indexOf('Dicoptica B')===0) return 't11'; if(n.indexOf('Calibrazione colori')===0) return 't12'; if(n.indexOf('Reticoli test')===0) return 't13'; if(n.indexOf('Reticoli esercizio')===0) return 't14'; if(n.indexOf('Reticolo a scorrimento')===0) return 't15'; if(n.indexOf('Reticoli rotazione')===0) return 't16'; return ''; }
 function curScheda(){ var r=DB.schede.filter(function(x){ return x.id===SET.schedaId; }); return r.length?r[0]:null; }
 function showTest(id){ var sc=curScheda(); if(!sc||SET.menuAll==='on') return true; if(id==='t9') return ['t9A','t9B','t9C','t9D','t9S'].some(function(k){ return sc.test.indexOf(k)>=0; }); return sc.test.indexOf(id)>=0; }
@@ -327,11 +333,12 @@ function later(fn,ms){ var tk=VRS.tok; return setTimeout(function(){ if(VRS.tok=
 function sceneMenu(){
   VRS.tok=(VRS.tok||0)+1; VRS.scene='menu'; clearScene(); VRS.clear=[0,0,0]; VRS.tick=null; VRS.onTrigger=null;
   var z=-1.7, sc=curScheda();
-  panel(['SFDN · Visore v0.5ABC'+(sc?'  ·  scheda: '+sc.nome:''),'Soglia stereo usata: '+thrUsed()+'"'+(thrFlag()?'  ·  '+thrFlag():'')+'  ·  palline a terra: '+(SET.cues==='on'?'SÌ':'NO')+'  ·  verde cal. '+calG().toFixed(2)],0,0.52,z,0.95,0.13,(thrRec()&&thrRec().liv==='bad')?{bg:'#7a1f1f'}:undefined);
+  panel(['SFDN · Visore v0.5D'+(sc?'  ·  scheda: '+sc.nome:''),'Soglia stereo usata: '+thrUsed()+'"'+(thrFlag()?'  ·  '+thrFlag():'')+'  ·  palline a terra: '+(SET.cues==='on'?'SÌ':'NO')+'  ·  verde cal. '+calG().toFixed(2)],0,0.52,z,0.95,0.13,(thrRec()&&thrRec().liv==='bad')?{bg:'#7a1f1f'}:undefined);
   var L=[{id:'t1',lab:'1. Separazione occhi',fn:sceneSep},{id:'t2',lab:'2. Profondità rapida',fn:sceneDepth},{id:'t3',lab:'3. Misura soglia stereo',fn:sceneThr},{id:'t4',lab:'4. Palline',fn:function(){ sceneGame(false); }},{id:'t5',lab:'5. Palline dicoptiche',fn:function(){ sceneGame(true); }},{id:'t10',lab:'10. Dicoptica A: coppie',fn:sceneDicA,col:'#6a1b9a'},{id:'t11',lab:'11. Dicoptica B: sovrapposte',fn:sceneDicB,col:'#6a1b9a'}];
-  var Rr=[{id:'t6',lab:'6. Prato: la più vicina',fn:function(){ meadowStart('near'); }},{id:'t7',lab:'7. Prato: in ordine',fn:function(){ meadowStart('order'); }},{id:'t8',lab:'8. Prato: davanti all’albero',fn:function(){ meadowStart('tree'); }},{id:'t9',lab:'9. Prato: si avvicina',fn:sceneApproachMenu},{id:'t12',lab:'12. Calibrazione colori',fn:sceneCal,col:'#b26a00'},{id:'t13',lab:'13. Reticoli test',fn:grIntroTest,col:'#00838f'},{id:'t14',lab:'14. Reticoli esercizio',fn:grIntroEx,col:'#00838f'},{id:'t15',lab:'15. RETICOLO A SCORRIMENTO',fn:grIntroDrift,col:'#00838f'},{id:'t16',lab:'16. Reticoli rotazione (sperim.)',fn:grIntroRot,col:'#00838f'}];
+  var Rr=[{id:'t6',lab:'6. Prato: la più vicina',fn:function(){ meadowStart('near'); }},{id:'t7',lab:'7. Prato: in ordine',fn:function(){ meadowStart('order'); }},{id:'t8',lab:'8. Prato: davanti all’albero',fn:function(){ meadowStart('tree'); }},{id:'t9',lab:'9. Prato: si avvicina',fn:sceneApproachMenu},{id:'t12',lab:'12. Calibrazione colori',fn:sceneCal,col:'#b26a00'}];
   function put(arr,pre,x,col0){ arr.forEach(function(b,i){ b.i=i; }); arr.filter(function(b){ return showTest(b.id); }).forEach(function(b,j){ var d=doneTest(b.id); button(pre+b.i,(d?'OK · ':'')+b.lab,x,0.3-j*0.105,z,0.38,0.05,b.fn,d?'#00695c':(b.col||col0)); }); }
   put(L,'l',-0.42,undefined); put(Rr,'r',0.42,'#2e7d32');
+  button('bk0','Prova tasti',0,-0.5,z,0.3,0.05,sceneKeys,'#455a64');
   button('bx','ESCI',0,-0.72,z,0.2,0.06,function(){ if(xrSession) xrSession.end(); },'#cf222e');
 }
 // ---- disparita' <-> profondita' ----
@@ -867,7 +874,8 @@ function calOvEnd(){
   button('m','Avanti',0,-0.2,-1.6,0.3,0.07,sceneCal);
 }
 function calInfoUpd(){ var e=$('calInfo'); if(e) e.textContent=calLine(); }
-// ================= 13-16. RETICOLI =================
+// ================= 13-16. RETICOLI (ARCHIVIATI nella v0.5D: voci tolte dal menu, codice conservato) =================
+// Questa sezione contiene anche lettura tasti, suono e vibrazione (GP, GPpoll, buzz, toneOn/Off, AUD) usati dalla Prova tasti: NON toglierli.
 var GP={t:false,s:false,a:false,b:false,seen:false,ev:{t:0,s:0,a:0,b:0}}, KEYMODE='', GR=null, AUD=null, TONE=null;
 function GPpoll(s){ var t=false,q=false,a=false,b=false,seen=false;
   for(var i=0;i<s.inputSources.length;i++){ var g=s.inputSources[i].gamepad; if(!g||!g.buttons) continue; seen=true; var bt=g.buttons;
@@ -1011,6 +1019,67 @@ function grExEnd(partial){
 }
 function grPartial(){ if(GR&&GR.active&&!GR.saved){ if(GR.kind==='test') grTestEnd(true); else grExEnd(true); } }
 
+
+// ================= PROVA TASTI (v0.5D) =================
+// Voce propria nel menu principale. Mostra in grande il tasto premuto (suono + vibrazione) e i valori degli assi del joystick.
+// Riusa AUD e buzz() della sezione reticoli. Sperimentale: la mappa dei tasti del Pico (xr-standard) va verificata nel visore vero.
+var KT=null, KT_F={0:440,1:554,4:659,5:784}, KT_KEY={t:0,s:1,a:4,b:5};
+function ktHand(h){ return h==='left'?'sinistro':(h==='right'?'destro':'?'); }
+function ktName(k,h){ if(k===0) return 'GRILLETTO'; if(k===1) return 'LATERALE (grip)'; if(k===4) return h==='left'?'X':(h==='right'?'A':'A / X'); if(k===5) return h==='left'?'Y':(h==='right'?'B':'B / Y'); if(k===3) return 'pulsante 3 (clic joystick?)'; return 'pulsante '+k; }
+function ktBeep(f){ window.__ktBeep=(window.__ktBeep||0)+1;
+  try{ if(!AUD) AUD=new (window.AudioContext||window.webkitAudioContext)(); if(AUD.state==='suspended') AUD.resume();
+    var o=AUD.createOscillator(), g=AUD.createGain(); o.frequency.value=f; g.gain.value=0.05; o.connect(g); g.connect(AUD.destination); o.start(); o.stop(AUD.currentTime+0.2); }catch(e){} }
+function ktRead(){ var r=[], s=xrSession; if(!s) return r;
+  for(var i=0;i<s.inputSources.length;i++){ var src=s.inputSources[i], g=src.gamepad; if(!g) continue;
+    var b=[], k; for(k=0;k<(g.buttons||[]).length;k++) b.push(!!(g.buttons[k]&&g.buttons[k].pressed));
+    r.push({h:src.handedness||'?', b:b, ax:Array.prototype.slice.call(g.axes||[])}); }
+  return r; }
+function ktF(v){ return (v>=0?'+':'')+v.toFixed(2); }
+function ktPanel(slot,lines,x,y,w,h,opt){ var o=KT.p[slot]; if(o){ try{ gl.deleteTexture(o.tex); }catch(e){} removeObj(o); } KT.p[slot]=panel(lines,x,y,-1.7,w,h,opt); }
+function ktBig(held){
+  if(held) ktPanel('big',[ktName(held.k,held.h),'mano '+ktHand(held.h)+' · pulsante '+held.k+' premuto'],0,0.4,0.9,0.22,{size:90,bg:'#1b5e20'});
+  else if(KT.last) ktPanel('big',['ultimo: '+ktName(KT.last.k,KT.last.h),'mano '+ktHand(KT.last.h)+' · rilasciato'],0,0.4,0.9,0.22,{size:80,bg:'#263238'});
+  else ktPanel('big',['Premi un tasto','compare qui in grande'],0,0.4,0.9,0.22,{size:90,bg:'#263238'}); }
+function sceneKeys(){
+  VRS.tok++; VRS.scene='tasti'; clearScene(); VRS.clear=[0,0,0]; VRS.onTrigger=null;
+  KT={active:true,saved:false,p:{},prev:{},seen:{},axMax:{},nAx:{},joy:false,last:null,held:'',nPress:0,axTxt:'',axT:0,dots:{},nGp:0};
+  panel(['Prova tasti','Premi i tasti uno alla volta (suono e vibrazione).','Muovi il joystick per vedere gli assi.'],0,0.79,-1.7,0.95,0.13);
+  ktBig(null);
+  var rows=[['t','GRILLETTO (indice)'],['s','LATERALE (grip, medio)'],['a','A / X'],['b','B / Y'],['j','JOYSTICK (mosso)']];
+  rows.forEach(function(n,i){ var y=0.1-i*0.095; panel([n[1]],-0.2,y,-1.7,0.36,0.04); KT.dots[n[0]]=add({kind:'disc',x:0.22,y:y,z:-1.7,w:0.028,h:0.028,col:[0.25,0.25,0.25,1]}); });
+  ktPanel('ax',['Assi del joystick: valori qui sotto'],0,-0.52,0.95,0.1,{size:34});
+  button('bk','Torna al menu',0,-0.76,-1.7,0.3,0.06,ktEnd,'#37474f');
+  VRS.tick=ktTick; }
+function ktTick(now){
+  if(!KT||!KT.active) return;
+  var st=ktRead(), pn=null, held=null, lines=[];
+  KT.nGp=st.length;
+  st.forEach(function(c,ci){ var pv=KT.prev[ci]||[];
+    c.b.forEach(function(p,k){ if(!p) return; held={k:k,h:c.h}; KT.seen[c.h+':'+k]={k:k,h:c.h}; if(!pv[k]) pn={k:k,h:c.h}; });
+    KT.prev[ci]=c.b.slice(); KT.nAx[c.h]=c.ax.length;
+    c.ax.forEach(function(v,j){ var a=Math.abs(v), key=c.h+':'+j; if(a>(KT.axMax[key]||0)) KT.axMax[key]=a; if(a>0.3) KT.joy=true; });
+    lines.push(c.ax.length?('mano '+ktHand(c.h)+':  '+c.ax.map(function(v,j){ return 'asse '+j+' '+ktF(v); }).join('   ')):('mano '+ktHand(c.h)+': nessun asse riportato')); });
+  if(pn){ KT.nPress++; KT.last=pn; ktBeep(KT_F[pn.k]||330); buzz(80); }
+  var hk=held?(held.k+'|'+held.h):'';
+  if(pn||hk!==KT.held){ KT.held=hk; ktBig(held); }
+  ['t','s','a','b'].forEach(function(n){ var k=KT_KEY[n], on=st.some(function(c){ return c.b[k]; }), ever=Object.keys(KT.seen).some(function(q){ return KT.seen[q].k===k; });
+    KT.dots[n].col=on?[0.1,0.9,0.2,1]:(ever?[0.1,0.45,0.15,1]:[0.25,0.25,0.25,1]); });
+  var jnow=st.some(function(c){ return c.ax.some(function(v){ return Math.abs(v)>0.3; }); });
+  KT.dots.j.col=jnow?[0.1,0.9,0.2,1]:(KT.joy?[0.1,0.45,0.15,1]:[0.25,0.25,0.25,1]);
+  var tx=st.length?lines.join('\n'):'nessun controller con tasti rilevato';
+  if(tx!==KT.axTxt&&now-KT.axT>=90){ KT.axTxt=tx; KT.axT=now; ktPanel('ax',tx.split('\n'),0,-0.52,0.95,0.05+0.04*Math.max(1,lines.length),{size:34}); } }
+function ktSave(){ if(!KT||KT.saved||!KT.active) return; KT.saved=true; KT.active=false; VRS.tick=null;
+  var seen=Object.keys(KT.seen).map(function(q){ return KT.seen[q]; }), mv=Object.keys(KT.axMax).filter(function(q){ return KT.axMax[q]>0.3; });
+  if(!seen.length&&!mv.length) return;
+  var P=seen.map(function(x){ return ktName(x.k,x.h)+' ('+ktHand(x.h)+')'; }),
+      N=[['GRILLETTO',0],['LATERALE',1],['A/X',4],['B/Y',5]].filter(function(c){ return !seen.some(function(x){ return x.k===c[1]; }); }).map(function(c){ return c[0]; }),
+      J=mv.map(function(q){ var p=q.split(':'); return 'asse '+p[1]+' ('+ktHand(p[0])+') max '+KT.axMax[q].toFixed(2); }),
+      nA=Object.keys(KT.nAx).map(function(h){ return ktHand(h)+' '+KT.nAx[h]; });
+  var txt='premuti: '+(P.length?P.join(', '):'nessuno')+' · NON premuti: '+(N.length?N.join(', '):'nessuno')+' · joystick: '+(J.length?J.join(', '):'nessun asse mosso')+' · assi riportati dal visore: '+(nA.length?nA.join(', '):'-')+' · '+KT.nPress+' pressioni';
+  addResult('Prova tasti',txt,{premuti:seen,non_premuti:N,assi_max:KT.axMax,assi_riportati:KT.nAx,pressioni:KT.nPress}); }
+function ktEnd(){ ktSave(); sceneMenu(); }
+function ktPartial(){ ktSave(); }
+
 // ---------------- raggi e clic ----------------
 function rayFromPose(m){ return {o:[m[12],m[13],m[14]],d:[-m[8],-m[9],-m[10]]}; }
 function hitTest(ray){
@@ -1086,7 +1155,7 @@ function startVR(){
     xrSession=s; try{ INFO.vrFeat=s.enabledFeatures?Array.prototype.slice.call(s.enabledFeatures).join(', '):'non dichiarate'; }catch(e){ INFO.vrFeat='?'; } renderSum(); if(!gl) initGL();
     var p=gl.makeXRCompatible?gl.makeXRCompatible():Promise.resolve();
     return p.then(function(){ s.updateRenderState({baseLayer:new XRWebGLLayer(s,gl)}); return s.requestReferenceSpace('local'); }).then(function(r){
-      refSpace=r; s.addEventListener('select',onSelect); s.addEventListener('end',function(){ try{ approachPartial(); }catch(e){} try{ grPartial(); }catch(e){} xrSession=null; clearScene(); $('vrMsg').textContent='Sei uscito dalla VR. I risultati sono qui sotto.'; renderRes(); });
+      refSpace=r; s.addEventListener('select',onSelect); s.addEventListener('end',function(){ try{ approachPartial(); }catch(e){} try{ grPartial(); }catch(e){} try{ ktPartial(); }catch(e){} xrSession=null; clearScene(); $('vrMsg').textContent='Sei uscito dalla VR. I risultati sono qui sotto.'; renderRes(); });
       VRS.fps={n:0,t0:0,val:null}; sceneMenu(); s.requestAnimationFrame(onXRFrame); $('vrMsg').textContent='VR avviata.'; });
   }).catch(function(e){ $('vrMsg').innerHTML='<span class="bad">Non riesco ad avviare la VR: '+esc(e.message||e)+'</span>'; addResult('Avvio VR','errore: '+(e.message||e)); });
 }
