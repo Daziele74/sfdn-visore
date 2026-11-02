@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SFDN Visore v0.6.1</title>
+<title>SFDN Visore v0.6.2</title>
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--ink:#1d2330;--mut:#667085;--acc:#1f6feb;--ok:#1a7f37;--bad:#cf222e;--line:#d0d7de}
 *{box-sizing:border-box}
@@ -28,7 +28,7 @@ pre{white-space:pre-wrap;background:#f6f8fa;border:1px solid var(--line);border-
 </style>
 </head>
 <body>
-<header><h1>SFDN &middot; Visore <small>v0.6.1 (Prova tasti: vibrazione e clic joystick)</small></h1></header>
+<header><h1>SFDN &middot; Visore <small>v0.6.2 (Riserve fusionali: motore del prisma; Prova voce)</small></h1></header>
 <main>
  <div class="card">
   <h2>1. Controlli automatici</h2>
@@ -45,10 +45,11 @@ pre{white-space:pre-wrap;background:#f6f8fa;border:1px solid var(--line);border-
 
  <div class="card">
   <h2>Scheda soggetto (facoltativa)</h2>
-  <p>Scheda attiva: <b id="schedaNow">nessuna</b></p>
+  <p>Scheda attiva: <b id="schedaNow">nessuna</b> &middot; occhio dominante motorio della scheda attiva <select id="schDomNow"><option value="">non inserito</option><option value="OD">destro (OD)</option><option value="OS">sinistro (OS)</option></select></p>
   <p><button class="primary" id="btnNewScheda">NUOVA SCHEDA SOGGETTO</button> <button id="btnCloseScheda">Chiudi la scheda attiva</button></p>
   <div id="schedaForm" style="display:none;border:1px solid #bbb;padding:10px;border-radius:8px;margin:8px 0">
    <p>Nome o codice del soggetto <input id="schNome" style="font-size:18px;padding:6px;width:260px"></p>
+   <p>Occhio dominante motorio <select id="schDom"><option value="">non inserito</option><option value="OD">destro (OD)</option><option value="OS">sinistro (OS)</option></select> <span class="hint">(serve alle Riserve fusionali; se non inserito si usa OD)</span></p>
    <p><b>Test da fare</b> <button id="schAll" type="button">tutti / nessuno</button></p>
    <div id="schTests"></div>
    <p><button class="primary" id="schOk">Crea la scheda</button> <button id="schCancel">Annulla</button> <span id="schMsg" class="hint"></span></p>
@@ -80,6 +81,29 @@ pre{white-space:pre-wrap;background:#f6f8fa;border:1px solid var(--line);border-
    Soglia stereo usata <select id="thrMode"><option value="auto">l'ultima misurata nel visore</option><option value="man">valore scritto a mano</option></select>
    <input type="number" id="thrMan" value="300" min="30" max="1500" step="10" style="width:90px;font-size:18px"> secondi d'arco &middot; <span id="thrInfo" class="hint"></span><br>
    Esercizi a <input type="number" id="factor" value="3" min="1.2" max="10" step="0.1" style="width:70px;font-size:18px"> volte la soglia, con il <input type="number" id="nearPct" value="20" min="0" max="100" step="5" style="width:70px;font-size:18px">% di prove vicino alla soglia (1,25 volte)</p>
+  <p><b>Riserve fusionali, voce 17 (SPERIMENTALE, non validato)</b><br>
+   Velocit&agrave; della rampa <select id="rfSpeed"><option value="0.5">0,5</option><option value="1">1 (predefinita)</option><option value="2">2</option><option value="3">3</option></select> dp/s (fissa per tutta la serie; si scrive nel risultato) &middot;
+   base di partenza <select id="rfFirst"><option value="in">prima interna (predefinita)</option><option value="out">prima esterna</option></select> &middot;
+   basi da misurare <select id="rfBases"><option value="both">tutte e due</option><option value="in">solo interna</option><option value="out">solo esterna</option></select><br>
+   Tetti (dp): da lontano, base interna <input type="number" id="rfCapFarIn" min="1" max="80" step="1" style="width:70px;font-size:18px"> base esterna <input type="number" id="rfCapFarOut" min="1" max="80" step="1" style="width:70px;font-size:18px"> &middot;
+   da vicino (si costruisce nella tappa 4), base interna <input type="number" id="rfCapNearIn" min="1" max="80" step="1" style="width:70px;font-size:18px"> base esterna <input type="number" id="rfCapNearOut" min="1" max="80" step="1" style="width:70px;font-size:18px"><br>
+   Scena: cornice <select id="rfFrame"><option value="on">s&igrave;</option><option value="off">no</option></select>
+   piano a punti <select id="rfPlane"><option value="on">s&igrave;</option><option value="off">no</option></select>
+   grandezza realistica del bersaglio <select id="rfSize"><option value="on">s&igrave;</option><option value="off">no (grandezza fissa)</option></select><br>
+   Cornice a <input type="number" id="rfFrameDeg" min="2" max="25" step="0.5" style="width:70px;font-size:18px"> gradi dal punto di fissazione &middot;
+   bersaglio reale di <input type="number" id="rfTargetCm" min="0.5" max="30" step="0.5" style="width:70px;font-size:18px"> cm &middot;
+   se la grandezza non &egrave; realistica: <input type="number" id="rfFixedDeg" min="0.2" max="10" step="0.1" style="width:70px;font-size:18px"> gradi<br>
+   Pausa a prisma zero tra le rampe <input type="number" id="rfPause" min="0" max="300" step="1" style="width:70px;font-size:18px"> s &middot;
+   conto alla rovescia sonoro <input type="number" id="rfCount" min="0" max="30" step="1" style="width:60px;font-size:18px"> s<br>
+   Dopo la rottura: controllo del recupero <select id="rfRec"><option value="always">sempre (predefinito)</option><option value="first">solo la prima volta</option><option value="never">mai</option></select>
+   limite <input type="number" id="rfRecT" min="2" max="300" step="1" style="width:70px;font-size:18px"> s &middot;
+   pausa dopo un mancato recupero <input type="number" id="rfSusp" min="0" max="600" step="5" style="width:70px;font-size:18px"> s &middot;
+   insuccessi di fila per chiudere la posizione <input type="number" id="rfFails" min="1" max="10" step="1" style="width:60px;font-size:18px"><br>
+   Centro ripetuto a fine serie, con l&rsquo;assegnazione dei pallini opposta <select id="rfRepeat"><option value="on">s&igrave; (predefinito)</option><option value="off">no</option></select> &middot;
+   seconda serie completa con l&rsquo;assegnazione opposta <select id="rfSecond"><option value="off">no (predefinito)</option><option value="on">s&igrave;</option></select><br>
+   Pallino sopra (si usa dalla tappa 3): occhio <select id="rfDot"><option value="dom">il dominante motorio della scheda soggetto (predefinito; se non inserito, OD)</option><option value="OD">sempre OD</option><option value="OS">sempre OS</option></select> &middot;
+   tempo limite di risposta <input type="number" id="rfAnsT" min="1" max="60" step="1" style="width:60px;font-size:18px"> s (dalla tappa 3)</p>
+  <p class="hint">Riserve fusionali: il valore in dp &egrave; <b>nominale</b> (angolo totale = atan(dp/100), met&agrave; per occhio) e va confrontato con le misure fatte con la barra di prismi. Il ritardo di risposta <b>gonfia il valore</b>: i confronti vanno fatti alla <b>stessa velocit&agrave;</b>. La pressione del grilletto non distingue tra fusione e soppressione.</p>
   <p><b>Email dei risultati</b><br>Indirizzo di destinazione <input id="mailTo" value="" placeholder="scrivi qui l'indirizzo" style="font-size:18px;padding:6px;width:320px"><br><b>Da scrivere una volta per browser</b>: resta salvato su questo dispositivo e non &egrave; scritto nel programma. Se in questo browser c'era gi&agrave; un indirizzo, resta.</p>
   <p class="hint">Senza indizi monoculari le palline del prato hanno sempre la stessa grandezza apparente e sono sospese, senza ombra: la profondit&agrave; si coglie solo con la visione binoculare. Con gli indizi la scena &egrave; pi&ugrave; naturale, ma si pu&ograve; indovinare anche con un occhio solo. La soglia si misura con la prova 3 del menu.</p>
   <p><button class="primary big" id="btnVR">ENTRA IN VR</button></p>
@@ -126,7 +150,7 @@ DB.visite=(DB.visite||0)+1;
 var STORE=true; try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){ STORE=false; }
 var SESS=Date.now();   // identifica questa apertura della pagina
 var BG_NAME={dots:'parete a punti',black:'nero',meadow:'prato con alberi'};
-var SET={dCol:'col',dRed:'OD',mailTo:'',cues:'off',thrMode:'auto',thrMan:300,factor:3,nearPct:20,subj:'',thr:null,thrDate:'',thrMap:null,sumScope:'sess',hands:'off',lock:'on',bg:'dots',a4n:12,shape:'sphere',headWarn:3,headBad:6,thrPolicy:'rel',thrBad:null,v:'',schedaId:'',calUse:'sub',calVal:0.4,calMap:{},dbMode:'exp',dbExp:0.8,grSize:4,grCpd:1.5,grCon:100,grBlock:40,grPause:20,grSwap:2,grDur:3,grLadder:'off',grStart:'OD',grDrift:0.2,grRot:1,grFb:'both',menuAll:'off',a4ord:'lat',a4cnt:0}; try{ var _s=JSON.parse(localStorage.getItem(KEY+'_imp')||'null'); if(_s) for(var _k in _s) SET[_k]=_s[_k]; }catch(e){}
+var SET={dCol:'col',dRed:'OD',mailTo:'',cues:'off',thrMode:'auto',thrMan:300,factor:3,nearPct:20,subj:'',thr:null,thrDate:'',thrMap:null,sumScope:'sess',hands:'off',lock:'on',bg:'dots',a4n:12,shape:'sphere',headWarn:3,headBad:6,thrPolicy:'rel',thrBad:null,v:'',schedaId:'',calUse:'sub',calVal:0.4,calMap:{},dbMode:'exp',dbExp:0.8,grSize:4,grCpd:1.5,grCon:100,grBlock:40,grPause:20,grSwap:2,grDur:3,grLadder:'off',grStart:'OD',grDrift:0.2,grRot:1,grFb:'both',menuAll:'off',a4ord:'lat',a4cnt:0,rfSpeed:'1',rfFirst:'in',rfBases:'both',rfCapFarIn:20,rfCapFarOut:35,rfCapNearIn:35,rfCapNearOut:35,rfFrame:'on',rfPlane:'on',rfSize:'on',rfFrameDeg:9,rfTargetCm:6,rfFixedDeg:1,rfPause:10,rfCount:5,rfRec:'always',rfRecT:30,rfSusp:60,rfFails:2,rfRepeat:'on',rfSecond:'off',rfDot:'dom',rfAnsT:6}; try{ var _s=JSON.parse(localStorage.getItem(KEY+'_imp')||'null'); if(_s) for(var _k in _s) SET[_k]=_s[_k]; }catch(e){}
 if(SET.v!=='0.5'){ SET.hands='off'; SET.v='0.5'; }   // v0.5: mani spente di default
 if(!SET.thrBad) SET.thrBad={};
 if(!SET.calMap) SET.calMap={};
@@ -206,7 +230,7 @@ renderRes();
 $('btnDl').onclick=function(){ var b=new Blob([JSON.stringify({info:INFO,db:DB},null,1)],{type:'application/json'}); var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='SFDN_test_visore_risultati.json'; document.body.appendChild(a); a.click(); setTimeout(function(){ a.remove(); },500); };
 // dettaglio compatto per la mail (profondita' prova per prova)
 function mailBody(){
-  var t='Risultati SFDN Visore v0.6.1 - '+(SET.subj?'soggetto '+SET.subj+' - ':'')+new Date().toLocaleString('it-IT')+'\n\n'+renderSum()+'\n';
+  var t='Risultati SFDN Visore v0.6.2 - '+(SET.subj?'soggetto '+SET.subj+' - ':'')+new Date().toLocaleString('it-IT')+'\n\n'+renderSum()+'\n';
   sumProve().slice(-6).forEach(function(p){ if((p.nome==='Profondità'||p.nome==='Soglia stereo')&&p.dati&&p.dati.prove){ t+='\n'+p.nome+' prova per prova (disparità in secondi d\'arco, G=giusta, S=sbagliata): '+p.dati.prove.map(function(x){ return x.disparita_arcsec+(x.giusta?'G':'S'); }).join(' ')+'\n'; } });
   var DPv=sumProve().slice(-6), isT9=function(p){ return /^t9[ABCDS]$/.test(p.tid||''); };
   DPv.filter(isT9).concat(DPv.filter(function(p){ return !isT9(p); })).forEach(function(p){ if(p.dati&&p.dati.dettaglio) t+='\n'+p.nome+' - dettaglio:\n'+p.dati.dettaglio+'\n'; });
@@ -215,7 +239,7 @@ function mailBody(){
 $('btnMail').onclick=function(){
   SET.mailTo=$('mailTo').value.trim(); saveSET();
   if(SET.mailTo.indexOf('@')<1){ $('mailMsg').innerHTML='<b style="color:#cf222e">Scrivi prima l&rsquo;indirizzo email di destinazione nelle impostazioni (riquadro 3, &laquo;Email dei risultati&raquo;): basta una volta per browser.</b>'; return; }
-  var url='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(SET.mailTo)+'&su='+encodeURIComponent('SFDN Visore v0.6.1 - risultati'+(SET.subj?' - '+SET.subj:''))+'&body='+encodeURIComponent(mailBody());
+  var url='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(SET.mailTo)+'&su='+encodeURIComponent('SFDN Visore v0.6.2 - risultati'+(SET.subj?' - '+SET.subj:''))+'&body='+encodeURIComponent(mailBody());
   var w=window.open(url,'_blank'); if(!w) location.href=url;
   $('mailMsg').innerHTML='Se Gmail non si apre: <a href="mailto:'+esc(SET.mailTo)+'?subject='+encodeURIComponent('SFDN Test Visore - risultati')+'&body='+encodeURIComponent(mailBody())+'">prova con l\'app di posta</a> oppure usa &laquo;Copia il riepilogo&raquo;.';
 };
@@ -233,15 +257,16 @@ $('dCol').value=SET.dCol; $('dRed').value=SET.dRed; $('mailTo').value=SET.mailTo
 $('dCol').onchange=function(){ SET.dCol=$('dCol').value; saveSET(); };
 $('dRed').onchange=function(){ SET.dRed=$('dRed').value; saveSET(); };
 $('mailTo').onchange=function(){ SET.mailTo=$('mailTo').value.trim(); saveSET(); };
-function renderScheda(){ var sc=curScheda(); $('schedaNow').textContent=sc?(sc.nome+' (creata '+sc.creata+', '+sc.test.length+' test)'):'nessuna'; var h='<option value="">-</option>'; DB.schede.slice().reverse().forEach(function(x){ h+='<option value="'+esc(x.id)+'">'+esc(x.nome)+' · '+esc(x.creata)+'</option>'; }); $('schList').innerHTML=h; }
+function renderScheda(){ var sc=curScheda(); $('schedaNow').textContent=sc?(sc.nome+' (creata '+sc.creata+', '+sc.test.length+' test)'):'nessuna'; var h='<option value="">-</option>'; DB.schede.slice().reverse().forEach(function(x){ h+='<option value="'+esc(x.id)+'">'+esc(x.nome)+' · '+esc(x.creata)+'</option>'; }); $('schList').innerHTML=h; $('schDomNow').value=sc?(sc.dom||''):''; $('schDomNow').disabled=!sc; }
 function buildSchForm(){ var h=''; TESTS.forEach(function(t){ h+='<label style="display:block;font-size:18px;margin:4px 0"><input type="checkbox" class="schT" value="'+t[0]+'" checked> '+esc(t[1])+'</label>'; }); $('schTests').innerHTML=h; }
-$('btnNewScheda').onclick=function(){ $('schedaForm').style.display='block'; $('schNome').value=SET.subj||''; $('schMsg').textContent=''; buildSchForm(); };
+$('btnNewScheda').onclick=function(){ $('schedaForm').style.display='block'; $('schNome').value=SET.subj||''; $('schMsg').textContent=''; buildSchForm(); $('schDom').value=''; };
 $('schAll').onclick=function(){ var cs=[].slice.call(document.querySelectorAll('.schT')), any=cs.some(function(c){ return c.checked; }); cs.forEach(function(c){ c.checked=!any; }); };
 $('schCancel').onclick=function(){ $('schedaForm').style.display='none'; };
 function useScheda(sc){ SET.schedaId=sc.id; SET.subj=sc.nome; $('subj').value=sc.nome; SET.sumScope='scheda'; $('sumScope').value='scheda'; saveSET(); renderScheda(); syncThrUI(); renderRes(); }
 $('schOk').onclick=function(){ var nome=$('schNome').value.trim(); if(!nome){ $('schMsg').textContent='Scrivi il nome o il codice del soggetto.'; return; }
   var T=[].slice.call(document.querySelectorAll('.schT')).filter(function(c){ return c.checked; }).map(function(c){ return c.value; }); if(!T.length){ $('schMsg').textContent='Scegli almeno un test.'; return; }
-  var sc={id:'s'+Date.now(),nome:nome,test:T,creata:new Date().toLocaleString('it-IT')}; DB.schede.push(sc); saveDB(); useScheda(sc); $('schedaForm').style.display='none'; };
+  var sc={id:'s'+Date.now(),nome:nome,test:T,dom:$('schDom').value,creata:new Date().toLocaleString('it-IT')}; DB.schede.push(sc); saveDB(); useScheda(sc); $('schedaForm').style.display='none'; };
+$('schDomNow').onchange=function(){ var sc=curScheda(); if(!sc) return; sc.dom=$('schDomNow').value; saveDB(); };
 $('btnCloseScheda').onclick=function(){ SET.schedaId=''; saveSET(); renderScheda(); renderRes(); };
 $('btnOpenScheda').onclick=function(){ var id=$('schList').value, r=DB.schede.filter(function(x){ return x.id===id; }); if(r.length) useScheda(r[0]); };
 renderScheda();
@@ -250,8 +275,8 @@ $('btnReset').onclick=function(){ var j=SET.subj||'', nome=j||'(senza nome)';
   if(!confirm('Azzerare soggetto, soglia e calibrazione?\n\nSoggetto: '+nome+'\nVengono tolti: il nome del soggetto, la sua soglia stereo e la sua calibrazione colori.\nRestano: le prove salvate, le schede soggetto e le altre impostazioni.')) return;
   if(SET.thrMap) delete SET.thrMap[j]; if(SET.thrBad) delete SET.thrBad[j]; if(SET.calMap) delete SET.calMap[j]; SET.thr=null; SET.thrDate=''; SET.subj=''; $('subj').value='';
   saveSET(); syncThrUI(); calInfoUpd(); renderRes(); };
-var TESTS=[['t1','1 Separazione occhi'],['t2','2 Profondità rapida'],['t3','3 Soglia stereo'],['t4','4 Palline'],['t5','5 Palline dicoptiche'],['t6','6 Prato: la più vicina'],['t7','7 Prato: in ordine'],['t8','8 Prato: davanti all’albero'],['t9A','9A Si avvicina: solo disparità'],['t9B','9B Si avvicina: solo ingrandimento'],['t9C','9C Si avvicina: disparità + ingrandimento'],['t9D','9D Si avvicina: conflitto'],['t9S','9 Si avvicina: sequenza completa'],['t10','10 Dicoptica A: coppie'],['t11','11 Dicoptica B: sovrapposte'],['t12','12 Calibrazione colori']];
-function tidOf(n){ var m; if(n==='Separazione occhi') return 't1'; if(n==='Profondità') return 't2'; if(n==='Soglia stereo') return 't3'; if(n==='Palline') return 't4'; if(n==='Palline dicoptiche') return 't5'; if(n==='Prato: la più vicina') return 't6'; if(n==='Prato: in ordine') return 't7'; if(n==='Prato: davanti all’albero') return 't8'; if(n==='Prato: si avvicina') return 't9old'; if(n.indexOf('Si avvicina: 4 condizioni')===0) return 't9S'; m=/^Si avvicina: ([A-D])\./.exec(n); if(m) return 't9'+m[1]; if(n.indexOf('Dicoptica A')===0) return 't10'; if(n.indexOf('Dicoptica B')===0) return 't11'; if(n.indexOf('Calibrazione colori')===0) return 't12'; if(n.indexOf('Reticoli test')===0) return 't13'; if(n.indexOf('Reticoli esercizio')===0) return 't14'; if(n.indexOf('Reticolo a scorrimento')===0) return 't15'; if(n.indexOf('Reticoli rotazione')===0) return 't16'; return ''; }
+var TESTS=[['t1','1 Separazione occhi'],['t2','2 Profondità rapida'],['t3','3 Soglia stereo'],['t4','4 Palline'],['t5','5 Palline dicoptiche'],['t6','6 Prato: la più vicina'],['t7','7 Prato: in ordine'],['t8','8 Prato: davanti all’albero'],['t9A','9A Si avvicina: solo disparità'],['t9B','9B Si avvicina: solo ingrandimento'],['t9C','9C Si avvicina: disparità + ingrandimento'],['t9D','9D Si avvicina: conflitto'],['t9S','9 Si avvicina: sequenza completa'],['t10','10 Dicoptica A: coppie'],['t11','11 Dicoptica B: sovrapposte'],['t12','12 Calibrazione colori'],['t17','17 Riserve fusionali (da lontano, centro)']];
+function tidOf(n){ var m; if(n==='Separazione occhi') return 't1'; if(n==='Profondità') return 't2'; if(n==='Soglia stereo') return 't3'; if(n==='Palline') return 't4'; if(n==='Palline dicoptiche') return 't5'; if(n==='Prato: la più vicina') return 't6'; if(n==='Prato: in ordine') return 't7'; if(n==='Prato: davanti all’albero') return 't8'; if(n==='Prato: si avvicina') return 't9old'; if(n.indexOf('Si avvicina: 4 condizioni')===0) return 't9S'; m=/^Si avvicina: ([A-D])\./.exec(n); if(m) return 't9'+m[1]; if(n.indexOf('Dicoptica A')===0) return 't10'; if(n.indexOf('Dicoptica B')===0) return 't11'; if(n.indexOf('Calibrazione colori')===0) return 't12'; if(n.indexOf('Riserve fusionali')===0) return 't17'; if(n.indexOf('Reticoli test')===0) return 't13'; if(n.indexOf('Reticoli esercizio')===0) return 't14'; if(n.indexOf('Reticolo a scorrimento')===0) return 't15'; if(n.indexOf('Reticoli rotazione')===0) return 't16'; return ''; }
 function curScheda(){ var r=DB.schede.filter(function(x){ return x.id===SET.schedaId; }); return r.length?r[0]:null; }
 function showTest(id){ var sc=curScheda(); if(!sc||SET.menuAll==='on') return true; if(id==='t9') return ['t9A','t9B','t9C','t9D','t9S'].some(function(k){ return sc.test.indexOf(k)>=0; }); return sc.test.indexOf(id)>=0; }
 function doneTest(id){ if(!curScheda()) return false; return DB.prove.some(function(p){ return p.scheda===SET.schedaId&&(p.tid===id||(id==='t9'&&/^t9[ABCDS]$/.test(p.tid||''))); }); }
@@ -284,8 +309,8 @@ function initGL(){
   var c=$('xrCanvas'); gl=c.getContext('webgl',{xrCompatible:true,antialias:true,alpha:false});
   if(!gl) throw new Error('WebGL non disponibile');
   var vs='attribute vec3 p;attribute vec2 uv;uniform mat4 P;uniform mat4 V;uniform mat4 M;varying vec2 vuv;void main(){vuv=uv;gl_Position=P*V*M*vec4(p,1.0);}';
-  var fs='#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\nvarying vec2 vuv;uniform int mode;uniform vec4 col;uniform sampler2D tex;uniform vec2 uvs;uniform vec4 gp;void main(){vec2 q=vuv*2.0-1.0;float r=length(q);'+
-    'if(mode==1){if(r>1.0)discard;gl_FragColor=col;}else if(mode==2){vec4 t=texture2D(tex,vec2(vuv.x,1.0-vuv.y));if(t.a<0.02)discard;gl_FragColor=t;}else if(mode==3){if(r>1.0||r<0.86)discard;gl_FragColor=col;}else if(mode==4){gl_FragColor=texture2D(tex,vuv*uvs);}else if(mode==5){if(r>1.0)discard;float zz=sqrt(1.0-r*r);vec3 n=vec3(q,zz);vec3 L=normalize(vec3(-0.45,0.55,0.7));float df=max(dot(n,L),0.0);vec3 H=normalize(L+vec3(0.0,0.0,1.0));float sp=pow(max(dot(n,H),0.0),24.0);float lit=0.32+0.68*df;gl_FragColor=vec4(col.rgb*lit+vec3(0.22*sp),col.a);}else if(mode==6){if(r>1.0)discard;gl_FragColor=vec4(col.rgb,col.a*(1.0-smoothstep(0.15,1.0,r)));}else if(mode==7){if(r>1.0)discard;vec2 nn=vec2(-sin(gp.x),cos(gp.x));float ph=dot(q,nn)*gp.y+gp.z;float I=0.5+0.5*gp.w*sin(6.2831853*ph);gl_FragColor=vec4(col.rgb*I,1.0-smoothstep(0.84,1.0,r));}else{gl_FragColor=col;}}';
+  var fs='#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\nvarying vec2 vuv;uniform int mode;uniform vec4 col;uniform sampler2D tex;uniform vec2 uvs;uniform vec4 gp;float dl(vec2 p,float cs,float sd,float R,float sf){vec2 c=floor(p/cs);vec2 f=p/cs-c;float h1=fract(sin(dot(c,vec2(127.1,311.7))+sd)*43758.5453);float h2=fract(sin(dot(c,vec2(269.5,183.3))+sd)*43758.5453);float h3=fract(sin(dot(c,vec2(419.2,371.9))+sd)*43758.5453);vec2 ctr=vec2(0.3+0.4*h1,0.3+0.4*h2);return 1.0-smoothstep(R*(0.6+0.4*h3)-sf,R*(0.6+0.4*h3),length(f-ctr)*cs);}void main(){vec2 q=vuv*2.0-1.0;float r=length(q);'+
+    'if(mode==1){if(r>1.0)discard;gl_FragColor=col;}else if(mode==2){vec4 t=texture2D(tex,vec2(vuv.x,1.0-vuv.y));if(t.a<0.02)discard;gl_FragColor=t;}else if(mode==3){if(r>1.0||r<0.86)discard;gl_FragColor=col;}else if(mode==4){gl_FragColor=texture2D(tex,vuv*uvs);}else if(mode==5){if(r>1.0)discard;float zz=sqrt(1.0-r*r);vec3 n=vec3(q,zz);vec3 L=normalize(vec3(-0.45,0.55,0.7));float df=max(dot(n,L),0.0);vec3 H=normalize(L+vec3(0.0,0.0,1.0));float sp=pow(max(dot(n,H),0.0),24.0);float lit=0.32+0.68*df;gl_FragColor=vec4(col.rgb*lit+vec3(0.22*sp),col.a);}else if(mode==6){if(r>1.0)discard;gl_FragColor=vec4(col.rgb,col.a*(1.0-smoothstep(0.15,1.0,r)));}else if(mode==7){if(r>1.0)discard;vec2 nn=vec2(-sin(gp.x),cos(gp.x));float ph=dot(q,nn)*gp.y+gp.z;float I=0.5+0.5*gp.w*sin(6.2831853*ph);gl_FragColor=vec4(col.rgb*I,1.0-smoothstep(0.84,1.0,r));}else if(mode==8){vec2 p=q*uvs;float a=dl(p,gp.x,gp.w,gp.y,gp.z);vec2 p2=vec2(0.891*p.x-0.454*p.y+7.3,0.454*p.x+0.891*p.y-3.1);a=max(a,dl(p2,gp.x*1.57,gp.w+17.0,gp.y*1.1,gp.z));if(a<0.02)discard;gl_FragColor=vec4(col.rgb,a);}else{gl_FragColor=col;}}';
   function sh(t,s){ var o=gl.createShader(t); gl.shaderSource(o,s); gl.compileShader(o); if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; }
   prog=gl.createProgram(); gl.attachShader(prog,sh(gl.VERTEX_SHADER,vs)); gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(prog);
   if(!gl.getProgramParameter(prog,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
@@ -332,14 +357,14 @@ function colFor(eye,forceCol){ if(!forceCol && SET.dCol==='white') return [1,1,1
 var GROUND_Y=-1.2;       // pavimento: circa 1,2 m sotto gli occhi (soggetto seduto)
 function later(fn,ms){ var tk=VRS.tok; return setTimeout(function(){ if(VRS.tok===tk) fn(); },ms); }
 function sceneMenu(){
-  VRS.tok=(VRS.tok||0)+1; VRS.scene='menu'; clearScene(); VRS.clear=[0,0,0]; VRS.tick=null; VRS.onTrigger=null;
+  VRS.tok=(VRS.tok||0)+1; VRS.scene='menu'; clearScene(); VRS.clear=[0,0,0]; VRS.tick=null; VRS.onTrigger=null; VRS.noRay=false; PRISM.half=0;
   var z=-1.7, sc=curScheda();
-  panel(['SFDN · Visore v0.6.1'+(sc?'  ·  scheda: '+sc.nome:''),'Soglia stereo usata: '+thrUsed()+'"'+(thrFlag()?'  ·  '+thrFlag():'')+'  ·  palline a terra: '+(SET.cues==='on'?'SÌ':'NO')+'  ·  verde cal. '+calG().toFixed(2)],0,0.52,z,0.95,0.13,(thrRec()&&thrRec().liv==='bad')?{bg:'#7a1f1f'}:undefined);
+  panel(['SFDN · Visore v0.6.2'+(sc?'  ·  scheda: '+sc.nome:''),'Soglia stereo usata: '+thrUsed()+'"'+(thrFlag()?'  ·  '+thrFlag():'')+'  ·  palline a terra: '+(SET.cues==='on'?'SÌ':'NO')+'  ·  verde cal. '+calG().toFixed(2)],0,0.52,z,0.95,0.13,(thrRec()&&thrRec().liv==='bad')?{bg:'#7a1f1f'}:undefined);
   var L=[{id:'t1',lab:'1. Separazione occhi',fn:sceneSep},{id:'t2',lab:'2. Profondità rapida',fn:sceneDepth},{id:'t3',lab:'3. Misura soglia stereo',fn:sceneThr},{id:'t4',lab:'4. Palline',fn:function(){ sceneGame(false); }},{id:'t5',lab:'5. Palline dicoptiche',fn:function(){ sceneGame(true); }},{id:'t10',lab:'10. Dicoptica A: coppie',fn:sceneDicA,col:'#6a1b9a'},{id:'t11',lab:'11. Dicoptica B: sovrapposte',fn:sceneDicB,col:'#6a1b9a'}];
-  var Rr=[{id:'t6',lab:'6. Prato: la più vicina',fn:function(){ meadowStart('near'); }},{id:'t7',lab:'7. Prato: in ordine',fn:function(){ meadowStart('order'); }},{id:'t8',lab:'8. Prato: davanti all’albero',fn:function(){ meadowStart('tree'); }},{id:'t9',lab:'9. Prato: si avvicina',fn:sceneApproachMenu},{id:'t12',lab:'12. Calibrazione colori',fn:sceneCal,col:'#b26a00'}];
+  var Rr=[{id:'t6',lab:'6. Prato: la più vicina',fn:function(){ meadowStart('near'); }},{id:'t7',lab:'7. Prato: in ordine',fn:function(){ meadowStart('order'); }},{id:'t8',lab:'8. Prato: davanti all’albero',fn:function(){ meadowStart('tree'); }},{id:'t9',lab:'9. Prato: si avvicina',fn:sceneApproachMenu},{id:'t12',lab:'12. Calibrazione colori',fn:sceneCal,col:'#b26a00'},{id:'t17',lab:'17. Riserve fusionali',fn:sceneRFSetup,col:'#ad1457'}];
   function put(arr,pre,x,col0){ arr.forEach(function(b,i){ b.i=i; }); arr.filter(function(b){ return showTest(b.id); }).forEach(function(b,j){ var d=doneTest(b.id); button(pre+b.i,(d?'OK · ':'')+b.lab,x,0.3-j*0.105,z,0.38,0.05,b.fn,d?'#00695c':(b.col||col0)); }); }
   put(L,'l',-0.42,undefined); put(Rr,'r',0.42,'#2e7d32');
-  button('bk0','Prova tasti',0,-0.5,z,0.3,0.05,sceneKeys,'#455a64');
+  button('bk0','Prova tasti',-0.32,-0.5,z,0.3,0.05,sceneKeys,'#455a64'); button('bkv','Prova voce',0.32,-0.5,z,0.3,0.05,sceneVoice,'#455a64');
   button('bx','ESCI',0,-0.72,z,0.2,0.06,function(){ if(xrSession) xrSession.end(); },'#cf222e');
 }
 // ---- disparita' <-> profondita' ----
@@ -1097,6 +1122,142 @@ function ktSave(){ if(!KT||KT.saved||!KT.active) return; KT.saved=true; KT.activ
 function ktEnd(){ ktSave(); sceneMenu(); }
 function ktPartial(){ ktSave(); }
 
+// ================= RISERVE FUSIONALI (v0.6.2, tappa 2: motore del prisma) =================
+// Modulo SPERIMENTALE e NON validato (voce 17). Prisma virtuale: si ruota la vista di ogni occhio di meta' dell'angolo totale;
+// angolo totale = atan(dp/100). I dp sono NOMINALI (da confrontare con la barra di prismi). Base interna: OD a destra, OS a sinistra; base esterna al contrario.
+// Durante la rampa NON c'e' nessun elemento fisso (niente pannelli, scritte, raggio): bersaglio, cornice e piano si spostano insieme (sola vergenza).
+// Risposte: grilletto = "vedo doppio" (rottura) e poi "rivedo singolo" (recupero); tenuto 3 s = stop. Nessuna vibrazione (non disponibile nel Pico): solo suoni.
+var PRISM={half:0,base:'in',dp:0};
+function rfAng(dp){ return Math.atan(dp/100); }                       // angolo totale (rad)
+function rfSetPrism(dp,base){ PRISM.dp=dp; PRISM.half=dp>0?rfAng(dp)/2:0; if(base) PRISM.base=base; }
+function mul4(a,b){ var r=new Array(16), c, w, k, t; for(c=0;c<4;c++) for(w=0;w<4;w++){ t=0; for(k=0;k<4;k++) t+=a[k*4+w]*b[c*4+k]; r[c*4+w]=t; } return r; }
+function prismView(V,eye){ if(!PRISM.half) return V;
+  var sh=PRISM.half*(PRISM.base==='in'?1:-1)*(eye==='right'?1:-1), ph=-sh, c=Math.cos(ph), n=Math.sin(ph);   // sh>0: il contenuto si sposta a destra
+  return mul4([c,0,-n,0, 0,1,0,0, n,0,c,0, 0,0,0,1],V); }
+var RF=null, RF_D=6;
+var RF_IDS=['rfSpeed','rfFirst','rfBases','rfCapFarIn','rfCapFarOut','rfCapNearIn','rfCapNearOut','rfFrame','rfPlane','rfSize','rfFrameDeg','rfTargetCm','rfFixedDeg','rfPause','rfCount','rfRec','rfRecT','rfSusp','rfFails','rfRepeat','rfSecond','rfDot','rfAnsT'];
+function rfRead(){ RF_IDS.forEach(function(k){ var e=$(k); if(e) SET[k]=e.value; }); saveSET(); }
+RF_IDS.forEach(function(k){ var e=$(k); e.value=SET[k]; e.onchange=function(){ SET[k]=e.value; saveSET(); }; });
+function rfNum(k,d,lo,hi){ var v=parseFloat(String(SET[k]).replace(',','.')); if(!isFinite(v)) v=d; return Math.max(lo,Math.min(hi,v)); }
+function rfOn(k){ return SET[k]!=='off'; }
+function rfDom(){ var sc=curScheda(), d=sc&&sc.dom, sel=SET.rfDot||'dom';
+  if(sel==='OD'||sel==='OS') return {eye:sel,fonte:'scelto nelle impostazioni'};
+  if(d==='OD'||d==='OS') return {eye:d,fonte:'occhio dominante motorio (scheda soggetto)'};
+  return {eye:'OD',fonte:'dominanza non inserita, usato OD'}; }
+function rfCfg(){   // fotografia delle impostazioni: resta fissa per tutta la serie
+  return {speed:rfNum('rfSpeed',1,0.1,10), first:SET.rfFirst==='out'?'out':'in', bases:(SET.rfBases==='in'||SET.rfBases==='out')?SET.rfBases:'both',
+    capFarIn:rfNum('rfCapFarIn',20,1,80), capFarOut:rfNum('rfCapFarOut',35,1,80), capNearIn:rfNum('rfCapNearIn',35,1,80), capNearOut:rfNum('rfCapNearOut',35,1,80),
+    frame:rfOn('rfFrame'), plane:rfOn('rfPlane'), size:rfOn('rfSize'), frameDeg:rfNum('rfFrameDeg',9,2,25), targetCm:rfNum('rfTargetCm',6,0.5,30), fixedDeg:rfNum('rfFixedDeg',1,0.2,10),
+    pause:rfNum('rfPause',10,0,300), count:Math.round(rfNum('rfCount',5,0,30)), rec:(SET.rfRec==='first'||SET.rfRec==='never')?SET.rfRec:'always', recT:rfNum('rfRecT',30,2,300),
+    susp:rfNum('rfSusp',60,0,600), fails:Math.round(rfNum('rfFails',2,1,10)), repeat:rfOn('rfRepeat'), second:SET.rfSecond==='on', ansT:rfNum('rfAnsT',6,1,60), assign:rfDom()}; }
+function rfBuild(c){ var bases=c.bases==='both'?[c.first,c.first==='in'?'out':'in']:[c.bases], A=c.assign.eye, O=A==='OD'?'OS':'OD', list=[];
+  function add(serie,tipo,pos,assign){ bases.forEach(function(b){ list.push({serie:serie,tipo:tipo,pos:pos,base:b,assign:assign,cap:(b==='in'?c.capFarIn:c.capFarOut),attempt:1}); }); }
+  add(1,'posizione','centro',A);                                  // (dalla tappa 5: le altre posizioni)
+  if(c.repeat) add(1,'ripetizione centro','centro',O);            // centro ripetuto a fine serie: stesso ordine delle basi, assegnazione opposta
+  if(c.second){ add(2,'posizione','centro',O); if(c.repeat) add(2,'ripetizione centro','centro',A); }   // seconda serie completa, assegnazione opposta
+  return list; }
+function rfTargetDeg(c){ return c.size?2*Math.atan((c.targetCm/100)/2/RF_D)*180/Math.PI:c.fixedDeg; }
+function rfBeep(f,d){ (window.__rfBeeps=window.__rfBeeps||[]).push([Math.round(f),d]);
+  try{ if(!AUD) AUD=new (window.AudioContext||window.webkitAudioContext)(); if(AUD.state==='suspended') AUD.resume();
+    var o=AUD.createOscillator(), g=AUD.createGain(); o.frequency.value=f; g.gain.value=0.15; o.connect(g); g.connect(AUD.destination); o.start(); o.stop(AUD.currentTime+d); }catch(e){} }
+function rfScene(c){   // scena da lontano: tutto e' nello spazio e si sposta con il prisma; nessun pannello, nessun raggio
+  clearScene(); VRS.clear=[0.12,0.12,0.12]; VRS.onTrigger=null; VRS.noRay=true; RAYS={};
+  var D=RF_D, zt=-D+0.02, A=rfTargetDeg(c), Rt=D*Math.tan(deg(A/2));
+  if(c.plane) add({kind:'dotwall',x:0,y:0,z:-D,w:80,h:80,uvs:[80,80],gp:[0.3,0.03,0.004,0],col:[0.55,0.55,0.55,1],bg:true});   // sovradimensionata: copre il campo di ogni occhio anche con il prisma
+  if(c.frame){ var H=D*Math.tan(deg(c.frameDeg)), th=D*Math.tan(deg(0.3)), zf=-D+0.01, col=[0.85,0.85,0.85,1];
+    add({kind:'rect',x:0,y:H,z:zf,w:H+th,h:th,col:col}); add({kind:'rect',x:0,y:-H,z:zf,w:H+th,h:th,col:col});
+    add({kind:'rect',x:-H,y:0,z:zf,w:th,h:H+th,col:col}); add({kind:'rect',x:H,y:0,z:zf,w:th,h:H+th,col:col}); }
+  add({kind:'ring',x:0,y:0,z:zt,w:Rt,h:Rt,col:[0.95,0.95,0.95,1]}); add({kind:'disc',x:0,y:0,z:zt+0.001,w:Rt*0.28,h:Rt*0.28,col:[0.95,0.95,0.95,1]}); }
+function sceneRFSetup(){ VRS.tok++; VRS.scene='rfsetup'; clearScene(); VRS.clear=[0,0,0]; VRS.tick=null; VRS.onTrigger=null; VRS.noRay=false; PRISM.half=0;
+  var c=rfCfg(), n=rfBuild(c).length, z=-1.7;
+  panel(['17. Riserve fusionali da lontano (6 m), centro','SPERIMENTALE e NON validato · i dp sono nominali','Guarda il bersaglio. Quando vedi DOPPIO premi il grilletto.','Quando rivedi UNA COSA SOLA premi di nuovo il grilletto.','Tieni premuto il grilletto 3 s per fermare la prova.'],0,0.66,z,0.95,0.2,{size:30});
+  panel(['Velocità '+c.speed+' dp/s · '+n+' rampe · prima base '+(c.first==='in'?'interna':'esterna')+(c.bases==='both'?'':' (solo questa)'),
+    'Tetti: base interna '+c.capFarIn+' dp, base esterna '+c.capFarOut+' dp',
+    'Cornice '+(c.frame?'sì':'no')+' · piano '+(c.plane?'sì':'no')+' · grandezza realistica '+(c.size?'sì':'no'),
+    'Pallino sopra: '+c.assign.eye+' ('+c.assign.fonte+')','Controllo del recupero: '+({always:'sempre',first:'solo la prima volta',never:'mai'})[c.rec]],0,0.22,z,0.95,0.2,{size:30});
+  panel(['Durante la prova non compare nessuna scritta e il raggio sparisce.','Dopo «Inizia»: conto alla rovescia sonoro ('+c.count+' s), poi il campo parte da solo.'],0,-0.12,z,0.95,0.1,{size:30});
+  button('rfgo','Inizia',0,-0.38,z,0.3,0.06,rfStart,'#ad1457'); button('rfbk','Torna al menu',0,-0.58,z,0.3,0.06,sceneMenu,'#37474f'); }
+function rfStart(){ var c=rfCfg(); VRS.tok++; VRS.scene='rf'; PRISM.half=0; PRISM.base=c.first; VRS.noSel=performance.now()+700;
+  RF={cfg:c,list:rfBuild(c),i:0,res:[],st:'wait',t0:performance.now(),wait:c.count*1000,lastTick:999,prevDown:!!GP.t,holdT0:0,fails:0,closed:{},askedRec:false,done:false,saved:false,why:'',started:true,cur:null};
+  rfScene(c); VRS.tick=rfTick; }
+function rfKey(r){ return r.serie+'|'+r.tipo+'|'+r.pos; }
+function rfRec(r,x){ var c=RF.cfg, o={n:RF.res.length+1,serie:r.serie,tipo:r.tipo,pos:r.pos,base:r.base,dist:'lontano',distanza_m:RF_D,vel_dp_s:c.speed,tetto_dp:r.cap,
+    assegnazione:{sopra:r.assign,sotto:r.assign==='OD'?'OS':'OD',fonte:c.assign.fonte},tentativo:r.attempt||1,esito:'',dp:null,tempo_ms:null,recupero:'non richiesto',recupero_ms:null,at:performance.now()};
+  for(var k in x) o[k]=x[k]; RF.res.push(o); RF.cur=o; return o; }
+function rfNext(now,restMs){ var c=RF.cfg; rfSetPrism(0); RF.i++; while(RF.list[RF.i]&&RF.closed[rfKey(RF.list[RF.i])]) RF.i++;
+  if(!RF.list[RF.i]){ rfFinish('serie completata'); return; }
+  RF.st='wait'; RF.t0=now; RF.wait=Math.max(restMs,c.count*1000); RF.lastTick=999; }       // il conto alla rovescia occupa gli ultimi secondi della pausa
+function rfTick(now){
+  if(!RF||RF.done) return;
+  var c=RF.cfg, down=!!GP.t, press=down&&!RF.prevDown; RF.prevDown=down;                 // un solo evento per pressione: si aspetta il rilascio
+  if(down){ if(!RF.holdT0) RF.holdT0=now; else if(now-RF.holdT0>=3000){ rfBeep(220,0.5); rfFinish('tasto tenuto 3 s'); return; } } else RF.holdT0=0;
+  var r=RF.list[RF.i]; if(!r){ rfFinish('serie completata'); return; }
+  if(RF.st==='wait'){ var left=RF.wait-(now-RF.t0), k=Math.ceil(left/1000);
+    if(left>0&&k<=c.count&&k!==RF.lastTick){ RF.lastTick=k; rfBeep(440,0.12); }
+    if(left<=0){ rfBeep(880,0.35); RF.st='ramp'; RF.t0=now; rfSetPrism(0,r.base); }
+    return; }
+  if(RF.st==='ramp'){ var dp=c.speed*(now-RF.t0)/1000;
+    if(press){ rfSetPrism(0); rfBeep(660,0.2); var rec=rfRec(r,{esito:'rottura',dp:dp,tempo_ms:Math.round(now-RF.t0)});
+      if(c.rec==='always'||(c.rec==='first'&&!RF.askedRec)){ RF.askedRec=true; rec.recupero='in attesa'; RF.st='recov'; RF.t0=now; } else rfNext(now,c.pause*1000);
+      return; }
+    if(dp>=r.cap){ rfSetPrism(0); rfBeep(300,0.3); rfRec(r,{esito:'non raggiunta',dp:r.cap,tempo_ms:Math.round(now-RF.t0)}); rfNext(now,c.pause*1000); return; }
+    rfSetPrism(dp,r.base); return; }
+  if(RF.st==='recov'){ var rc=RF.cur;
+    if(press){ rc.recupero='ok'; rc.recupero_ms=Math.round(now-RF.t0); rc.at=now; RF.fails=0; rfBeep(990,0.1); later(function(){ rfBeep(990,0.1); },160); rfNext(now,c.pause*1000); return; }
+    if(now-RF.t0>=c.recT*1000){ rc.recupero='non recuperata'; RF.fails++; rfBeep(250,0.4);
+      if(RF.fails>=c.fails){ RF.closed[rfKey(r)]=true; RF.fails=0; rc.posizione_chiusa=true; rfNext(now,c.susp*1000); }
+      else { var cl={}; for(var q in r) cl[q]=r[q]; cl.attempt=(r.attempt||1)+1; RF.list.splice(RF.i+1,0,cl); rfNext(now,c.susp*1000); }
+    } } }
+function rfRowTxt(x){ var t, p=(x.serie>1?'S'+x.serie+' ':'')+(x.tipo==='ripetizione centro'?'centro ripetuto':x.pos)+', base '+(x.base==='in'?'interna':'esterna');
+  if(x.esito==='rottura') t='rottura '+x.dp.toFixed(1)+' dp'; else if(x.esito==='non raggiunta') t='non raggiunta (tetto '+x.tetto_dp+' dp)'; else t=x.esito;
+  if(x.recupero==='ok') t+=', recupero '+(x.recupero_ms/1000).toFixed(1)+' s'; else if(x.recupero==='non recuperata') t+=', FUSIONE NON RECUPERATA';
+  if(x.tentativo>1) t+=' (tentativo '+x.tentativo+')'; if(x.valore_non_valido) t+=' [non valido: tasto tenuto 3 s]';
+  return p+': '+t; }
+function rfSave(){ if(!RF||RF.saved||!RF.res.length) return; RF.saved=true; var c=RF.cfg, A=c.assign.eye;
+  var txt='Riserve fusionali, da lontano (6 m), centro (SPERIMENTALE, non validato, dp nominali): '+RF.res.map(rfRowTxt).join(' · ')+' · velocità '+c.speed+' dp/s · tetti lontano: interna '+c.capFarIn+', esterna '+c.capFarOut+' dp'
+    +' · pallino sopra '+A+' ('+c.assign.fonte+') · cornice '+(c.frame?'sì':'no')+', piano '+(c.plane?'sì':'no')+', grandezza realistica '+(c.size?'sì':'no')+' · fine: '+RF.why;
+  addResult('Riserve fusionali (lontano, centro)',txt,{versione:'v0.6.2',sperimentale:true,nota:'dp nominali: angolo totale = atan(dp/100), meta per occhio; non validato',distanza:'lontano',distanza_m:RF_D,posizioni:['centro'],
+    velocita_dp_s:c.speed,tetti:{lontano:{interna:c.capFarIn,esterna:c.capFarOut},vicino:{interna:c.capNearIn,esterna:c.capNearOut}},
+    interruttori:{cornice:c.frame,piano:c.plane,grandezza_realistica:c.size},cornice_gradi:c.frameDeg,bersaglio_gradi:+rfTargetDeg(c).toFixed(3),bersaglio_cm:c.targetCm,
+    base_di_partenza:c.first,basi:c.bases,ordine_basi:(c.bases==='both'?[c.first,c.first==='in'?'out':'in']:[c.bases]),assegnazione:{sopra:A,sotto:A==='OD'?'OS':'OD',fonte:c.assign.fonte,fissa_per_serie:true},
+    opzioni:{controllo_ripartenza:c.rec,limite_recupero_s:c.recT,pausa_s:c.pause,conto_s:c.count,sospensione_s:c.susp,insuccessi_per_chiudere:c.fails,centro_ripetuto:c.repeat,seconda_serie:c.second,tempo_limite_risposta_s:c.ansT},
+    rampe:RF.res.map(function(x){ var y={}; for(var k in x) if(k!=='at') y[k]=x[k]; return y; }),posizioni_chiuse:Object.keys(RF.closed),fine:RF.why}); }
+function rfFinish(why){ if(!RF||RF.done) return; var now=performance.now(); RF.done=true; RF.why=why; rfSetPrism(0);
+  if(why==='tasto tenuto 3 s'){ var l=RF.res[RF.res.length-1]; if(l&&now-l.at<3600){ l.valore_non_valido=true; l.nota='la pressione serviva a fermare la prova'; } }   // la pressione lunga non e' una rottura vera
+  rfSave(); sceneRFEnd(); }
+function rfPartial(){ PRISM.half=0; if(RF&&!RF.done&&RF.started){ RF.done=true; RF.why='uscita dalla VR'; rfSave(); } }
+function sceneRFEnd(){ VRS.tok++; VRS.scene='rfend'; clearScene(); VRS.clear=[0,0,0]; VRS.tick=null; VRS.onTrigger=null; VRS.noRay=false; PRISM.half=0; VRS.noSel=performance.now()+800;
+  var L=['Riserve fusionali: '+(RF.why==='serie completata'?'serie completata':'prova interrotta ('+RF.why+')'),'Sperimentale e non validato · dp nominali'];
+  RF.res.slice(0,11).forEach(function(x){ L.push(rfRowTxt(x)); }); if(RF.res.length>11) L.push('... altre '+(RF.res.length-11)+' rampe nel risultato salvato');
+  panel(L,0,0.3,-1.7,0.95,0.06+0.045*L.length,{size:36});
+  button('rfn','Nuova serie',-0.25,-0.62,-1.7,0.22,0.06,sceneRFSetup,'#ad1457'); button('rfb','Torna al menu',0.25,-0.62,-1.7,0.22,0.06,sceneMenu,'#37474f'); }
+
+// ================= PROVA VOCE (v0.6.2) =================
+// Prova la sintesi vocale del browser in italiano (it-IT): quali voci trova e fa ascoltare una frase. NON c'e' ancora nessuna logica vocale.
+var VO=null;
+function voInfo(){ var ok=false, v=[]; try{ ok=!!(window.speechSynthesis&&window.SpeechSynthesisUtterance); if(ok) v=Array.prototype.slice.call(speechSynthesis.getVoices()||[]); }catch(e){ ok=false; }
+  return {ok:ok,n:v.length,it:v.filter(function(x){ return /^it([-_]|$)/i.test(x.lang||''); })}; }
+function voTxt(){ var i=voInfo(), L=['Sintesi vocale del browser: '+(i.ok?'disponibile':'NON disponibile')];
+  if(i.ok){ L.push('voci trovate: '+i.n+' · voci italiane (it): '+i.it.length); i.it.slice(0,3).forEach(function(x){ L.push('   '+x.name+' ('+x.lang+')'); }); if(!i.it.length) L.push('nessuna voce italiana: si userebbe la voce predefinita'); }
+  L.push('ultima frase: '+(VO.ev||'mai avviata')+(VO.voice?' · voce: '+VO.voice:'')); if(VO.err) L.push('errore: '+VO.err); return L; }
+function sceneVoice(){ VRS.tok++; VRS.scene='voce'; clearScene(); VRS.clear=[0,0,0]; VRS.onTrigger=null; VRS.noRay=false;
+  VO={saved:false,p:null,txt:'',t:0,ev:'',voice:'',err:'',spoken:0,active:true};
+  panel(['Prova voce','Prova la sintesi vocale del browser in italiano (it-IT).','Premi «Ascolta una frase»: dovresti sentire una voce.'],0,0.7,-1.7,0.95,0.13);
+  button('vo1','Ascolta una frase',0,-0.3,-1.7,0.3,0.06,voSpeak,'#1565c0'); button('vo2','Torna al menu',0,-0.52,-1.7,0.3,0.06,voEnd,'#37474f');
+  VRS.tick=voTick; }
+function voTick(now){ if(!VO||!VO.active||now-VO.t<300) return; VO.t=now; var L=voTxt(), tx=L.join('|');
+  if(tx!==VO.txt){ VO.txt=tx; if(VO.p){ try{ gl.deleteTexture(VO.p.tex); }catch(e){} removeObj(VO.p); } VO.p=panel(L,0,0.2,-1.7,0.95,0.06+0.045*L.length,{size:38}); } }
+function voSpeak(){ if(!VO) return; VO.err='';
+  try{ var u=new SpeechSynthesisUtterance('Quali pallini vedi? Sopra, sotto, entrambi, nessuno.'); u.lang='it-IT'; var it=voInfo().it;
+    if(it.length){ u.voice=it[0]; VO.voice=it[0].name+' ('+it[0].lang+')'; } else VO.voice='nessuna voce italiana: predefinita';
+    u.onstart=function(){ VO.ev='avviata'; }; u.onend=function(){ VO.ev='finita'; }; u.onerror=function(e){ VO.ev='errore'; VO.err=String((e&&e.error)||e); };
+    speechSynthesis.cancel(); speechSynthesis.speak(u); VO.spoken++; VO.ev='richiesta inviata'; }
+  catch(e){ VO.err=String((e&&e.message)||e); VO.ev='errore'; } }
+function voSave(){ if(!VO||VO.saved||!VO.active) return; VO.saved=true; VO.active=false; VRS.tick=null; var i=voInfo(), l=VO.ev||'mai avviata';
+  addResult('Prova voce','sintesi vocale '+(i.ok?'disponibile':'NON disponibile')+(i.ok?' · voci '+i.n+', italiane '+i.it.length+(i.it.length?' ('+i.it.slice(0,3).map(function(x){ return x.name+' '+x.lang; }).join(', ')+')':''):'')+' · frasi provate '+VO.spoken+' · ultima: '+l+(VO.voice?' · voce '+VO.voice:'')+(VO.err?' · errore '+VO.err:''),
+    {disponibile:i.ok,voci:i.n,voci_italiane:i.it.map(function(x){ return {nome:x.name,lingua:x.lang}; }),frasi_provate:VO.spoken,ultima:l,voce:VO.voice,errore:VO.err}); }
+function voEnd(){ voSave(); sceneMenu(); }
+
 // ---------------- raggi e clic ----------------
 function rayFromPose(m){ return {o:[m[12],m[13],m[14]],d:[-m[8],-m[9],-m[10]]}; }
 function hitTest(ray){
@@ -1108,7 +1269,7 @@ function hitTest(ray){
   return best;
 }
 function inputType(src){ if(!src) return '?'; if(src.hand||((src.profiles||[]).join(' ').toLowerCase().indexOf('hand')>=0)) return 'mani'; if(src.targetRayMode==='screen') return 'schermo'; if(src.targetRayMode==='gaze') return 'sguardo'; return 'controller'; }
-function onSelect(ev){ var ty=inputType(ev.inputSource); VRS.inp=VRS.inp||{}; VRS.inp[ty]=(VRS.inp[ty]||0)+1;
+function onSelect(ev){ if(VRS.noSel&&performance.now()<VRS.noSel) return; var ty=inputType(ev.inputSource); VRS.inp=VRS.inp||{}; VRS.inp[ty]=(VRS.inp[ty]||0)+1;
   if(VRS.onTrigger){ VRS.onTrigger(); return; } var r=RAYS[ev.inputSource.handedness||'x']; if(!r) return; var h=hitTest(r); if(h&&h.o.click) h.o.click(); }
 
 // ---------------- disegno ----------------
@@ -1121,14 +1282,14 @@ function sphereM(o,V){ var t0=V[12],t1=V[13],t2=V[14], ex=-(V[0]*t0+V[1]*t1+V[2]
 function drawObj(o,P,Vm){
   var M=o.M||((o.kind==='sphere'&&Vm)?sphereM(o,Vm):[o.w,0,0,0, 0,o.h,0,0, 0,0,1,0, o.x,o.y,o.z,1]);
   gl.uniformMatrix4fv(U.M,false,M);
-  var mode=o.kind==='disc'?1:(o.kind==='text'?2:(o.kind==='ring'?3:(o.kind==='tex4'?4:(o.kind==='sphere'?5:(o.kind==='blob'?6:(o.kind==='grat'?7:0))))));
+  var mode=o.kind==='disc'?1:(o.kind==='text'?2:(o.kind==='ring'?3:(o.kind==='tex4'?4:(o.kind==='sphere'?5:(o.kind==='blob'?6:(o.kind==='grat'?7:(o.kind==='dotwall'?8:0)))))));
   gl.uniform2fv(U.uvs,o.uvs||[1,1]); gl.blendFunc(gl.SRC_ALPHA,o.add?gl.ONE:gl.ONE_MINUS_SRC_ALPHA);
   gl.uniform1i(U.mode,mode); gl.uniform4fv(U.col,o.col||[1,1,1,1]); gl.uniform4fv(U.gp,o.gp||[0,0,0,0]);
   if(o.tex){ gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,o.tex); gl.uniform1i(U.tex,0); }
   gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
 }
 function bindQuad(){ gl.bindBuffer(gl.ARRAY_BUFFER,quadBuf); gl.enableVertexAttribArray(U.p); gl.vertexAttribPointer(U.p,3,gl.FLOAT,false,20,0); gl.enableVertexAttribArray(U.uv); gl.vertexAttribPointer(U.uv,2,gl.FLOAT,false,20,12); }
-function drawRays(){
+function drawRays(){ if(VRS.noRay) return;
   Object.keys(RAYS).forEach(function(k){ var r=RAYS[k], h=hitTest(r), len=h?h.t:3, e=[r.o[0]+r.d[0]*len,r.o[1]+r.d[1]*len,r.o[2]+r.d[2]*len];
     gl.bindBuffer(gl.ARRAY_BUFFER,lineBuf); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([r.o[0],r.o[1],r.o[2],0,0,e[0],e[1],e[2],0,0]),gl.DYNAMIC_DRAW);
     gl.vertexAttribPointer(U.p,3,gl.FLOAT,false,20,0); gl.vertexAttribPointer(U.uv,2,gl.FLOAT,false,20,12);
@@ -1158,13 +1319,13 @@ function onXRFrame(t,frame){
   bindQuad();
   var headInv=pose.transform.inverse.matrix;
   pose.views.forEach(function(v){ var vp=layer.getViewport(v); gl.viewport(vp.x,vp.y,vp.width,vp.height);
-    var Vv=v.transform.inverse.matrix; gl.uniformMatrix4fv(U.P,false,v.projectionMatrix); gl.uniformMatrix4fv(U.V,false,Vv);
+    var Vv=prismView(v.transform.inverse.matrix,v.eye); gl.uniformMatrix4fv(U.P,false,v.projectionMatrix); gl.uniformMatrix4fv(U.V,false,Vv);
     var eye=v.eye==='right'?'right':(v.eye==='left'?'left':'both');
     // disegno dal piu' lontano al piu' vicino
     OBJ.slice().sort(function(p,q){ return (q.bg?1:0)-(p.bg?1:0) || p.z-q.z; }).forEach(function(o){ if(o.eye==='both'||o.eye===eye||eye==='both'){ gl.uniformMatrix4fv(U.V,false,o.mono?headInv:Vv); drawObj(o,null,o.mono?headInv:Vv); } });
     gl.uniformMatrix4fv(U.V,false,Vv); drawJoints(); drawRays(); });
 }
-function readSettings(){ ['dCol','dRed','cues','thrMode','thrMan','factor','nearPct','subj','hands','lock','bg','a4n','shape','headWarn','headBad','thrPolicy','a4ord','menuAll','calUse','calVal','dbMode','dbExp','grSize','grCpd','grCon','grBlock','grPause','grSwap','grDur','grLadder','grStart','grDrift','grRot','grFb'].forEach(function(k){ if($(k)) SET[k]=$(k).value; }); saveSET(); syncThrUI(); }
+function readSettings(){ try{ rfRead(); }catch(e){} ['dCol','dRed','cues','thrMode','thrMan','factor','nearPct','subj','hands','lock','bg','a4n','shape','headWarn','headBad','thrPolicy','a4ord','menuAll','calUse','calVal','dbMode','dbExp','grSize','grCpd','grCon','grBlock','grPause','grSwap','grDur','grLadder','grStart','grDrift','grRot','grFb'].forEach(function(k){ if($(k)) SET[k]=$(k).value; }); saveSET(); syncThrUI(); }
 function startVR(){
   readSettings();
   if(!navigator.xr){ $('vrMsg').textContent='Questo browser non offre la realtà virtuale (WebXR).'; return; }
@@ -1172,7 +1333,7 @@ function startVR(){
     xrSession=s; try{ INFO.vrFeat=s.enabledFeatures?Array.prototype.slice.call(s.enabledFeatures).join(', '):'non dichiarate'; }catch(e){ INFO.vrFeat='?'; } renderSum(); if(!gl) initGL();
     var p=gl.makeXRCompatible?gl.makeXRCompatible():Promise.resolve();
     return p.then(function(){ s.updateRenderState({baseLayer:new XRWebGLLayer(s,gl)}); return s.requestReferenceSpace('local'); }).then(function(r){
-      refSpace=r; s.addEventListener('select',onSelect); s.addEventListener('end',function(){ try{ approachPartial(); }catch(e){} try{ grPartial(); }catch(e){} try{ ktPartial(); }catch(e){} xrSession=null; clearScene(); $('vrMsg').textContent='Sei uscito dalla VR. I risultati sono qui sotto.'; renderRes(); });
+      refSpace=r; s.addEventListener('select',onSelect); s.addEventListener('end',function(){ try{ approachPartial(); }catch(e){} try{ grPartial(); }catch(e){} try{ ktPartial(); }catch(e){} try{ rfPartial(); }catch(e){} try{ voSave(); }catch(e){} xrSession=null; clearScene(); $('vrMsg').textContent='Sei uscito dalla VR. I risultati sono qui sotto.'; renderRes(); });
       VRS.fps={n:0,t0:0,val:null}; sceneMenu(); s.requestAnimationFrame(onXRFrame); $('vrMsg').textContent='VR avviata.'; });
   }).catch(function(e){ $('vrMsg').innerHTML='<span class="bad">Non riesco ad avviare la VR: '+esc(e.message||e)+'</span>'; addResult('Avvio VR','errore: '+(e.message||e)); });
 }
