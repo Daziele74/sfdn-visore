@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SFDN Visore v0.5D</title>
+<title>SFDN Visore v0.6.1</title>
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--ink:#1d2330;--mut:#667085;--acc:#1f6feb;--ok:#1a7f37;--bad:#cf222e;--line:#d0d7de}
 *{box-sizing:border-box}
@@ -28,7 +28,7 @@ pre{white-space:pre-wrap;background:#f6f8fa;border:1px solid var(--line);border-
 </style>
 </head>
 <body>
-<header><h1>SFDN &middot; Visore <small>v0.5D (Prova tasti; reticoli archiviati)</small></h1></header>
+<header><h1>SFDN &middot; Visore <small>v0.6.1 (Prova tasti: vibrazione e clic joystick)</small></h1></header>
 <main>
  <div class="card">
   <h2>1. Controlli automatici</h2>
@@ -80,6 +80,7 @@ pre{white-space:pre-wrap;background:#f6f8fa;border:1px solid var(--line);border-
    Soglia stereo usata <select id="thrMode"><option value="auto">l'ultima misurata nel visore</option><option value="man">valore scritto a mano</option></select>
    <input type="number" id="thrMan" value="300" min="30" max="1500" step="10" style="width:90px;font-size:18px"> secondi d'arco &middot; <span id="thrInfo" class="hint"></span><br>
    Esercizi a <input type="number" id="factor" value="3" min="1.2" max="10" step="0.1" style="width:70px;font-size:18px"> volte la soglia, con il <input type="number" id="nearPct" value="20" min="0" max="100" step="5" style="width:70px;font-size:18px">% di prove vicino alla soglia (1,25 volte)</p>
+  <p><b>Email dei risultati</b><br>Indirizzo di destinazione <input id="mailTo" value="" placeholder="scrivi qui l'indirizzo" style="font-size:18px;padding:6px;width:320px"><br><b>Da scrivere una volta per browser</b>: resta salvato su questo dispositivo e non &egrave; scritto nel programma. Se in questo browser c'era gi&agrave; un indirizzo, resta.</p>
   <p class="hint">Senza indizi monoculari le palline del prato hanno sempre la stessa grandezza apparente e sono sospese, senza ombra: la profondit&agrave; si coglie solo con la visione binoculare. Con gli indizi la scena &egrave; pi&ugrave; naturale, ma si pu&ograve; indovinare anche con un occhio solo. La soglia si misura con la prova 3 del menu.</p>
   <p><button class="primary big" id="btnVR">ENTRA IN VR</button></p>
   <p id="vrMsg" class="hint"></p>
@@ -104,7 +105,7 @@ pre{white-space:pre-wrap;background:#f6f8fa;border:1px solid var(--line);border-
   <p>Nel riepilogo e nella mail includi: <select id="sumScope"><option value="scheda">questa scheda soggetto (se attiva)</option><option value="sess">solo questa apertura della pagina</option><option value="all">tutte le prove salvate di questo soggetto</option></select> <span class="hint">(soggetto scritto nelle impostazioni del riquadro 3)</span></p>
   <p><button class="primary" id="btnMail">Invia i risultati per email</button> <button id="btnCopy">Copia il riepilogo</button> <button id="btnDl">Scarica i risultati (.json)</button> <button id="btnClr">Cancella le prove salvate</button> <button id="btnReset">Azzera soggetto, soglia e calibrazione</button></p>
   <p class="hint"><b>Cancella le prove salvate</b> toglie solo l&rsquo;elenco delle prove. <b>Restano</b>: soggetto, schede soggetto, soglia stereo, calibrazione colori e impostazioni. <b>Azzera soggetto, soglia e calibrazione</b> toglie il nome del soggetto e la soglia stereo e la calibrazione colori <b>di quel soggetto</b>; <b>restano</b> le prove salvate, le schede soggetto e le altre impostazioni.</p>
-  <p class="hint">Indirizzo: <input id="mailTo" value="" placeholder="scrivi qui l'indirizzo" style="font-size:18px;padding:6px;width:320px"> <b>da scrivere una volta per browser</b> (resta salvato su questo dispositivo, non &egrave; scritto nel programma) &middot; &laquo;Invia&raquo; apre Gmail nel browser con la mail gi&agrave; scritta: controlla e premi <b>Invia</b> (serve internet e l'accesso a Gmail). <span id="mailMsg"></span></p>
+  <p class="hint">&laquo;Invia&raquo; apre Gmail nel browser con la mail gi&agrave; scritta: controlla e premi <b>Invia</b> (serve internet e l'accesso a Gmail). L&rsquo;indirizzo di destinazione si scrive <b>una volta</b> nelle impostazioni del riquadro 3 (&laquo;Email dei risultati&raquo;). <span id="mailMsg"></span></p>
  </div>
 
  <div class="card">
@@ -205,7 +206,7 @@ renderRes();
 $('btnDl').onclick=function(){ var b=new Blob([JSON.stringify({info:INFO,db:DB},null,1)],{type:'application/json'}); var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='SFDN_test_visore_risultati.json'; document.body.appendChild(a); a.click(); setTimeout(function(){ a.remove(); },500); };
 // dettaglio compatto per la mail (profondita' prova per prova)
 function mailBody(){
-  var t='Risultati SFDN Visore v0.5D - '+(SET.subj?'soggetto '+SET.subj+' - ':'')+new Date().toLocaleString('it-IT')+'\n\n'+renderSum()+'\n';
+  var t='Risultati SFDN Visore v0.6.1 - '+(SET.subj?'soggetto '+SET.subj+' - ':'')+new Date().toLocaleString('it-IT')+'\n\n'+renderSum()+'\n';
   sumProve().slice(-6).forEach(function(p){ if((p.nome==='Profondità'||p.nome==='Soglia stereo')&&p.dati&&p.dati.prove){ t+='\n'+p.nome+' prova per prova (disparità in secondi d\'arco, G=giusta, S=sbagliata): '+p.dati.prove.map(function(x){ return x.disparita_arcsec+(x.giusta?'G':'S'); }).join(' ')+'\n'; } });
   var DPv=sumProve().slice(-6), isT9=function(p){ return /^t9[ABCDS]$/.test(p.tid||''); };
   DPv.filter(isT9).concat(DPv.filter(function(p){ return !isT9(p); })).forEach(function(p){ if(p.dati&&p.dati.dettaglio) t+='\n'+p.nome+' - dettaglio:\n'+p.dati.dettaglio+'\n'; });
@@ -213,8 +214,8 @@ function mailBody(){
 }
 $('btnMail').onclick=function(){
   SET.mailTo=$('mailTo').value.trim(); saveSET();
-  if(SET.mailTo.indexOf('@')<1){ $('mailMsg').innerHTML='<b style="color:#cf222e">Scrivi prima l&rsquo;indirizzo email di destinazione nel campo qui sopra (basta una volta per browser).</b>'; return; }
-  var url='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(SET.mailTo)+'&su='+encodeURIComponent('SFDN Visore v0.5D - risultati'+(SET.subj?' - '+SET.subj:''))+'&body='+encodeURIComponent(mailBody());
+  if(SET.mailTo.indexOf('@')<1){ $('mailMsg').innerHTML='<b style="color:#cf222e">Scrivi prima l&rsquo;indirizzo email di destinazione nelle impostazioni (riquadro 3, &laquo;Email dei risultati&raquo;): basta una volta per browser.</b>'; return; }
+  var url='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(SET.mailTo)+'&su='+encodeURIComponent('SFDN Visore v0.6.1 - risultati'+(SET.subj?' - '+SET.subj:''))+'&body='+encodeURIComponent(mailBody());
   var w=window.open(url,'_blank'); if(!w) location.href=url;
   $('mailMsg').innerHTML='Se Gmail non si apre: <a href="mailto:'+esc(SET.mailTo)+'?subject='+encodeURIComponent('SFDN Test Visore - risultati')+'&body='+encodeURIComponent(mailBody())+'">prova con l\'app di posta</a> oppure usa &laquo;Copia il riepilogo&raquo;.';
 };
@@ -333,7 +334,7 @@ function later(fn,ms){ var tk=VRS.tok; return setTimeout(function(){ if(VRS.tok=
 function sceneMenu(){
   VRS.tok=(VRS.tok||0)+1; VRS.scene='menu'; clearScene(); VRS.clear=[0,0,0]; VRS.tick=null; VRS.onTrigger=null;
   var z=-1.7, sc=curScheda();
-  panel(['SFDN · Visore v0.5D'+(sc?'  ·  scheda: '+sc.nome:''),'Soglia stereo usata: '+thrUsed()+'"'+(thrFlag()?'  ·  '+thrFlag():'')+'  ·  palline a terra: '+(SET.cues==='on'?'SÌ':'NO')+'  ·  verde cal. '+calG().toFixed(2)],0,0.52,z,0.95,0.13,(thrRec()&&thrRec().liv==='bad')?{bg:'#7a1f1f'}:undefined);
+  panel(['SFDN · Visore v0.6.1'+(sc?'  ·  scheda: '+sc.nome:''),'Soglia stereo usata: '+thrUsed()+'"'+(thrFlag()?'  ·  '+thrFlag():'')+'  ·  palline a terra: '+(SET.cues==='on'?'SÌ':'NO')+'  ·  verde cal. '+calG().toFixed(2)],0,0.52,z,0.95,0.13,(thrRec()&&thrRec().liv==='bad')?{bg:'#7a1f1f'}:undefined);
   var L=[{id:'t1',lab:'1. Separazione occhi',fn:sceneSep},{id:'t2',lab:'2. Profondità rapida',fn:sceneDepth},{id:'t3',lab:'3. Misura soglia stereo',fn:sceneThr},{id:'t4',lab:'4. Palline',fn:function(){ sceneGame(false); }},{id:'t5',lab:'5. Palline dicoptiche',fn:function(){ sceneGame(true); }},{id:'t10',lab:'10. Dicoptica A: coppie',fn:sceneDicA,col:'#6a1b9a'},{id:'t11',lab:'11. Dicoptica B: sovrapposte',fn:sceneDicB,col:'#6a1b9a'}];
   var Rr=[{id:'t6',lab:'6. Prato: la più vicina',fn:function(){ meadowStart('near'); }},{id:'t7',lab:'7. Prato: in ordine',fn:function(){ meadowStart('order'); }},{id:'t8',lab:'8. Prato: davanti all’albero',fn:function(){ meadowStart('tree'); }},{id:'t9',lab:'9. Prato: si avvicina',fn:sceneApproachMenu},{id:'t12',lab:'12. Calibrazione colori',fn:sceneCal,col:'#b26a00'}];
   function put(arr,pre,x,col0){ arr.forEach(function(b,i){ b.i=i; }); arr.filter(function(b){ return showTest(b.id); }).forEach(function(b,j){ var d=doneTest(b.id); button(pre+b.i,(d?'OK · ':'')+b.lab,x,0.3-j*0.105,z,0.38,0.05,b.fn,d?'#00695c':(b.col||col0)); }); }
@@ -881,7 +882,18 @@ function GPpoll(s){ var t=false,q=false,a=false,b=false,seen=false;
   for(var i=0;i<s.inputSources.length;i++){ var g=s.inputSources[i].gamepad; if(!g||!g.buttons) continue; seen=true; var bt=g.buttons;
     if(bt[0]&&bt[0].pressed) t=true; if(bt[1]&&bt[1].pressed) q=true; if(bt[4]&&bt[4].pressed) a=true; if(bt[5]&&bt[5].pressed) b=true; }
   GP.t=t; GP.s=q; GP.a=a; GP.b=b; GP.seen=seen; }
-function buzz(ms){ try{ var s=xrSession; if(!s) return; for(var i=0;i<s.inputSources.length;i++){ var g=s.inputSources[i].gamepad; if(g&&g.hapticActuators&&g.hapticActuators[0]&&g.hapticActuators[0].pulse) g.hapticActuators[0].pulse(0.4,ms); } }catch(e){} }
+// vibrazione (v0.6.1): prima gamepad.vibrationActuator.playEffect('dual-rumble'), poi come riserva hapticActuators[0].pulse.
+// BZ ricorda quale via e' stata usata e l'ultimo errore (si legge nel pannello della Prova tasti).
+var BZ={via:'',err:'',n:0};
+function bzErr(e){ return String((e&&e.message)||e); }
+function bzPulse(g,ms){ try{ if(g.hapticActuators&&g.hapticActuators[0]&&g.hapticActuators[0].pulse){ g.hapticActuators[0].pulse(0.4,ms); BZ.via='pulse'; return true; } }catch(e){ BZ.err='pulse: '+bzErr(e); } return false; }
+function buzz1(g,ms){ var va=g.vibrationActuator;
+  if(va&&typeof va.playEffect==='function'){
+    try{ var pr=va.playEffect('dual-rumble',{startDelay:0,duration:ms,strongMagnitude:0.8,weakMagnitude:0.8}); BZ.via='playEffect';
+      if(pr&&pr.then) pr.then(function(r){ if(r&&r!=='complete'&&r!=='preempted'){ BZ.err='playEffect: '+r; bzPulse(g,ms); } },function(e){ BZ.err='playEffect: '+bzErr(e); bzPulse(g,ms); });
+      return; }catch(e){ BZ.err='playEffect: '+bzErr(e); } }
+  if(!bzPulse(g,ms)&&!BZ.via) BZ.via='nessuna interfaccia'; }
+function buzz(ms){ try{ var s=xrSession; if(!s) return; BZ.n++; for(var i=0;i<s.inputSources.length;i++){ var g=s.inputSources[i].gamepad; if(g) buzz1(g,ms); } }catch(e){} }
 function toneOn(){ window.__tone=(window.__tone||0)+1; if(SET.grFb==='off') return;
   try{ if(!AUD) AUD=new (window.AudioContext||window.webkitAudioContext)(); if(AUD.state==='suspended') AUD.resume(); if(!TONE){ var o=AUD.createOscillator(), g=AUD.createGain(); o.frequency.value=520; g.gain.value=0.04; o.connect(g); g.connect(AUD.destination); o.start(); TONE={o:o}; } }catch(e){}
   if(SET.grFb==='both') buzz(30); }
@@ -1020,19 +1032,19 @@ function grExEnd(partial){
 function grPartial(){ if(GR&&GR.active&&!GR.saved){ if(GR.kind==='test') grTestEnd(true); else grExEnd(true); } }
 
 
-// ================= PROVA TASTI (v0.5D) =================
+// ================= PROVA TASTI (v0.5D, v0.6.1: vibrazione playEffect/pulse, clic joystick) =================
 // Voce propria nel menu principale. Mostra in grande il tasto premuto (suono + vibrazione) e i valori degli assi del joystick.
 // Riusa AUD e buzz() della sezione reticoli. Sperimentale: la mappa dei tasti del Pico (xr-standard) va verificata nel visore vero.
-var KT=null, KT_F={0:440,1:554,4:659,5:784}, KT_KEY={t:0,s:1,a:4,b:5};
+var KT=null, KT_F={0:440,1:554,3:392,4:659,5:784}, KT_KEY={t:0,s:1,a:4,b:5,c:3};
 function ktHand(h){ return h==='left'?'sinistro':(h==='right'?'destro':'?'); }
-function ktName(k,h){ if(k===0) return 'GRILLETTO'; if(k===1) return 'LATERALE (grip)'; if(k===4) return h==='left'?'X':(h==='right'?'A':'A / X'); if(k===5) return h==='left'?'Y':(h==='right'?'B':'B / Y'); if(k===3) return 'pulsante 3 (clic joystick?)'; return 'pulsante '+k; }
+function ktName(k,h){ if(k===0) return 'GRILLETTO'; if(k===1) return 'LATERALE (grip)'; if(k===4) return h==='left'?'X':(h==='right'?'A':'A / X'); if(k===5) return h==='left'?'Y':(h==='right'?'B':'B / Y'); if(k===3) return 'CLIC JOYSTICK (pulsante 3)'; return 'pulsante '+k; }
 function ktBeep(f){ window.__ktBeep=(window.__ktBeep||0)+1;
   try{ if(!AUD) AUD=new (window.AudioContext||window.webkitAudioContext)(); if(AUD.state==='suspended') AUD.resume();
     var o=AUD.createOscillator(), g=AUD.createGain(); o.frequency.value=f; g.gain.value=0.05; o.connect(g); g.connect(AUD.destination); o.start(); o.stop(AUD.currentTime+0.2); }catch(e){} }
 function ktRead(){ var r=[], s=xrSession; if(!s) return r;
   for(var i=0;i<s.inputSources.length;i++){ var src=s.inputSources[i], g=src.gamepad; if(!g) continue;
     var b=[], k; for(k=0;k<(g.buttons||[]).length;k++) b.push(!!(g.buttons[k]&&g.buttons[k].pressed));
-    r.push({h:src.handedness||'?', b:b, ax:Array.prototype.slice.call(g.axes||[])}); }
+    r.push({h:src.handedness||'?', b:b, ax:Array.prototype.slice.call(g.axes||[]), vib:!!g.vibrationActuator, hap:!!(g.hapticActuators&&g.hapticActuators.length)}); }
   return r; }
 function ktF(v){ return (v>=0?'+':'')+v.toFixed(2); }
 function ktPanel(slot,lines,x,y,w,h,opt){ var o=KT.p[slot]; if(o){ try{ gl.deleteTexture(o.tex); }catch(e){} removeObj(o); } KT.p[slot]=panel(lines,x,y,-1.7,w,h,opt); }
@@ -1042,13 +1054,13 @@ function ktBig(held){
   else ktPanel('big',['Premi un tasto','compare qui in grande'],0,0.4,0.9,0.22,{size:90,bg:'#263238'}); }
 function sceneKeys(){
   VRS.tok++; VRS.scene='tasti'; clearScene(); VRS.clear=[0,0,0]; VRS.onTrigger=null;
-  KT={active:true,saved:false,p:{},prev:{},seen:{},axMax:{},nAx:{},joy:false,last:null,held:'',nPress:0,axTxt:'',axT:0,dots:{},nGp:0};
-  panel(['Prova tasti','Premi i tasti uno alla volta (suono e vibrazione).','Muovi il joystick per vedere gli assi.'],0,0.79,-1.7,0.95,0.13);
+  KT={active:true,saved:false,p:{},prev:{},seen:{},axMax:{},nAx:{},joy:false,last:null,held:'',nPress:0,axTxt:'',axT:0,dots:{},nGp:0,vib:{},vibTxt:'',vibT:0};
+  panel(['Prova tasti','Premi i tasti uno alla volta (suono e vibrazione).','Muovi il joystick e premilo (clic) per vedere assi e pallini.'],0,0.79,-1.7,0.95,0.13);
   ktBig(null);
-  var rows=[['t','GRILLETTO (indice)'],['s','LATERALE (grip, medio)'],['a','A / X'],['b','B / Y'],['j','JOYSTICK (mosso)']];
-  rows.forEach(function(n,i){ var y=0.1-i*0.095; panel([n[1]],-0.2,y,-1.7,0.36,0.04); KT.dots[n[0]]=add({kind:'disc',x:0.22,y:y,z:-1.7,w:0.028,h:0.028,col:[0.25,0.25,0.25,1]}); });
-  ktPanel('ax',['Assi del joystick: valori qui sotto'],0,-0.52,0.95,0.1,{size:34});
-  button('bk','Torna al menu',0,-0.76,-1.7,0.3,0.06,ktEnd,'#37474f');
+  var rows=[['t','GRILLETTO (indice)'],['s','LATERALE (grip, medio)'],['a','A / X'],['b','B / Y'],['j','JOYSTICK (mosso)'],['c','CLIC JOYSTICK (pulsante 3)']];
+  rows.forEach(function(n,i){ var y=0.1-i*0.08; panel([n[1]],-0.2,y,-1.7,0.36,0.04); KT.dots[n[0]]=add({kind:'disc',x:0.22,y:y,z:-1.7,w:0.028,h:0.028,col:[0.25,0.25,0.25,1]}); });
+  ktPanel('ax',['Assi del joystick: valori qui sotto'],0,-0.48,0.95,0.1,{size:34});
+  button('bk','Torna al menu',0.62,-0.1,-1.7,0.28,0.07,ktEnd,'#37474f');
   VRS.tick=ktTick; }
 function ktTick(now){
   if(!KT||!KT.active) return;
@@ -1056,27 +1068,32 @@ function ktTick(now){
   KT.nGp=st.length;
   st.forEach(function(c,ci){ var pv=KT.prev[ci]||[];
     c.b.forEach(function(p,k){ if(!p) return; held={k:k,h:c.h}; KT.seen[c.h+':'+k]={k:k,h:c.h}; if(!pv[k]) pn={k:k,h:c.h}; });
-    KT.prev[ci]=c.b.slice(); KT.nAx[c.h]=c.ax.length;
+    KT.prev[ci]=c.b.slice(); KT.nAx[c.h]=c.ax.length; KT.vib[c.h]={v:c.vib,h:c.hap};
     c.ax.forEach(function(v,j){ var a=Math.abs(v), key=c.h+':'+j; if(a>(KT.axMax[key]||0)) KT.axMax[key]=a; if(a>0.3) KT.joy=true; });
     lines.push(c.ax.length?('mano '+ktHand(c.h)+':  '+c.ax.map(function(v,j){ return 'asse '+j+' '+ktF(v); }).join('   ')):('mano '+ktHand(c.h)+': nessun asse riportato')); });
   if(pn){ KT.nPress++; KT.last=pn; ktBeep(KT_F[pn.k]||330); buzz(80); }
   var hk=held?(held.k+'|'+held.h):'';
   if(pn||hk!==KT.held){ KT.held=hk; ktBig(held); }
-  ['t','s','a','b'].forEach(function(n){ var k=KT_KEY[n], on=st.some(function(c){ return c.b[k]; }), ever=Object.keys(KT.seen).some(function(q){ return KT.seen[q].k===k; });
+  ['t','s','a','b','c'].forEach(function(n){ var k=KT_KEY[n], on=st.some(function(c){ return c.b[k]; }), ever=Object.keys(KT.seen).some(function(q){ return KT.seen[q].k===k; });
     KT.dots[n].col=on?[0.1,0.9,0.2,1]:(ever?[0.1,0.45,0.15,1]:[0.25,0.25,0.25,1]); });
   var jnow=st.some(function(c){ return c.ax.some(function(v){ return Math.abs(v)>0.3; }); });
   KT.dots.j.col=jnow?[0.1,0.9,0.2,1]:(KT.joy?[0.1,0.45,0.15,1]:[0.25,0.25,0.25,1]);
+  var vl=['Vibrazione: interfacce trovate dal visore']; st.forEach(function(c){ vl.push('controller '+ktHand(c.h)+':  vibrationActuator '+(c.vib?'SÌ':'NO')+'   ·   hapticActuators '+(c.hap?'SÌ':'NO')); });
+  if(!st.length) vl.push('nessun controller con tasti rilevato');
+  vl.push('ultima vibrazione: '+(BZ.via||'nessuna ancora')+(BZ.err?'   (errore: '+BZ.err+')':''));
+  var vt=vl.join('\n'); if(vt!==KT.vibTxt&&now-KT.vibT>=90){ KT.vibTxt=vt; KT.vibT=now; ktPanel('vib',vl,0,-0.82,0.95,0.045+0.028*vl.length,{size:36}); }
   var tx=st.length?lines.join('\n'):'nessun controller con tasti rilevato';
-  if(tx!==KT.axTxt&&now-KT.axT>=90){ KT.axTxt=tx; KT.axT=now; ktPanel('ax',tx.split('\n'),0,-0.52,0.95,0.05+0.04*Math.max(1,lines.length),{size:34}); } }
+  if(tx!==KT.axTxt&&now-KT.axT>=90){ KT.axTxt=tx; KT.axT=now; ktPanel('ax',tx.split('\n'),0,-0.48,0.95,0.05+0.04*Math.max(1,lines.length),{size:34}); } }
 function ktSave(){ if(!KT||KT.saved||!KT.active) return; KT.saved=true; KT.active=false; VRS.tick=null;
   var seen=Object.keys(KT.seen).map(function(q){ return KT.seen[q]; }), mv=Object.keys(KT.axMax).filter(function(q){ return KT.axMax[q]>0.3; });
   if(!seen.length&&!mv.length) return;
   var P=seen.map(function(x){ return ktName(x.k,x.h)+' ('+ktHand(x.h)+')'; }),
-      N=[['GRILLETTO',0],['LATERALE',1],['A/X',4],['B/Y',5]].filter(function(c){ return !seen.some(function(x){ return x.k===c[1]; }); }).map(function(c){ return c[0]; }),
+      N=[['GRILLETTO',0],['LATERALE',1],['A/X',4],['B/Y',5],['CLIC JOYSTICK',3]].filter(function(c){ return !seen.some(function(x){ return x.k===c[1]; }); }).map(function(c){ return c[0]; }),
       J=mv.map(function(q){ var p=q.split(':'); return 'asse '+p[1]+' ('+ktHand(p[0])+') max '+KT.axMax[q].toFixed(2); }),
-      nA=Object.keys(KT.nAx).map(function(h){ return ktHand(h)+' '+KT.nAx[h]; });
-  var txt='premuti: '+(P.length?P.join(', '):'nessuno')+' · NON premuti: '+(N.length?N.join(', '):'nessuno')+' · joystick: '+(J.length?J.join(', '):'nessun asse mosso')+' · assi riportati dal visore: '+(nA.length?nA.join(', '):'-')+' · '+KT.nPress+' pressioni';
-  addResult('Prova tasti',txt,{premuti:seen,non_premuti:N,assi_max:KT.axMax,assi_riportati:KT.nAx,pressioni:KT.nPress}); }
+      nA=Object.keys(KT.nAx).map(function(h){ return ktHand(h)+' '+KT.nAx[h]; }),
+      VB=Object.keys(KT.vib).map(function(h){ var q=KT.vib[h]; return ktHand(h)+' vibrationActuator '+(q.v?'sì':'no')+', hapticActuators '+(q.h?'sì':'no'); });
+  var txt='premuti: '+(P.length?P.join(', '):'nessuno')+' · NON premuti: '+(N.length?N.join(', '):'nessuno')+' · joystick: '+(J.length?J.join(', '):'nessun asse mosso')+' · assi riportati dal visore: '+(nA.length?nA.join(', '):'-')+' · '+KT.nPress+' pressioni · vibrazione: '+(VB.length?VB.join('; '):'-')+' · ultima vibrazione via '+(BZ.via||'nessuna')+(BZ.err?' (errore '+BZ.err+')':'');
+  addResult('Prova tasti',txt,{premuti:seen,non_premuti:N,assi_max:KT.axMax,assi_riportati:KT.nAx,pressioni:KT.nPress,vibrazione:{interfacce:KT.vib,via:BZ.via,errore:BZ.err}}); }
 function ktEnd(){ ktSave(); sceneMenu(); }
 function ktPartial(){ ktSave(); }
 
