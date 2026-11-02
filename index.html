@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SFDN Visore v0.5ABCC</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--ink:#1d2330;--mut:#667085;--acc:#1f6feb;--ok:#1a7f37;--bad:#cf222e;--line:#d0d7de}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:19px}
+header{background:#1d2330;color:#fff;padding:14px 20px}
+header h1{font-size:24px;margin:0}
+header small{color:#aab4c8}
+main{max-width:1100px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+.card h2{font-size:21px;margin:0 0 10px;color:var(--acc)}
+table{border-collapse:collapse;width:100%}
+td,th{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+.ok{color:var(--ok);font-weight:bold}.bad{color:var(--bad);font-weight:bold}.mut{color:var(--mut)}
+button{font-size:20px;padding:12px 20px;border-radius:10px;border:1px solid #888;background:#fff;cursor:pointer;margin:4px 6px 4px 0}
+button.primary{background:var(--acc);color:#fff;border-color:var(--acc)}
+button.big{font-size:26px;padding:18px 34px}
+select{font-size:19px;padding:8px}
+#pad{width:100%;height:320px;background:#111;border-radius:10px;position:relative;touch-action:none}
+.hint{font-size:16px;color:var(--mut)}
+pre{white-space:pre-wrap;background:#f6f8fa;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px}
+#xrCanvas{display:none}
+</style>
+</head>
+<body>
+<header><h1>SFDN &middot; Visore <small>v0.5ABC (reticoli, calibrazione colori)</small></h1></header>
+<main>
+ <div class="card">
+  <h2>1. Controlli automatici</h2>
+  <table id="info"></table>
+  <p class="hint">Questa tabella si compila da sola. Le righe importanti sono: <b>pagina aperta senza internet</b>, <b>contesto sicuro</b>, <b>salvataggio</b> e <b>realt&agrave; virtuale (VR)</b>.</p>
+ </div>
+
+ <div class="card">
+  <h2>2. Prova del puntatore (raggio del controller)</h2>
+  <p>Punta il raggio del controller dentro il riquadro nero e premi il <b>grilletto</b> (il tasto sotto l'indice). Prova a colpire la pallina verde: cambia posto a ogni colpo.</p>
+  <div id="pad"></div>
+  <p id="padInfo" class="hint">Nessun clic ancora.</p>
+ </div>
+
+ <div class="card">
+  <h2>Scheda soggetto (facoltativa)</h2>
+  <p>Scheda attiva: <b id="schedaNow">nessuna</b></p>
+  <p><button class="primary" id="btnNewScheda">NUOVA SCHEDA SOGGETTO</button> <button id="btnCloseScheda">Chiudi la scheda attiva</button></p>
+  <div id="schedaForm" style="display:none;border:1px solid #bbb;padding:10px;border-radius:8px;margin:8px 0">
+   <p>Nome o codice del soggetto <input id="schNome" style="font-size:18px;padding:6px;width:260px"></p>
+   <p><b>Test da fare</b> <button id="schAll" type="button">tutti / nessuno</button></p>
+   <div id="schTests"></div>
+   <p><button class="primary" id="schOk">Crea la scheda</button> <button id="schCancel">Annulla</button> <span id="schMsg" class="hint"></span></p>
+  </div>
+  <p>Schede salvate: <select id="schList" style="font-size:18px"></select> <button id="btnOpenScheda">Riapri</button></p>
+  <p class="hint">Con una scheda attiva il menu in VR mostra solo i test scelti (con OK quando sono fatti) e il riepilogo contiene solo i dati della scheda.</p>
+ </div>
+
+ <div class="card">
+  <h2>3. Prove in realt&agrave; virtuale</h2>
+  <p>Premi il pulsante blu: la pagina sparisce e ti trovi in uno spazio nero con un menu. Scegli le prove puntando il raggio e premendo il grilletto. Per uscire usa il pulsante <b>ESCI</b> nel menu.</p>
+  <p><b>Colori delle prove dicoptiche</b><br>
+   Palline <select id="dCol"><option value="col">colorate (controllo: rossa e verde)</option><option value="white">tutte bianche (esercizio)</option></select>
+   &nbsp; Pallina rossa all'occhio <select id="dRed"><option value="OD">destro (OD), verde al sinistro</option><option value="OS">sinistro (OS), verde al destro</option></select></p>
+  <p><b>Calibrazione colori rosso/verde</b> (menu 12 nel visore)<br>Usa la calibrazione <select id="calUse"><option value="sub">s&igrave;, quella del soggetto (media dei due metodi)</option><option value="man">s&igrave;, solo metodo manuale (flicker)</option><option value="auto">s&igrave;, solo metodo automatico (rivalit&agrave;)</option><option value="val">valore scritto a mano</option><option value="off">no (rosso e verde pieni)</option></select>
+   &nbsp; valore a mano (guadagno del verde, 0,05-1) <input type="number" id="calVal" value="0.4" min="0.05" max="1" step="0.01" style="width:80px;font-size:18px"> &middot; <span id="calInfo" class="hint"></span><br>
+   Dicoptica B: lo stimolo <select id="dbMode"><option value="exp">compare per poco e poi rispondi sul primo percetto (predefinito)</option><option value="long">resta finch&eacute; rispondi</option></select> durata <input type="number" id="dbExp" value="0.8" min="0.2" max="3" step="0.1" style="width:70px;font-size:18px"> s</p>
+  <p><b>Reticoli (menu 13-16, sperimentali)</b><br>
+   Disco (gradi) <input type="number" id="grSize" value="4" min="1" max="10" step="0.5" style="width:70px;font-size:18px"> &middot; frequenza (cicli/grado) <input type="number" id="grCpd" value="1.5" min="0.5" max="3" step="0.1" style="width:70px;font-size:18px"> &middot; contrasto (%) <input type="number" id="grCon" value="100" min="10" max="100" step="5" style="width:70px;font-size:18px"><br>
+   Test: blocco (s) <input type="number" id="grBlock" value="40" min="20" max="120" step="5" style="width:70px;font-size:18px"> &middot; pausa (s) <input type="number" id="grPause" value="20" min="5" max="60" step="5" style="width:70px;font-size:18px"> &middot; colori: usa l'impostazione "Palline" (colorate = rosso/verde, bianche = una riga bianca per occhio)<br>
+   Esercizio: cambio ogni (s) <input type="number" id="grSwap" value="2" min="1" max="20" step="0.5" style="width:70px;font-size:18px"> &middot; durata (min) <input type="number" id="grDur" value="3" min="0.5" max="20" step="0.5" style="width:70px;font-size:18px"> &middot; parte con il rosso a <select id="grStart"><option value="OD">OD</option><option value="OS">OS</option></select> &middot; contrasto <select id="grLadder"><option value="off">fisso</option><option value="on">a gradini (scala)</option></select><br>
+   Scorrimento (cicli/s) <input type="number" id="grDrift" value="0.2" min="0.05" max="1" step="0.05" style="width:70px;font-size:18px"> &middot; rotazione (gradi/s) <input type="number" id="grRot" value="1" min="0.2" max="5" step="0.2" style="width:70px;font-size:18px"> &middot; segnale quando tieni il tasto <select id="grFb"><option value="both">suono e vibrazione</option><option value="snd">solo suono</option><option value="off">nessuno</option></select></p>
+  <p><b>Mani e dicoptica B</b><br>Mani in VR <select id="hands"><option value="off">no, solo controller (predefinito)</option><option value="on">s&igrave; (se il visore le fornisce; se no restano i controller)</option></select><br>Dicoptica B: aiuto di fusione (cornice e croce visibili a tutti e due gli occhi) <select id="lock"><option value="on">s&igrave;</option><option value="off">no (solo le due palline sul nero)</option></select></p>
+  <p><b>Test 9, sfere e movimento della testa</b><br>Fondale del test 9 <select id="bg"><option value="dots">parete a punti lontana (via di mezzo, predefinito)</option><option value="black">nero</option><option value="meadow">prato con alberi</option></select><br>Ordine delle condizioni nella sequenza <select id="a4ord"><option value="lat">bilanciato tra una sequenza e l'altra (predefinito)</option><option value="rnd">casuale</option><option value="fix">fisso A, B, C, D</option></select><br>Menu in VR con una scheda attiva <select id="menuAll"><option value="off">solo i test della scheda</option><option value="on">tutti i test</option></select><br>Prove per condizione (test 9) <input type="number" id="a4n" value="12" min="6" max="20" step="1" style="width:70px;font-size:18px"><br>Forma delle palline negli esercizi e nel prato <select id="shape"><option value="sphere">sfere (predefinito)</option><option value="flat">dischi piatti</option></select> <span class="hint">(le misure restano sempre con dischi piatti)</span><br>Movimento della testa nella soglia: attenzione da <input type="number" id="headWarn" value="3" min="1" max="20" step="0.5" style="width:70px;font-size:18px"> cm, non affidabile da <input type="number" id="headBad" value="6" min="2" max="30" step="0.5" style="width:70px;font-size:18px"> cm<br>Se l'ultima soglia non &egrave; affidabile <select id="thrPolicy"><option value="rel">usa l'ultima affidabile (se c'&egrave;)</option><option value="last">usa comunque l'ultima, con nota rossa</option></select></p>
+  <p class="hint">La prova 1 (separazione occhi) usa sempre i colori, per controllare a colpo d'occhio quale occhio vede cosa. Nella prova 5 (palline dicoptiche) puoi scegliere: colorate per controllare, bianche per un vero esercizio (il colore non fa capire a quale occhio appartiene la pallina).</p>
+  <p><b>Profondit&agrave; e prato</b><br>
+   Soggetto <input id="subj" placeholder="nome o codice (facoltativo)" style="font-size:18px;padding:6px;width:260px"><br>
+   Palline a terra con ombra (aiuto per la stereopsi, solo esercizi) <select id="cues"><option value="off">NO: palline sospese, profondit&agrave; solo con i due occhi (predefinito)</option><option value="on">S&Igrave;: palline appoggiate a terra con ombra (aiuto)</option></select><br>
+   Soglia stereo usata <select id="thrMode"><option value="auto">l'ultima misurata nel visore</option><option value="man">valore scritto a mano</option></select>
+   <input type="number" id="thrMan" value="300" min="30" max="1500" step="10" style="width:90px;font-size:18px"> secondi d'arco &middot; <span id="thrInfo" class="hint"></span><br>
+   Esercizi a <input type="number" id="factor" value="3" min="1.2" max="10" step="0.1" style="width:70px;font-size:18px"> volte la soglia, con il <input type="number" id="nearPct" value="20" min="0" max="100" step="5" style="width:70px;font-size:18px">% di prove vicino alla soglia (1,25 volte)</p>
+  <p class="hint">Senza indizi monoculari le palline del prato hanno sempre la stessa grandezza apparente e sono sospese, senza ombra: la profondit&agrave; si coglie solo con la visione binoculare. Con gli indizi la scena &egrave; pi&ugrave; naturale, ma si pu&ograve; indovinare anche con un occhio solo. La soglia si misura con la prova 3 del menu.</p>
+  <p><button class="primary big" id="btnVR">ENTRA IN VR</button></p>
+  <p id="vrMsg" class="hint"></p>
+  <ul class="hint">
+   <li><b>Separazione occhi</b>: una pallina rossa vista da un solo occhio e una verde solo dall'altro (prova dicoptica, scelta qui sopra).</li>
+   <li><b>Profondit&agrave;</b>: tre palline uguali; una &egrave; pi&ugrave; vicina. Si indica quale. La differenza diminuisce se rispondi giusto.</li>
+   <li><b>Palline</b>: 20 palline compaiono sul &quot;muro&quot; virtuale a 2 metri; si colpiscono con il raggio, come nel Gioco Palline.</li>
+   <li><b>Palline dicoptiche</b>: come sopra, ma ogni pallina &egrave; vista da un solo occhio (met&agrave; OD, met&agrave; OS).</li>
+   <li><b>Misura soglia stereo</b>: come la profondit&agrave; rapida ma fino a 40 prove, con una regola pi&ugrave; stabile (3 giuste per scendere, 1 errore per salire); il risultato viene usato negli esercizi del prato.</li>
+   <li><b>Prato</b>: prato con alberi; esercizi &laquo;la pi&ugrave; vicina&raquo;, &laquo;in ordine dalla pi&ugrave; vicina&raquo;, &laquo;davanti all'albero&raquo;, &laquo;si avvicina&raquo; (premere quando la pallina passa nell'anello). Le differenze di profondit&agrave; sono calcolate sulla soglia.</li>
+   <li><b>9. Si avvicina (4 condizioni)</b>: A solo disparit&agrave; (la pallina non cambia grandezza), B solo ingrandimento (scena piatta, la pallina cresce), C disparit&agrave; + ingrandimento (naturale), D conflitto (grandezza e disparit&agrave; non d'accordo). Si preme quando la pallina entra nell'anello; la sequenza completa include una calibrazione del ritardo di risposta e calcola il <b>vantaggio binoculare</b>.</li>
+   <li><b>10. Dicoptica A (coppie)</b>: due palline insieme in due punti diversi, una per occhio; si colpiscono entrambe. Mancate = possibile soppressione in quella zona.</li>
+   <li><b>11. Dicoptica B (sovrapposte)</b>: rossa a un occhio e verde all'altro nello stesso punto; si dice cosa si vede (solo rossa, solo verde, alternano, mescolate, due palline). Il colore passa a caso da un occhio all'altro.</li>
+  </ul>
+ </div>
+
+ <div class="card">
+  <h2>4. Risultati</h2>
+  <div id="res"><p class="mut">Ancora nessuna prova in VR.</p></div>
+  <h3>Riepilogo test 9 (tutte le esecuzioni del riepilogo)</h3>
+  <pre id="t9sum" class="mut">nessun test 9 ancora</pre>
+  <p>Nel riepilogo e nella mail includi: <select id="sumScope"><option value="scheda">questa scheda soggetto (se attiva)</option><option value="sess">solo questa apertura della pagina</option><option value="all">tutte le prove salvate di questo soggetto</option></select> <span class="hint">(soggetto scritto nelle impostazioni del riquadro 3)</span></p>
+  <p><button class="primary" id="btnMail">Invia i risultati per email</button> <button id="btnCopy">Copia il riepilogo</button> <button id="btnDl">Scarica i risultati (.json)</button> <button id="btnClr">Cancella i risultati salvati</button></p>
+  <p class="hint">Indirizzo: <input id="mailTo" value="otticastefanucci@gmail.com" style="font-size:18px;padding:6px;width:320px"> &middot; &laquo;Invia&raquo; apre Gmail nel browser con la mail gi&agrave; scritta: controlla e premi <b>Invia</b> (serve internet e l'accesso a Gmail). <span id="mailMsg"></span></p>
+ </div>
+
+ <div class="card">
+  <h2>5. Riepilogo da mandare a Claude</h2>
+  <p class="hint">Fai una foto (o uno screenshot) di questo riquadro, oppure ricopia le righe.</p>
+  <pre id="sum"></pre>
+ </div>
+</main>
+<canvas id="xrCanvas"></canvas>
+<script>
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var KEY='SFDN_test_visore';
+var DB={visite:0,prove:[],schede:[]};
+try{ DB=JSON.parse(localStorage.getItem(KEY)||'null')||DB; }catch(e){}
+if(!DB.schede) DB.schede=[];
+DB.visite=(DB.visite||0)+1;
+var STORE=true; try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){ STORE=false; }
+var SESS=Date.now();   // identifica questa apertura della pagina
+var BG_NAME={dots:'parete a punti',black:'nero',meadow:'prato con alberi'};
+var SET={dCol:'col',dRed:'OD',mailTo:'otticastefanucci@gmail.com',cues:'off',thrMode:'auto',thrMan:300,factor:3,nearPct:20,subj:'',thr:null,thrDate:'',thrMap:null,sumScope:'sess',hands:'off',lock:'on',bg:'dots',a4n:12,shape:'sphere',headWarn:3,headBad:6,thrPolicy:'rel',thrBad:null,v:'',schedaId:'',calUse:'sub',calVal:0.4,calMap:{},dbMode:'exp',dbExp:0.8,grSize:4,grCpd:1.5,grCon:100,grBlock:40,grPause:20,grSwap:2,grDur:3,grLadder:'off',grStart:'OD',grDrift:0.2,grRot:1,grFb:'both',menuAll:'off',a4ord:'lat',a4cnt:0}; try{ var _s=JSON.parse(localStorage.getItem(KEY+'_imp')||'null'); if(_s) for(var _k in _s) SET[_k]=_s[_k]; }catch(e){}
+if(SET.v!=='0.5'){ SET.hands='off'; SET.v='0.5'; }   // v0.5: mani spente di default
+if(!SET.thrBad) SET.thrBad={};
+if(!SET.calMap) SET.calMap={};
+if(!SET.thrMap){ SET.thrMap={}; if(SET.thr) SET.thrMap[SET.subj||'']={thr:SET.thr,date:SET.thrDate}; }   // migrazione: la soglia ora e' per soggetto
+function saveSET(){ try{ localStorage.setItem(KEY+'_imp',JSON.stringify(SET)); }catch(e){} }
+function saveDB(){ try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){} }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+// ---------------- 1. controlli automatici ----------------
+var INFO={};
+function row(lab,val,ok,note){ return '<tr><td>'+lab+'</td><td class="'+(ok===true?'ok':(ok===false?'bad':''))+'">'+val+'</td><td class="mut">'+(note||'')+'</td></tr>'; }
+var hz=null;
+function measureHz(cb){ var n=0,t0=0; function f(t){ if(!t0) t0=t; n++; if(t-t0<1500) requestAnimationFrame(f); else cb(Math.round((n-1)*1000/(t-t0))); } requestAnimationFrame(f); }
+function renderInfo(){
+  var p=location.protocol, h='';
+  INFO.protocollo=p; INFO.sicuro=!!window.isSecureContext; INFO.salvataggio=STORE; INFO.visite=DB.visite;
+  INFO.browser=navigator.userAgent; INFO.schermo=screen.width+'x'+screen.height+' (finestra '+innerWidth+'x'+innerHeight+', dpr '+(devicePixelRatio||1)+')';
+  h+=row('Pagina aperta senza internet',p==='file:'?'S&Igrave; (file sul visore)':(p==='https:'?'NO, da internet (https)':'da rete locale ('+p+')'),p==='file:'?true:null,'file: = aperta dalla memoria del visore');
+  h+=row('Contesto sicuro (serve alla VR)',INFO.sicuro?'S&Igrave;':'NO',INFO.sicuro,'senza contesto sicuro il browser non permette la VR');
+  h+=row('Salvataggio dei dati',STORE?'funziona (aperture di questa pagina: '+DB.visite+')':'NON funziona',STORE,'chiudi e riapri la pagina: il numero deve aumentare');
+  h+=row('Supporto VR (WebXR) nel browser',navigator.xr?'presente':'assente',!!navigator.xr,'');
+  h+=row('Realt&agrave; virtuale immersiva',INFO.vr==null?'controllo in corso...':(INFO.vr?'DISPONIBILE':'NON disponibile'),INFO.vr==null?null:INFO.vr,INFO.vrNote||'');
+  h+=row('Aggiornamento dello schermo (pagina)',hz?hz+' Hz':'misura in corso...',null,'nella pagina normale; in VR viene misurato a parte');
+  h+=row('Browser',esc(INFO.browser),null,'');
+  h+=row('Schermo',INFO.schermo,null,'');
+  $('info').innerHTML=h; renderSum();
+}
+if(navigator.xr&&navigator.xr.isSessionSupported){ navigator.xr.isSessionSupported('immersive-vr').then(function(s){ INFO.vr=!!s; if(!s) INFO.vrNote='il browser dice che la VR non &egrave; supportata qui'; renderInfo(); }).catch(function(e){ INFO.vr=false; INFO.vrNote='errore: '+esc(e.message||e); renderInfo(); }); }
+else { INFO.vr=false; INFO.vrNote=window.isSecureContext?'il browser non offre WebXR':'probabilmente perch&eacute; la pagina non &egrave; in contesto sicuro'; }
+measureHz(function(v){ hz=v; renderInfo(); });
+renderInfo();
+
+// ---------------- 2. puntatore ----------------
+(function(){
+  var pad=$('pad'), dot=document.createElement('div'), n=0, hit=0, tShow=performance.now(), rts=[], types={};
+  dot.style.cssText='position:absolute;width:70px;height:70px;border-radius:50%;background:#1fc21f;transform:translate(-50%,-50%)';
+  pad.appendChild(dot);
+  function move(){ var r=pad.getBoundingClientRect(); dot.style.left=(10+Math.random()*80)+'%'; dot.style.top=(15+Math.random()*70)+'%'; tShow=performance.now(); }
+  move();
+  pad.addEventListener('pointerdown',function(e){ e.preventDefault(); n++; types[e.pointerType||'?']=1;
+    var r=pad.getBoundingClientRect(), d=dot.getBoundingClientRect(), cx=d.left+d.width/2, cy=d.top+d.height/2, ok=Math.hypot(e.clientX-cx,e.clientY-cy)<=d.width/2+6;
+    var m=document.createElement('div'); m.style.cssText='position:absolute;width:10px;height:10px;border-radius:50%;background:'+(ok?'#7ee787':'#ff7b72')+';left:'+(e.clientX-r.left-5)+'px;top:'+(e.clientY-r.top-5)+'px'; pad.appendChild(m);
+    if(ok){ hit++; rts.push(performance.now()-tShow); move(); }
+    INFO.puntatore={clic:n,colpi:hit,tipo:Object.keys(types).join(','),rt:rts.length?Math.round(median(rts)):null};
+    $('padInfo').textContent='Clic: '+n+' · colpi sulla pallina: '+hit+' · tipo di puntatore: '+INFO.puntatore.tipo+(rts.length?' · tempo mediano per colpire: '+INFO.puntatore.rt+' ms':'');
+    renderSum(); });
+})();
+function median(a){ var b=a.slice().sort(function(x,y){return x-y;}), m=b.length>>1; return b.length?(b.length%2?b[m]:(b[m-1]+b[m])/2):null; }
+
+// ---------------- 4/5. risultati e riepilogo ----------------
+function resHtml(t){ return esc(t).replace(/(NON AFFIDABILE[^·]*)/g,'<b style="color:#cf222e">$1</b>').replace(/(attenzione: testa[^·]*)/g,'<b style="color:#b35900">$1</b>'); }
+function renderRes(){
+  if(!DB.prove.length){ $('res').innerHTML='<p class="mut">Ancora nessuna prova in VR.</p>'; renderSum(); return; }
+  var h='<table><tr><th>Data</th><th>Soggetto</th><th>Prova</th><th>Risultato</th></tr>';
+  DB.prove.slice().reverse().forEach(function(p){ h+='<tr><td>'+esc(p.data)+'</td><td>'+esc(p.sogg||'-')+'</td><td>'+esc(p.nome)+'</td><td>'+resHtml(p.testo)+'</td></tr>'; });
+  $('res').innerHTML=h+'</table>'; renderSum();
+}
+function sumProve(){ var sc=SET.sumScope||'sess', sj=SET.subj||''; if(sc==='scheda'&&SET.schedaId) return DB.prove.filter(function(p){ return p.scheda===SET.schedaId; }); if(sc==='scheda') sc='sess'; return DB.prove.filter(function(p){ if((p.sogg||'')!==sj) return false; return sc==='all'||p.sess===SESS; }); }
+function renderSum(){
+  var L=[];
+  if(SET.subj) L.push('Soggetto: '+SET.subj);
+  if(curScheda()) L.push('Scheda soggetto: '+curScheda().nome+' ('+curScheda().creata+'), test scelti: '+curScheda().test.join(' '));
+  L.push(calLine()); calInfoUpd();
+  L.push('Pagina: '+(location.protocol==='file:'?'file sul visore':location.protocol));
+  L.push('Soglia stereo: '+(thrRec()?thrRec().thr+'" ('+thrRec().date+')'+(thrFlag()?' ['+thrFlag()+']':''):'non misurata')+' · usata '+thrUsed()+'" · fattore '+SET.factor+' · vicino soglia '+SET.nearPct+'% · indizi monoculari '+(SET.cues==='on'?'si':'no')+' · palline negli esercizi '+(SET.shape==='sphere'?'sfere':'dischi')+' · fondale test 9 '+BG_NAME[SET.bg]);
+  L.push('Contesto sicuro: '+(window.isSecureContext?'si':'no')+' · Salvataggio: '+(STORE?'si':'no')+' (visite '+DB.visite+')');
+  L.push('WebXR: '+(navigator.xr?'presente':'assente')+' · VR immersiva: '+(INFO.vr==null?'?':(INFO.vr?'si':'no'))+' · Hz pagina: '+(hz||'?'));
+  if(INFO.vrFeat) L.push('Funzioni VR attive: '+INFO.vrFeat+' · mani richieste: '+(SET.hands==='off'?'no':'si'));
+  if(INFO.puntatore) L.push('Puntatore: '+INFO.puntatore.clic+' clic, '+INFO.puntatore.colpi+' colpi, tipo '+INFO.puntatore.tipo+(INFO.puntatore.rt?', tempo '+INFO.puntatore.rt+' ms':''));
+  var SP=sumProve(); var T9=t9Lines(SP); T9.forEach(function(l){ L.push(l); }); $('t9sum').textContent=T9.length?T9.join('\n'):'nessun test 9 ancora'; SP.slice(-12).forEach(function(p){ L.push(p.nome+': '+p.testo); });
+  var hid=DB.prove.length-SP.length; if(hid>0) L.push('('+hid+' prove salvate non incluse: altro soggetto o altra apertura della pagina)');
+  L.push('Browser: '+navigator.userAgent);
+  $('sum').textContent=L.join('\n');
+  return L.join('\n');
+}
+renderRes();
+$('btnDl').onclick=function(){ var b=new Blob([JSON.stringify({info:INFO,db:DB},null,1)],{type:'application/json'}); var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='SFDN_test_visore_risultati.json'; document.body.appendChild(a); a.click(); setTimeout(function(){ a.remove(); },500); };
+// dettaglio compatto per la mail (profondita' prova per prova)
+function mailBody(){
+  var t='Risultati SFDN Visore v0.5ABCC - '+(SET.subj?'soggetto '+SET.subj+' - ':'')+new Date().toLocaleString('it-IT')+'\n\n'+renderSum()+'\n';
+  sumProve().slice(-6).forEach(function(p){ if((p.nome==='Profondità'||p.nome==='Soglia stereo')&&p.dati&&p.dati.prove){ t+='\n'+p.nome+' prova per prova (disparità in secondi d\'arco, G=giusta, S=sbagliata): '+p.dati.prove.map(function(x){ return x.disparita_arcsec+(x.giusta?'G':'S'); }).join(' ')+'\n'; } });
+  var DPv=sumProve().slice(-6), isT9=function(p){ return /^t9[ABCDS]$/.test(p.tid||''); };
+  DPv.filter(isT9).concat(DPv.filter(function(p){ return !isT9(p); })).forEach(function(p){ if(p.dati&&p.dati.dettaglio) t+='\n'+p.nome+' - dettaglio:\n'+p.dati.dettaglio+'\n'; });
+  return t.length>4800?t.slice(0,4800)+'\n[...]':t;
+}
+$('btnMail').onclick=function(){
+  SET.mailTo=$('mailTo').value.trim()||'otticastefanucci@gmail.com'; saveSET();
+  var url='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(SET.mailTo)+'&su='+encodeURIComponent('SFDN Visore v0.5ABCC - risultati'+(SET.subj?' - '+SET.subj:''))+'&body='+encodeURIComponent(mailBody());
+  var w=window.open(url,'_blank'); if(!w) location.href=url;
+  $('mailMsg').innerHTML='Se Gmail non si apre: <a href="mailto:'+esc(SET.mailTo)+'?subject='+encodeURIComponent('SFDN Test Visore - risultati')+'&body='+encodeURIComponent(mailBody())+'">prova con l\'app di posta</a> oppure usa &laquo;Copia il riepilogo&raquo;.';
+};
+$('btnCopy').onclick=function(){ var t=mailBody();
+  function ok(){ $('mailMsg').textContent='Riepilogo copiato: incollalo in una mail.'; }
+  function fb(){ var ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); ok(); }catch(e){ $('mailMsg').textContent='Copia non riuscita: seleziona il testo del riquadro 5.'; } ta.remove(); }
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok,fb); else fb(); };
+function syncThrUI(){ var r=thrRec(), b=(SET.thrBad||{})[SET.subj||''], t;
+  if(r) t='usata per '+(SET.subj||'questo soggetto')+': '+r.thr+'" ('+r.date+')'+(thrFlag(r)?' · '+thrFlag(r):''); else t='nessuna misura per '+(SET.subj?SET.subj:'questo soggetto')+': si usa 300"';
+  if(b&&r!==b) t+=' · ultima misura NON AFFIDABILE: '+b.thr+'" ('+b.date+', testa '+b.testa_cm+' cm), non usata';
+  $('thrInfo').textContent=t; $('thrInfo').style.color=(r&&r.liv==='bad')?'#cf222e':''; }
+['cues','thrMode','thrMan','factor','nearPct','subj','sumScope','hands','lock','bg','a4n','shape','headWarn','headBad','thrPolicy','a4ord','menuAll','calUse','calVal','dbMode','dbExp','grSize','grCpd','grCon','grBlock','grPause','grSwap','grDur','grLadder','grStart','grDrift','grRot','grFb'].forEach(function(k){ $(k).value=SET[k]; $(k).onchange=function(){ SET[k]=$(k).value; saveSET(); syncThrUI(); renderRes(); }; });
+syncThrUI();
+$('dCol').value=SET.dCol; $('dRed').value=SET.dRed; $('mailTo').value=SET.mailTo;
+$('dCol').onchange=function(){ SET.dCol=$('dCol').value; saveSET(); };
+$('dRed').onchange=function(){ SET.dRed=$('dRed').value; saveSET(); };
+$('mailTo').onchange=function(){ SET.mailTo=$('mailTo').value.trim(); saveSET(); };
+function renderScheda(){ var sc=curScheda(); $('schedaNow').textContent=sc?(sc.nome+' (creata '+sc.creata+', '+sc.test.length+' test)'):'nessuna'; var h='<option value="">-</option>'; DB.schede.slice().reverse().forEach(function(x){ h+='<option value="'+esc(x.id)+'">'+esc(x.nome)+' · '+esc(x.creata)+'</option>'; }); $('schList').innerHTML=h; }
+function buildSchForm(){ var h=''; TESTS.forEach(function(t){ h+='<label style="display:block;font-size:18px;margin:4px 0"><input type="checkbox" class="schT" value="'+t[0]+'" checked> '+esc(t[1])+'</label>'; }); $('schTests').innerHTML=h; }
+$('btnNewScheda').onclick=function(){ $('schedaForm').style.display='block'; $('schNome').value=SET.subj||''; $('schMsg').textContent=''; buildSchForm(); };
+$('schAll').onclick=function(){ var cs=[].slice.call(document.querySelectorAll('.schT')), any=cs.some(function(c){ return c.checked; }); cs.forEach(function(c){ c.checked=!any; }); };
+$('schCancel').onclick=function(){ $('schedaForm').style.display='none'; };
+function useScheda(sc){ SET.schedaId=sc.id; SET.subj=sc.nome; $('subj').value=sc.nome; SET.sumScope='scheda'; $('sumScope').value='scheda'; saveSET(); renderScheda(); syncThrUI(); renderRes(); }
+$('schOk').onclick=function(){ var nome=$('schNome').value.trim(); if(!nome){ $('schMsg').textContent='Scrivi il nome o il codice del soggetto.'; return; }
+  var T=[].slice.call(document.querySelectorAll('.schT')).filter(function(c){ return c.checked; }).map(function(c){ return c.value; }); if(!T.length){ $('schMsg').textContent='Scegli almeno un test.'; return; }
+  var sc={id:'s'+Date.now(),nome:nome,test:T,creata:new Date().toLocaleString('it-IT')}; DB.schede.push(sc); saveDB(); useScheda(sc); $('schedaForm').style.display='none'; };
+$('btnCloseScheda').onclick=function(){ SET.schedaId=''; saveSET(); renderScheda(); renderRes(); };
+$('btnOpenScheda').onclick=function(){ var id=$('schList').value, r=DB.schede.filter(function(x){ return x.id===id; }); if(r.length) useScheda(r[0]); };
+renderScheda();
+$('btnClr').onclick=function(){ if(!confirm('Cancellare i risultati salvati?')) return; DB.prove=[]; saveDB(); renderRes(); };
+var TESTS=[['t1','1 Separazione occhi'],['t2','2 Profondità rapida'],['t3','3 Soglia stereo'],['t4','4 Palline'],['t5','5 Palline dicoptiche'],['t6','6 Prato: la più vicina'],['t7','7 Prato: in ordine'],['t8','8 Prato: davanti all’albero'],['t9A','9A Si avvicina: solo disparità'],['t9B','9B Si avvicina: solo ingrandimento'],['t9C','9C Si avvicina: disparità + ingrandimento'],['t9D','9D Si avvicina: conflitto'],['t9S','9 Si avvicina: sequenza completa'],['t10','10 Dicoptica A: coppie'],['t11','11 Dicoptica B: sovrapposte'],['t12','12 Calibrazione colori'],['t13','13 Reticoli test'],['t14','14 Reticoli esercizio'],['t15','15 Reticolo a scorrimento'],['t16','16 Reticoli rotazione']];
+function tidOf(n){ var m; if(n==='Separazione occhi') return 't1'; if(n==='Profondità') return 't2'; if(n==='Soglia stereo') return 't3'; if(n==='Palline') return 't4'; if(n==='Palline dicoptiche') return 't5'; if(n==='Prato: la più vicina') return 't6'; if(n==='Prato: in ordine') return 't7'; if(n==='Prato: davanti all’albero') return 't8'; if(n==='Prato: si avvicina') return 't9old'; if(n.indexOf('Si avvicina: 4 condizioni')===0) return 't9S'; m=/^Si avvicina: ([A-D])\./.exec(n); if(m) return 't9'+m[1]; if(n.indexOf('Dicoptica A')===0) return 't10'; if(n.indexOf('Dicoptica B')===0) return 't11'; if(n.indexOf('Calibrazione colori')===0) return 't12'; if(n.indexOf('Reticoli test')===0) return 't13'; if(n.indexOf('Reticoli esercizio')===0) return 't14'; if(n.indexOf('Reticolo a scorrimento')===0) return 't15'; if(n.indexOf('Reticoli rotazione')===0) return 't16'; return ''; }
+function curScheda(){ var r=DB.schede.filter(function(x){ return x.id===SET.schedaId; }); return r.length?r[0]:null; }
+function showTest(id){ var sc=curScheda(); if(!sc||SET.menuAll==='on') return true; if(id==='t9') return ['t9A','t9B','t9C','t9D','t9S'].some(function(k){ return sc.test.indexOf(k)>=0; }); return sc.test.indexOf(id)>=0; }
+function doneTest(id){ if(!curScheda()) return false; return DB.prove.some(function(p){ return p.scheda===SET.schedaId&&(p.tid===id||(id==='t9'&&/^t9[ABCDS]$/.test(p.tid||''))); }); }
+function sdr(a){ if(a.length<3) return null; var m=median(a); return 1.4826*median(a.map(function(x){ return Math.abs(x-m); })); }
+function confStats(a){ var c=a.filter(function(r){ return r.peso_disparita!=null; }), P=c.filter(function(r){ return r.dt_s>0; }), N=c.filter(function(r){ return r.dt_s<0; });
+  function f(x){ return {n:x.length,w:x.length?+mean(x.map(function(r){ return r.peso_disparita; })).toFixed(2):null,g:x.filter(function(r){ return r.peso_disparita<0.5; }).length}; }
+  return {tot:f(c),pos:f(P),neg:f(N)}; }
+function confTxt(cs){ return ', peso medio '+(cs.tot.w==null?'-':cs.tot.w)+' | grandezza ANTICIPA: peso '+(cs.pos.w==null?'-':cs.pos.w)+', segue la grandezza '+cs.pos.g+'/'+cs.pos.n+' | grandezza RITARDA: peso '+(cs.neg.w==null?'-':cs.neg.w)+', segue la grandezza '+cs.neg.g+'/'+cs.neg.n; }
+function t9Lines(P){
+  var R=P.filter(function(p){ return /^t9[ABCDS]$/.test(p.tid||'')&&p.dati&&p.dati.prove; }); if(!R.length) return [];
+  var NM={disp:'A. Solo disparità',loom:'B. Solo ingrandimento',cong:'C. Disparità + ingrandimento',conf:'D. Conflitto'}, G={};
+  R.forEach(function(p,i){ var fo=p.dati.fondale||'?'; p.dati.prove.forEach(function(r){ if(!r.cond||r.cond==='calib') return; var k=r.cond+'|'+fo; if(!G[k]) G[k]={cond:r.cond,fo:fo,runs:{},t:[]}; G[k].runs[i]=1; G[k].t.push(r); }); });
+  var out=['Riepilogo test 9 (tutte le esecuzioni: '+R.length+' registrazioni; fondali diversi non mescolati):'];
+  ['disp','loom','cong','conf'].forEach(function(c){ Object.keys(G).filter(function(k){ return G[k].cond===c; }).forEach(function(k){ var g=G[k], e=g.t.filter(function(r){ return !r.mancata; }).map(function(r){ return r.errore_ms; }), mi=g.t.length-e.length, sdv=sd(e), rb=sdr(e);
+    out.push(NM[c]+' ['+(BG_NAME[g.fo]||g.fo)+']: '+Object.keys(g.runs).length+' esecuzioni, '+e.length+' prove valide'+(mi?', mancate '+mi:'')+', bias '+(e.length?sgn(median(e),' ms'):'-')+', SD '+(sdv==null?'-':Math.round(sdv)+' ms')+', SD robusta '+(rb==null?'-':Math.round(rb)+' ms')+(c==='conf'?confTxt(confStats(g.t)):'')); }); });
+  R.forEach(function(p){ out.push('  '+p.data+' · '+p.nome.replace('Si avvicina: ','')+' · ordine '+((p.dati.ordine||[]).join(','))+' · fondale '+(BG_NAME[p.dati.fondale]||'?')); });
+  return out; }
+function addResult(nome,testo,dati){ var inp=''; try{ inp=Object.keys(VRS.inp||{}).map(function(k){ return k+' '+VRS.inp[k]; }).join(', '); }catch(e){} VRS.inp={}; if(inp) testo+=' · input: '+inp;
+  DB.prove.push({data:new Date().toLocaleString('it-IT'),nome:nome,testo:testo,dati:dati,sess:SESS,sogg:SET.subj||'',input:inp,scheda:SET.schedaId||'',tid:tidOf(nome)}); saveDB(); renderRes(); }
+
+// =====================================================================
+// ---------------- 3. REALTA' VIRTUALE (WebXR, WebGL senza librerie) ----------------
+// =====================================================================
+var gl=null, prog=null, U={}, quadBuf=null, lineBuf=null, xrSession=null, refSpace=null;
+var OBJ=[];            // oggetti da disegnare
+var RAYS={};           // raggi dei controller o delle mani
+var JOINTS=[];         // articolazioni delle mani (se il visore le fornisce)
+var VRS={scene:'menu', fps:{n:0,t0:0,val:null}, head:{yaw:[],pitch:[]}, ipd:null};
+function initGL(){
+  var c=$('xrCanvas'); gl=c.getContext('webgl',{xrCompatible:true,antialias:true,alpha:false});
+  if(!gl) throw new Error('WebGL non disponibile');
+  var vs='attribute vec3 p;attribute vec2 uv;uniform mat4 P;uniform mat4 V;uniform mat4 M;varying vec2 vuv;void main(){vuv=uv;gl_Position=P*V*M*vec4(p,1.0);}';
+  var fs='#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\nvarying vec2 vuv;uniform int mode;uniform vec4 col;uniform sampler2D tex;uniform vec2 uvs;uniform vec4 gp;void main(){vec2 q=vuv*2.0-1.0;float r=length(q);'+
+    'if(mode==1){if(r>1.0)discard;gl_FragColor=col;}else if(mode==2){vec4 t=texture2D(tex,vec2(vuv.x,1.0-vuv.y));if(t.a<0.02)discard;gl_FragColor=t;}else if(mode==3){if(r>1.0||r<0.86)discard;gl_FragColor=col;}else if(mode==4){gl_FragColor=texture2D(tex,vuv*uvs);}else if(mode==5){if(r>1.0)discard;float zz=sqrt(1.0-r*r);vec3 n=vec3(q,zz);vec3 L=normalize(vec3(-0.45,0.55,0.7));float df=max(dot(n,L),0.0);vec3 H=normalize(L+vec3(0.0,0.0,1.0));float sp=pow(max(dot(n,H),0.0),24.0);float lit=0.32+0.68*df;gl_FragColor=vec4(col.rgb*lit+vec3(0.22*sp),col.a);}else if(mode==6){if(r>1.0)discard;gl_FragColor=vec4(col.rgb,col.a*(1.0-smoothstep(0.15,1.0,r)));}else if(mode==7){if(r>1.0)discard;vec2 nn=vec2(-sin(gp.x),cos(gp.x));float ph=dot(q,nn)*gp.y+gp.z;float I=0.5+0.5*gp.w*sin(6.2831853*ph);gl_FragColor=vec4(col.rgb*I,1.0-smoothstep(0.84,1.0,r));}else{gl_FragColor=col;}}';
+  function sh(t,s){ var o=gl.createShader(t); gl.shaderSource(o,s); gl.compileShader(o); if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; }
+  prog=gl.createProgram(); gl.attachShader(prog,sh(gl.VERTEX_SHADER,vs)); gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(prog);
+  if(!gl.getProgramParameter(prog,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+  ['P','V','M','mode','col','tex','uvs','gp'].forEach(function(k){ U[k]=gl.getUniformLocation(prog,k); });
+  U.p=gl.getAttribLocation(prog,'p'); U.uv=gl.getAttribLocation(prog,'uv');
+  quadBuf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,quadBuf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,0,0,0, 1,-1,0,1,0, -1,1,0,0,1, 1,1,0,1,1]),gl.STATIC_DRAW);
+  lineBuf=gl.createBuffer();
+}
+var ID=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
+function texFromLines(lines,w,h,opt){
+  opt=opt||{}; var c=document.createElement('canvas'); c.width=w; c.height=h; var x=c.getContext('2d');
+  x.fillStyle=opt.bg||'rgba(30,34,44,0.92)'; if(opt.round!==false){ x.beginPath(); if(x.roundRect) x.roundRect(0,0,w,h,28); else x.rect(0,0,w,h); x.fill(); } else x.fillRect(0,0,w,h);
+  if(opt.border){ x.strokeStyle=opt.border; x.lineWidth=8; x.beginPath(); if(x.roundRect) x.roundRect(4,4,w-8,h-8,24); else x.rect(4,4,w-8,h-8); x.stroke(); }
+  x.fillStyle=opt.fg||'#fff'; x.textAlign='center'; x.textBaseline='middle';
+  var fs=opt.size||Math.min(70,h/(lines.length+0.6)*0.72), lh=fs*1.3, y0=h/2-(lines.length-1)*lh/2;
+  lines.forEach(function(t,i){ var f=i===0?fs:fs*0.85, bo=(i===0&&opt.bold!==false?'bold ':''); x.font=bo+Math.round(f)+'px sans-serif'; while(x.measureText(t).width>w*0.92&&f>12){ f*=0.92; x.font=bo+Math.round(f)+'px sans-serif'; } x.fillText(t,w/2,y0+i*lh); });
+  var t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,c);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  return t;
+}
+// oggetto: {kind:'disc'|'ring'|'rect'|'text', x,y,z, w,h (meta' larghezza/altezza in metri), col:[r,g,b,a], tex, eye:'both'|'left'|'right', id, click}
+function add(o){ o.eye=o.eye||'both'; OBJ.push(o); return o; }
+function clearScene(){ OBJ.forEach(function(o){ if(o.tex&&!o.tex.keep) gl.deleteTexture(o.tex); }); OBJ=[]; }
+function button(id,label,x,y,z,w,h,cb,color){ return add({kind:'text',id:id,x:x,y:y,z:z,w:w,h:h,tex:texFromLines([label],512,Math.round(512*h/w),{bg:color||'#1f6feb',size:Math.round(512*h/w*0.42)}),click:cb}); }
+function panel(lines,x,y,z,w,h,opt){ return add({kind:'text',x:x,y:y,z:z,w:w,h:h,tex:texFromLines(lines,1024,Math.round(1024*h/w),opt)}); }
+function cross(z,eye){ add({kind:'rect',x:0,y:0,z:z,w:0.04,h:0.004,col:[1,1,1,1],eye:eye}); add({kind:'rect',x:0,y:0,z:z,w:0.004,h:0.04,col:[1,1,1,1],eye:eye}); }
+function frame(z,w,h){ var t=0.004; add({kind:'rect',x:0,y:h,z:z,w:w,h:t,col:[.45,.45,.45,1]}); add({kind:'rect',x:0,y:-h,z:z,w:w,h:t,col:[.45,.45,.45,1]}); add({kind:'rect',x:-w,y:0,z:z,w:t,h:h,col:[.45,.45,.45,1]}); add({kind:'rect',x:w,y:0,z:z,w:t,h:h,col:[.45,.45,.45,1]}); }
+function deg(a){ return a*Math.PI/180; }
+var RED=[1,0.12,0.12,1], GREEN=[0.12,1,0.12,1];
+function eyeOfRed(){ return SET.dRed==='OS'?'left':'right'; }      // OD = occhio destro = vista 'right'
+function eyeName(e){ return e==='right'?'OD':'OS'; }
+function BK(){ return SET.shape==='sphere'?'sphere':'disc'; }      // forma delle palline negli esercizi
+function calRec(){ return (SET.calMap||{})[SET.subj||''] || null; }
+function calG(){ var u=SET.calUse||'sub'; if(u==='off') return 1; if(u==='val') return Math.max(0.03,Math.min(1,+SET.calVal||1));
+  var r=calRec(); if(!r) return 1; var m=r.man&&r.man.g, a=r.auto&&r.auto.g;
+  if(u==='man') return m||1; if(u==='auto') return a||1; if(m&&a) return Math.sqrt(m*a); return m||a||1; }
+function greenC(g){ if(g==null) g=calG(); return [0.12*g,g,0.12*g,1]; }
+function colFor(eye,forceCol){ if(!forceCol && SET.dCol==='white') return [1,1,1,1]; return eye===eyeOfRed()?RED:greenC(); }
+
+// ---------------- scene ----------------
+// ======== v0.3: MENU, SOGLIA STEREO, PRATO ========
+var GROUND_Y=-1.2;       // pavimento: circa 1,2 m sotto gli occhi (soggetto seduto)
+function later(fn,ms){ var tk=VRS.tok; return setTimeout(function(){ if(VRS.tok===tk) fn(); },ms); }
+function sceneMenu(){
+  VRS.tok=(VRS.tok||0)+1; VRS.scene='menu'; clearScene(); VRS.clear=[0,0,0]; VRS.tick=null; VRS.onTrigger=null;
+  var z=-1.7, sc=curScheda();
+  panel(['SFDN · Visore v0.5ABC'+(sc?'  ·  scheda: '+sc.nome:''),'Soglia stereo usata: '+thrUsed()+'"'+(thrFlag()?'  ·  '+thrFlag():'')+'  ·  palline a terra: '+(SET.cues==='on'?'SÌ':'NO')+'  ·  verde cal. '+calG().toFixed(2)],0,0.52,z,0.95,0.13,(thrRec()&&thrRec().liv==='bad')?{bg:'#7a1f1f'}:undefined);
+  var L=[{id:'t1',lab:'1. Separazione occhi',fn:sceneSep},{id:'t2',lab:'2. Profondità rapida',fn:sceneDepth},{id:'t3',lab:'3. Misura soglia stereo',fn:sceneThr},{id:'t4',lab:'4. Palline',fn:function(){ sceneGame(false); }},{id:'t5',lab:'5. Palline dicoptiche',fn:function(){ sceneGame(true); }},{id:'t10',lab:'10. Dicoptica A: coppie',fn:sceneDicA,col:'#6a1b9a'},{id:'t11',lab:'11. Dicoptica B: sovrapposte',fn:sceneDicB,col:'#6a1b9a'}];
+  var Rr=[{id:'t6',lab:'6. Prato: la più vicina',fn:function(){ meadowStart('near'); }},{id:'t7',lab:'7. Prato: in ordine',fn:function(){ meadowStart('order'); }},{id:'t8',lab:'8. Prato: davanti all’albero',fn:function(){ meadowStart('tree'); }},{id:'t9',lab:'9. Prato: si avvicina',fn:sceneApproachMenu},{id:'t12',lab:'12. Calibrazione colori',fn:sceneCal,col:'#b26a00'},{id:'t13',lab:'13. Reticoli test',fn:grIntroTest,col:'#00838f'},{id:'t14',lab:'14. Reticoli esercizio',fn:grIntroEx,col:'#00838f'},{id:'t15',lab:'15. RETICOLO A SCORRIMENTO',fn:grIntroDrift,col:'#00838f'},{id:'t16',lab:'16. Reticoli rotazione (sperim.)',fn:grIntroRot,col:'#00838f'}];
+  function put(arr,pre,x,col0){ arr.forEach(function(b,i){ b.i=i; }); arr.filter(function(b){ return showTest(b.id); }).forEach(function(b,j){ var d=doneTest(b.id); button(pre+b.i,(d?'OK · ':'')+b.lab,x,0.3-j*0.105,z,0.38,0.05,b.fn,d?'#00695c':(b.col||col0)); }); }
+  put(L,'l',-0.42,undefined); put(Rr,'r',0.42,'#2e7d32');
+  button('bx','ESCI',0,-0.72,z,0.2,0.06,function(){ if(xrSession) xrSession.end(); },'#cf222e');
+}
+// ---- disparita' <-> profondita' ----
+function ARC(){ return 206265; }
+function ipdM(){ return VRS.ipd||0.063; }
+function deltaFor(etaArc,d){ var e=etaArc/ARC(); return e*d*d/(ipdM()+e*d); }          // quanto piu' vicino di d per avere disparita' eta
+function etaOf(dNear,dFar){ return Math.round(ipdM()*(dFar-dNear)/(dNear*dFar)*ARC()); }   // disparita' tra due distanze
+function thrRec(){ var j=SET.subj||'', m=(SET.thrMap||{})[j], b=(SET.thrBad||{})[j];
+  if(b&&SET.thrPolicy==='last'&&(!m||(b.ts||0)>=(m.ts||0))) return b;
+  return m||b||null; }
+function thrFlag(r){ r=r||thrRec(); if(!r||!r.liv||r.liv==='ok') return ''; return r.liv==='bad'?'NON AFFIDABILE: movimento eccessivo della testa ('+r.testa_cm+' cm)':'attenzione: testa mossa di '+r.testa_cm+' cm'; }
+function thrUsed(){ if(SET.thrMode==='man') return +SET.thrMan||300; var r=thrRec(); return r?r.thr:300; }
+function pickEta(near){ var T=thrUsed(), e=near?T*1.25:T*(+SET.factor||3); return Math.max(30,Math.min(1500,Math.round(e))); }
+function isNear(){ return Math.random()*100<(+SET.nearPct||20); }
+
+// ---- 3. misura della soglia stereo (3 alternative, scala 3 giuste giu' / 1 errore su) ----
+var TH=null;
+function sceneThr(){ VRS.tok++; VRS.scene='thr'; VRS.clear=[0,0,0]; TH={n:0,max:40,eta:600,ok:0,dir:0,rev:[],trials:[],base:2.0,pos:[],rej:0,scartate:[]}; thrTrial(); }
+function thrTrial(){
+  clearScene();
+  if(TH.n>=TH.max||TH.rev.length>=10){ thrEnd(); return; }
+  var base=TH.base, d=deltaFor(TH.eta,base), tgt=Math.floor(Math.random()*3), angs=[-10,0,10];
+  panel(['Quale pallina è più VICINA?','Testa ferma · prova '+(TH.n+1)+' (massimo '+TH.max+')'],0,0.62,-2,0.85,0.13);
+  for(var i=0;i<3;i++){ var dd=(i===tgt)?base-d:base, ra=deg(1.3)*(1+(Math.random()*0.16-0.08));
+    var o=add({kind:'disc',x:Math.tan(deg(angs[i]))*dd,y:0,z:-dd,w:Math.tan(ra)*dd,h:Math.tan(ra)*dd,col:[0.85,0.85,0.85,1],id:'t'+i});
+    (function(ii){ o.click=function(){ thrAnswer(ii===tgt); }; })(i); }
+  TH.cur={t0:performance.now(),eta:TH.eta}; TH.pos=[];
+}
+function thrAnswer(ok){
+  var c=TH.cur, mv=headMove(TH.pos), BAD=+SET.headBad||6;
+  if(mv>BAD&&TH.rej<5){ TH.rej++; TH.scartate.push({disparita_arcsec:c.eta,testa_cm:mv}); clearScene(); panel(['TESTA TROPPO IN MOVIMENTO','('+mv+' cm) la prova si ripete'],0,0,-2,0.55,0.15,{bg:'#cf222e'}); later(thrTrial,1300); return; }
+  TH.trials.push({disparita_arcsec:c.eta,giusta:ok,tempo_ms:Math.round(performance.now()-c.t0),testa_cm:mv});
+  TH.n++;
+  var old=TH.eta;
+  if(ok){ TH.ok++; if(TH.ok>=3){ TH.ok=0; if(TH.dir===1) TH.rev.push(old); TH.dir=-1; TH.eta=Math.max(30,Math.round(TH.eta/1.4)); } }
+  else { TH.ok=0; if(TH.dir===-1) TH.rev.push(old); TH.dir=1; TH.eta=Math.min(1500,Math.round(TH.eta*1.4)); }
+  clearScene(); panel([ok?'GIUSTO':'SBAGLIATO'],0,0,-2,0.3,0.1,{bg:ok?'#1a7f37':'#cf222e'});
+  later(thrTrial,600);
+}
+function headMove(P){ if(!P||P.length<2) return 0; var mx=0; P.forEach(function(p){ mx=Math.max(mx,Math.hypot(p[0]-P[0][0],p[1]-P[0][1],p[2]-P[0][2])); }); return Math.round(mx*1000)/10; }
+function thrEnd(){
+  var r=TH.rev.slice(-6), est;
+  if(r.length>=4) est=Math.round(Math.exp(r.reduce(function(s,v){ return s+Math.log(v); },0)/r.length));
+  else { var l=TH.trials.slice(-6); est=Math.round(Math.exp(l.reduce(function(s,v){ return s+Math.log(v.disparita_arcsec); },0)/l.length)); }
+  var mv=Math.max.apply(null,TH.trials.map(function(t){ return t.testa_cm; }).concat([0])), W=+SET.headWarn||3, B=+SET.headBad||6, j=SET.subj||'';
+  var liv=mv>=B?'bad':(mv>=W?'att':'ok'), floor=est<=40;
+  SET.thr=est; SET.thrDate=new Date().toLocaleString('it-IT'); SET.thrMap=SET.thrMap||{}; SET.thrBad=SET.thrBad||{};
+  var rec={thr:est,date:SET.thrDate,testa_cm:mv,liv:liv,ts:Date.now(),ripetute:TH.rej};
+  if(liv==='bad') SET.thrBad[j]=rec; else { SET.thrMap[j]=rec; delete SET.thrBad[j]; }
+  saveSET(); syncThrUI();
+  var flag=liv==='bad'?'NON AFFIDABILE: movimento eccessivo della testa ('+mv+' cm, limite '+B+' cm)':(liv==='att'?'attenzione: testa mossa di '+mv+' cm (tra '+W+' e '+B+' cm)':'');
+  var txt='soglia stimata '+est+'" ('+TH.trials.length+' prove, '+TH.rev.length+' inversioni, giuste '+TH.trials.filter(function(t){return t.giusta;}).length+'), movimento massimo della testa '+mv+' cm, IPD '+Math.round(ipdM()*1000)+' mm'+(floor?' · al limite del visore (30-40")':'')+(flag?' · '+flag:'')+(TH.rej?' · prove ripetute per movimento: '+TH.rej:'');
+  addResult('Soglia stereo',txt,{prove:TH.trials,inversioni:TH.rev,soglia:est,ipd_m:VRS.ipd,affidabilita:liv,testa_max_cm:mv,limiti_cm:[W,B],ripetute:TH.rej,scartate:TH.scartate});
+  clearScene();
+  var used=liv==='bad'?'Di norma NON usata negli esercizi: rifai la misura (o scegli "usa comunque" nelle impostazioni)':(floor?'È al limite del visore: la stereopsi può essere migliore di così.':'Usata da ora negli esercizi del prato.');
+  panel(['Soglia stereo: '+est+' secondi d’arco',used,(flag?flag:'Movimento della testa: '+mv+' cm (ok)'),'Valore del visore, non è un test clinico'],0,0.2,-1.6,0.95,0.3,liv==='bad'?{bg:'#7a1f1f'}:(liv==='att'?{bg:'#7a5a10'}:undefined));
+  button('rf','Rifai la misura',-0.17,-0.18,-1.6,0.16,0.07,sceneThr,liv==='bad'?'#cf222e':'#1f6feb');
+  button('m','Torna al menu',0.17,-0.18,-1.6,0.16,0.07,sceneMenu);
+}
+
+// ---- prato ----
+var TEXC={};
+function texCanvas(c,repeat){ var t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,c);
+  if(repeat){ gl.generateMipmap(gl.TEXTURE_2D); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT); }
+  else { gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE); }
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR); t.keep=true; return t; }
+function grassTex(){ if(TEXC.grass) return TEXC.grass; var c=document.createElement('canvas'); c.width=c.height=256; var x=c.getContext('2d'); x.fillStyle='#4f8a2e'; x.fillRect(0,0,256,256);
+  var rnd=mulberry(7); for(var i=0;i<2600;i++){ var g=90+Math.floor(rnd()*90); x.strokeStyle='rgba('+(40+Math.floor(rnd()*40))+','+g+','+(20+Math.floor(rnd()*30))+',0.8)'; x.lineWidth=1+rnd(); var px=rnd()*256, py=rnd()*256; x.beginPath(); x.moveTo(px,py); x.lineTo(px+(rnd()*4-2),py-3-rnd()*6); x.stroke(); }
+  return TEXC.grass=texCanvas(c,true); }
+function treeTex(k){ var key='tree'+k; if(TEXC[key]) return TEXC[key]; var c=document.createElement('canvas'); c.width=256; c.height=512; var x=c.getContext('2d'), rnd=mulberry(11+k);
+  x.fillStyle='#6b4a2b'; x.fillRect(112,300,32,212);
+  var greens=['#2f6b2a','#3a7d32','#28592a','#467f35'];
+  for(var i=0;i<38;i++){ x.fillStyle=greens[Math.floor(rnd()*4)]; var a=rnd()*Math.PI*2, rr=rnd()*95; x.beginPath(); x.arc(128+Math.cos(a)*rr*0.9,190+Math.sin(a)*rr*1.1,30+rnd()*28,0,Math.PI*2); x.fill(); }
+  return TEXC[key]=texCanvas(c,false); }
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function addGround(){ var W=60,Hh=60, cz=-Hh+2; add({kind:'tex4',bg:true,M:[W,0,0,0, 0,0,-Hh,0, 0,1,0,0, 0,GROUND_Y,cz,1],tex:grassTex(),uvs:[40,40],x:0,y:GROUND_Y,z:cz,w:W,h:Hh}); }
+function addTree(x,z,hgt,k){ var hw=hgt*0.25, hh=hgt/2; return add({kind:'text',x:x,y:GROUND_Y+hh,z:z,w:hw,h:hh,tex:treeTex(k)}); }
+function meadowBase(extraTree){
+  VRS.clear=[0.56,0.76,0.95]; addGround();
+  var rnd=mulberry(3);
+  for(var i=0;i<18;i++){ var z=-(5+rnd()*30), x=(rnd()<0.5?-1:1)*(2.5+rnd()*12); addTree(x,z,3+rnd()*3,i%4); }
+  if(extraTree) return addTree(0,-extraTree,3.4,1);
+}
+// pallina del prato: con indizi = grandezza fisica fissa, appoggiata a terra con ombra; senza = grandezza angolare fissa, sospesa
+function meadowBall(ang,d,col,yAng){
+  var cues=SET.cues==='on', r, x=Math.tan(deg(ang))*d, y, o;
+  if(cues){ r=0.075; y=GROUND_Y+r; add({kind:'blob',M:[r*1.6,0,0,0, 0,0,-r*0.7,0, 0,1,0,0, x,GROUND_Y+0.002,-d,1],x:x,y:GROUND_Y,z:-d+0.01,w:r,h:r,col:[0,0,0,0.55],shadow:true}); }
+  else { r=Math.tan(deg(1.4))*d*(1+(Math.random()*0.16-0.08)); y=Math.tan(deg(yAng||0))*d; }
+  o=add({kind:BK(),x:x,y:y,z:-d,w:r,h:r,col:col||[0.95,0.95,0.95,1],hitScale:1.4});
+  return o;
+}
+var MD=null;
+var MD_NAME={near:'Prato: la più vicina',order:'Prato: in ordine',tree:'Prato: davanti all’albero',approach:'Prato: si avvicina'};
+function meadowStart(kind){ VRS.tok++; VRS.scene='meadow'; MD={kind:kind,n:0,max:kind==='approach'?8:10,res:[]}; meadowTrial(); }
+function meadowMsg(lines,cb,ms){ clearScene(); meadowBase(); panel(lines,0,0.1,-1.6,0.4,0.12,{bg:lines[0]==='GIUSTO'?'#1a7f37':(lines[0]==='SBAGLIATO'?'#cf222e':undefined)}); later(cb,ms||700); }
+function meadowTrial(){
+  VRS.tick=null; VRS.onTrigger=null;
+  if(MD.n>=MD.max){ meadowEnd(); return; }
+  clearScene();
+  var k=MD.kind, near=isNear(), eta=pickEta(near);
+  if(k==='near'){
+    meadowBase(); var base=1.9+Math.random()*0.8, tgt=Math.floor(Math.random()*3), angs=[-12,0,12], dn=base-deltaFor(eta,base);
+    panel(['Colpisci la pallina più VICINA','prova '+(MD.n+1)+' di '+MD.max],0,0.62,-2,0.75,0.13);
+    var t0=performance.now();
+    for(var i=0;i<3;i++){ var o=meadowBall(angs[i]+(Math.random()*4-2),i===tgt?dn:base,null,Math.random()*6-3); (function(ii){ o.click=function(){ meadowRes(ii===tgt,{eta:eta,vicino_soglia:near,tempo_ms:Math.round(performance.now()-t0)}); }; })(i); }
+  }
+  else if(k==='order'){
+    meadowBase(); var b0=1.7+Math.random()*0.4, e2=pickEta(isNear()), d1=b0, d2=d1+deltaFar(eta,d1), d3=d2+deltaFar(e2,d2), ds=[d1,d2,d3], ang=[-14,0,14].sort(function(){ return Math.random()-0.5; }), sel=[], badges=[], t1=performance.now();
+    MD.sel=sel;
+    panel(['In ordine: dalla più VICINA alla più lontana','tocca per numerare · tocca di nuovo per togliere · poi CONFERMA','prova '+(MD.n+1)+' di '+MD.max],0,0.62,-2,0.9,0.16);
+    var upd=function(){ badges.forEach(dropObj); badges=[]; sel.forEach(function(o,n){ badges.push(add({kind:'text',x:o.x,y:o.y+o.h*1.8,z:o.z+0.01,w:o.w*1.2,h:o.w*1.2,tex:texFromLines([String(n+1)],128,128,{bg:'#1f6feb',size:80})})); }); };
+    ds.forEach(function(d,i){ var o=meadowBall(ang[i],d,null,Math.random()*6-3); o.idx=i; o.click=function(){ var q=sel.indexOf(o); if(q>=0) sel.splice(q,1); else if(sel.length<3) sel.push(o); upd(); }; });
+    button('az','AZZERA',-0.25,-0.45,-1.8,0.2,0.06,function(){ sel.length=0; upd(); },'#6d6d6d');
+    button('fatto','CONFERMA',0.25,-0.45,-1.8,0.2,0.06,function(){ if(sel.length<3) return; var od=sel.map(function(o){ return o.idx; }), ok=od[0]===0&&od[1]===1&&od[2]===2; meadowRes(ok,{eta1:eta,eta2:e2,ordine:od.join(''),tempo_ms:Math.round(performance.now()-t1)}); });
+  }
+  else if(k==='tree'){
+    var dT=2.4+Math.random()*0.6, tr=meadowBase(dT), sel=[], balls=[], t2=performance.now(), selTxt=null;
+    MD.sel=sel;
+    panel(['Tocca le palline DAVANTI all’albero','tocca di nuovo per togliere · poi CONFERMA','prova '+(MD.n+1)+' di '+MD.max],0,1.0,-2,0.85,0.16);
+    var updT=function(){ if(selTxt) dropObj(selTxt); selTxt=add({kind:'text',x:0,y:-0.33,z:-1.8,w:0.2,h:0.05,tex:texFromLines(['selezionate: '+sel.length],512,128,{size:60})}); };
+    var slots=[[-1.25,0.9],[-0.95,0.2],[0.95,0.9],[1.25,0.2]].sort(function(){ return Math.random()-0.5; }), nF=1+Math.floor(Math.random()*3);
+    slots.forEach(function(s,i){ var front=i<nF, e=pickEta(isNear()), d=front?dT-deltaFor(e,dT):dT+deltaFar(e,dT), ax=Math.atan((s[0]*(1+Math.random()*0.15))/dT)*180/Math.PI;
+      var o=meadowBall(ax,d,null,Math.atan((s[1]-0.3)/dT)*180/Math.PI); o.front=front; o.eta=e; balls.push(o);
+      o.click=function(){ var k2=sel.indexOf(o); if(k2>=0){ sel.splice(k2,1); removeObj(o.ring); o.ring=null; } else { sel.push(o); o.ring=add({kind:'ring',x:o.x,y:o.y,z:o.z+0.005,w:o.w*1.35,h:o.h*1.35,col:[1,0.85,0.2,1]}); } updT(); }; });
+    updT();
+    button('az','AZZERA',-0.25,-0.45,-1.8,0.2,0.06,function(){ sel.forEach(function(b){ if(b.ring){ removeObj(b.ring); b.ring=null; } }); sel.length=0; updT(); },'#6d6d6d');
+    button('fatto','CONFERMA',0.25,-0.45,-1.8,0.2,0.06,function(){ var good=balls.filter(function(b){ return (sel.indexOf(b)>=0)===b.front; }).length; meadowRes(good===balls.length,{giuste:good,su:balls.length,davanti:nF,tempo_ms:Math.round(performance.now()-t2),eta:balls.map(function(b){return b.eta;})}); });
+  }
+  else if(k==='approach'){
+    meadowBase(); var dR=1.6, ang2=Math.random()*16-8, yA=Math.random()*6-3, rr=0.11, x0=Math.tan(deg(ang2)), y0=Math.tan(deg(yA));
+    add({kind:'ring',x:x0*dR,y:y0*dR,z:-dR,w:rr,h:rr,col:[1,0.85,0.2,1]});
+    panel(['Premi il grilletto quando la pallina passa nell’ANELLO','prova '+(MD.n+1)+' di '+MD.max],0,0.62,-2,0.8,0.13);
+    var dS=4.2, v=0.7+Math.random()*0.6, tS=performance.now()+900, ball=meadowBall(ang2,dS,null,yA), done=false, cues=SET.cues==='on';
+    var shadow=cues?OBJ[OBJ.indexOf(ball)-1]:null;
+    VRS.tick=function(now){ if(done) return; var t=(now-tS)/1000, d=t<0?dS:dS-v*t; if(d<0.6){ done=true; meadowRes(false,{mancata:true,velocita:+v.toFixed(2)}); return; }
+      ball.z=-d; ball.x=x0*d; if(cues){ ball.y=GROUND_Y+ball.w; if(shadow){ shadow.M[12]=ball.x; shadow.M[14]=-d; shadow.z=-d+0.01; } } else { ball.y=y0*d; var r=Math.tan(deg(1.4))*d; ball.w=ball.h=r; } MD.dNow=d; };
+    VRS.onTrigger=function(){ if(done||performance.now()<tS) return; done=true; var err=MD.dNow-dR; meadowRes(Math.abs(err)<0.15,{errore_cm:Math.round(err*100),errore_ms:Math.round(err/v*1000),velocita:+v.toFixed(2)}); };
+  }
+}
+function deltaFar(etaArc,d){ var e=etaArc/ARC(); return e*d*d/Math.max(0.005,ipdM()-e*d); }      // quanto piu' lontano di d
+function meadowRes(ok,data){ VRS.tick=null; VRS.onTrigger=null; data.giusta=ok; MD.res.push(data); MD.n++; meadowMsg([ok?'GIUSTO':'SBAGLIATO'],meadowTrial,700); }
+function meadowEnd(){
+  var R=MD.res, ok=R.filter(function(r){return r.giusta;}).length, txt;
+  if(MD.kind==='approach'){ var e=R.filter(function(r){return r.errore_cm!=null;}).map(function(r){return Math.abs(r.errore_cm);}); txt='entro 15 cm: '+ok+'/'+R.length+', errore medio '+(e.length?Math.round(e.reduce(function(s,v){return s+v;},0)/e.length):'-')+' cm, mancate '+R.filter(function(r){return r.mancata;}).length; }
+  else txt='giuste '+ok+'/'+R.length;
+  txt+=' · soglia usata '+thrUsed()+'" ×'+(SET.factor||3)+', vicino soglia '+(SET.nearPct||20)+'% · indizi monoculari '+(SET.cues==='on'?'sì':'no')+' · palline '+(SET.shape==='sphere'?'sfere':'dischi')+(thrFlag()?' · soglia '+thrFlag():'');
+  addResult(MD_NAME[MD.kind],txt,{prove:R,soglia:thrUsed(),fattore:+SET.factor,indizi:SET.cues,forma:SET.shape,affidabilita:(thrRec()||{}).liv||null});
+  clearScene(); meadowBase(); panel([MD_NAME[MD.kind]+': fine',txt.split(' · ')[0]],0,0.2,-1.6,0.7,0.12);
+  button('m','Torna al menu',0,0,-1.6,0.3,0.07,sceneMenu);
+}
+
+function sceneSep(){
+  VRS.tok++; VRS.scene='sep'; clearScene(); VRS.clear=[0,0,0]; var z=-2;
+  frame(z,0.75,0.42); cross(z,'both');
+  add({kind:'disc',x:-0.35,y:0,z:z,w:0.09,h:0.09,col:colFor('left',true),eye:'left'});
+  add({kind:'disc',x:0.35,y:0,z:z,w:0.09,h:0.09,col:colFor('right',true),eye:'right'});
+  var cs=eyeOfRed()==='left'?'ROSSA':'VERDE', cd=eyeOfRed()==='right'?'ROSSA':'VERDE';
+  panel(['Separazione occhi','Chiudi un occhio alla volta.','Solo SINISTRO aperto: vedi solo la pallina '+cs+' (a sinistra).','Solo DESTRO aperto: vedi solo la pallina '+cd+' (a destra).','Con entrambi aperti le vedi tutte e due.'],0,0.72,z,0.85,0.26);
+  button('ok','Funziona',-0.3,-0.6,z,0.25,0.08,function(){ addResult('Separazione occhi','funziona (rossa a '+SET.dRed+')',{ipd_m:VRS.ipd,rossa:SET.dRed}); sceneMenu(); },'#1a7f37');
+  button('ko','Non funziona',0.3,-0.6,z,0.25,0.08,function(){ addResult('Separazione occhi','NON funziona (rossa a '+SET.dRed+')',{ipd_m:VRS.ipd,rossa:SET.dRed}); sceneMenu(); },'#cf222e');
+}
+// ---- profondita': tre dischi di uguale grandezza angolare, uno piu' vicino ----
+var DP=null;
+function sceneDepth(){ VRS.tok++; VRS.clear=[0,0,0]; VRS.scene='depth'; DP={n:0,max:14,delta:0.40,trials:[],base:2.0,streak:0}; depthTrial(); }
+function depthTrial(){
+  clearScene();
+  if(DP.n>=DP.max){ depthEnd(); return; }
+  var base=DP.base, tgt=Math.floor(Math.random()*3), angs=[-10,0,10], rAng=1.3;
+  panel(['Quale pallina è più VICINA?','Tieni la testa ferma, puntala e premi il grilletto  ('+(DP.n+1)+' di '+DP.max+')'],0,0.62,-2,0.85,0.14);
+  for(var i=0;i<3;i++){ var d=(i===tgt)?base-DP.delta:base, jit=1+(Math.random()*0.16-0.08), ra=deg(rAng)*jit;
+    var o=add({kind:'disc',x:Math.tan(deg(angs[i]))*d,y:0,z:-d,w:Math.tan(ra)*d,h:Math.tan(ra)*d,col:[0.85,0.85,0.85,1],id:'d'+i});
+    (function(ii,dd){ o.click=function(){ depthAnswer(ii===tgt,dd); }; })(i,d); }
+  DP.cur={tgt:tgt,delta:DP.delta,t0:performance.now()};
+}
+// limite: non scendere sotto circa 30 secondi d'arco (sotto il pixel del visore, circa 3 primi, conta solo la sfumatura dei bordi)
+function minDelta(){ var ipd=VRS.ipd||0.063, b=DP.base, eta=30/206265; return eta*b*b/(ipd+eta*b); }
+function disparityArcsec(delta,base){ var ipd=VRS.ipd||0.063; return Math.round(ipd*delta/(base*(base-delta))*206265); }
+function depthAnswer(ok){
+  var c=DP.cur; DP.trials.push({delta_m:+c.delta.toFixed(3),disparita_arcsec:disparityArcsec(c.delta,DP.base),giusta:ok,tempo_ms:Math.round(performance.now()-c.t0)});
+  DP.n++; if(ok){ DP.streak++; DP.delta=Math.max(minDelta(),DP.delta*0.65); } else { DP.streak=0; DP.delta=Math.min(0.6,DP.delta*1.6); }
+  clearScene(); panel([ok?'GIUSTO':'SBAGLIATO'],0,0,-2,0.3,0.1,{bg:ok?'#1a7f37':'#cf222e'});
+  later(depthTrial,700);
+}
+function depthEnd(){
+  var t=DP.trials, ok=t.filter(function(x){return x.giusta;}), last=t.slice(-6), est=Math.round(last.reduce(function(s,x){return s+x.disparita_arcsec;},0)/last.length), best=ok.length?Math.min.apply(null,ok.map(function(x){return x.disparita_arcsec;})):null;
+  var txt='giuste '+ok.length+'/'+t.length+', disparità più piccola indovinata '+(best!=null?best+'"':'-')+', stima (media ultime 6) '+est+'", IPD del visore '+(VRS.ipd?Math.round(VRS.ipd*1000)+' mm':'?');
+  addResult('Profondità',txt,{prove:t,ipd_m:VRS.ipd});
+  clearScene(); panel(['Profondità: fine','Giuste '+ok.length+' su '+t.length,'Disparità più piccola indovinata: '+(best!=null?best+' secondi d\'arco':'-'),'Stima (media delle ultime 6): '+est+' secondi d\'arco','Stima indicativa, non è un test clinico'],0,0.2,-1.6,0.85,0.3);
+  button('m','Torna al menu',0,-0.12,-1.6,0.3,0.07,sceneMenu);
+}
+// ---- palline (come il Gioco Palline), anche dicoptiche ----
+var GM=null;
+function sceneGame(dich){
+  VRS.tok++; VRS.scene='game'; clearScene(); VRS.clear=[0,0,0];
+  var n=20, eyes=[]; for(var i=0;i<n;i++) eyes.push(dich?(i<n/2?'left':'right'):'both'); eyes.sort(function(){return Math.random()-0.5;});
+  GM={dich:dich,n:n,i:0,eyes:eyes,res:[],ball:null,timer:null,head0:null,yaw:[],pitch:[]};
+  panel([dich?'Palline dicoptiche':'Palline','Guarda la croce. Quando compare una pallina, colpiscila con il raggio.','Inizia tra 3 secondi'],0,0,-1.8,0.8,0.2);
+  later(function(){ clearScene(); gameBase(); gameNext(); },3000);
+}
+function gameBase(){ var z=-2; frame(z,Math.tan(deg(24))*2,Math.tan(deg(17))*2); cross(z,'both'); }
+function gameNext(){
+  if(GM.i>=GM.n){ gameEnd(); return; }
+  var zones=[[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1],[0,0]], zn=zones[GM.i%9], z=-2;
+  var ax=zn[0]*14+(Math.random()*8-4), ay=zn[1]*10+(Math.random()*6-3); if(zn[0]===0&&zn[1]===0){ ax=(Math.random()<0.5?-1:1)*(6+Math.random()*4); }
+  var r=Math.tan(deg(2))*2, eye=GM.eyes[GM.i];
+  var b=add({kind:(eye==='both'?BK():'disc'),x:Math.tan(deg(ax))*2,y:Math.tan(deg(ay))*2,z:z,w:r,h:r,col:(eye==='both'?[1,1,1,1]:colFor(eye)),eye:eye,id:'ball',hitScale:1.5});
+  var t0=performance.now(), done=false;
+  b.click=function(){ if(done) return; done=true; clearTimeout(GM.timer); GM.res.push({occhio:eye,colpita:true,rt:Math.round(performance.now()-t0),ax:Math.round(ax),ay:Math.round(ay)}); removeObj(b); GM.i++; later(gameNext,400+Math.random()*500); };
+  GM.timer=later(function(){ if(done) return; done=true; GM.res.push({occhio:eye,colpita:false,rt:null,ax:Math.round(ax),ay:Math.round(ay)}); removeObj(b); GM.i++; later(gameNext,400+Math.random()*500); },2500);
+}
+function removeObj(o){ var k=OBJ.indexOf(o); if(k>=0) OBJ.splice(k,1); }
+function dropObj(o){ removeObj(o); if(o.tex&&!o.tex.keep&&gl) gl.deleteTexture(o.tex); }
+function gameEnd(){
+  var R=GM.res, by=function(e){ var a=R.filter(function(x){return e==='all'||x.occhio===e;}), h=a.filter(function(x){return x.colpita;}); return {n:a.length,h:h.length,rt:h.length?Math.round(median(h.map(function(x){return x.rt;}))):null}; };
+  var all=by('all'), L=by('left'), Rr=by('right');
+  var yawR=GM.yaw.length?Math.round(Math.max.apply(null,GM.yaw)-Math.min.apply(null,GM.yaw)):null, pitR=GM.pitch.length?Math.round(Math.max.apply(null,GM.pitch)-Math.min.apply(null,GM.pitch)):null;
+  var txt='colpite '+all.h+'/'+all.n+', tempo mediano '+(all.rt||'-')+' ms'+(GM.dich?' · OS '+L.h+'/'+L.n+' ('+(L.rt||'-')+' ms) · OD '+Rr.h+'/'+Rr.n+' ('+(Rr.rt||'-')+' ms)':'')+' · rotazione testa: orizzontale '+(yawR!=null?yawR+'°':'-')+', verticale '+(pitR!=null?pitR+'°':'-')+' · '+(VRS.fps.val||'?')+' fps';
+  if(GM.dich) txt+=' · colori: '+(SET.dCol==='white'?'bianche':'rossa a '+SET.dRed+', verde a '+(SET.dRed==='OD'?'OS':'OD')+' (guadagno verde '+calG().toFixed(2)+')');
+  addResult(GM.dich?'Palline dicoptiche':'Palline',txt,{prove:R,colori:SET.dCol,rossa:SET.dRed});
+  clearScene(); panel(['Fine',GM.dich?'Colpite '+all.h+'/'+all.n+'  ·  OS '+L.h+'/'+L.n+'  ·  OD '+Rr.h+'/'+Rr.n:'Colpite '+all.h+'/'+all.n,'Tempo mediano '+(all.rt||'-')+' ms · testa ruotata '+(yawR!=null?yawR:'-')+'° / '+(pitR!=null?pitR:'-')+'°'],0,0.2,-1.6,0.85,0.22);
+  button('m','Torna al menu',0,-0.12,-1.6,0.3,0.07,sceneMenu);
+}
+
+
+// =====================================================================
+// ======== v0.4: TEST 9 A 4 CONDIZIONI, DICOPTICA A E B, MANI ========
+// =====================================================================
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function mean(a){ return a.length?a.reduce(function(s,v){ return s+v; },0)/a.length:null; }
+function sd(a){ if(a.length<3) return null; var m=mean(a); return Math.sqrt(a.reduce(function(s2,v){ return s2+(v-m)*(v-m); },0)/(a.length-1)); }
+function sgn(v,u){ return (v>0?'+':'')+Math.round(v)+(u||''); }
+var ZONES=[[-1,-1],[0,-1],[1,-1],[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1]];     // [orizzontale, verticale]: -1 sinistra/basso, +1 destra/alto
+function zoneName(i){ var z=ZONES[i]; if(!z[0]&&!z[1]) return 'centro'; var v=z[1]>0?'alto':(z[1]<0?'basso':''), h=z[0]<0?'sx':(z[0]>0?'dx':''); if(v&&h) return v+'-'+h; if(v) return v; return h==='sx'?'sinistra':'destra'; }
+function drawJoints(){ JOINTS.forEach(function(j){ var r=Math.max(0.005,j.r||0.008); gl.uniformMatrix4fv(U.M,false,[r,0,0,0, 0,r,0,0, 0,0,1,0, j.x,j.y,j.z,1]); gl.uniform1i(U.mode,1); gl.uniform4fv(U.col,j.tip?[1,0.6,0.2,1]:[0.95,0.8,0.65,1]); gl.drawArrays(gl.TRIANGLE_STRIP,0,4); }); }
+
+// ---------------- TEST 9: si avvicina, 4 condizioni ----------------
+// A disp: la pallina non cambia grandezza (solo disparita')   B loom: scena piatta, la pallina cresce (solo ingrandimento)
+// C cong: disparita' + ingrandimento                           D conf: grandezza e disparita' sfasate di +-0,5 s (conflitto)
+var A4=null;
+var A4_TXT={
+  disp:['A. Solo disparità','La pallina NON cambia grandezza: la profondità si capisce solo con i due occhi.'],
+  loom:['B. Solo ingrandimento','Scena piatta (senza disparità): la pallina CRESCE come un oggetto che si avvicina.'],
+  cong:['C. Disparità + ingrandimento','Come nella vita reale: tutti e due gli indizi insieme.'],
+  conf:['D. Conflitto','Grandezza e disparità non vanno d’accordo (una anticipa o ritarda). Premi quando TI SEMBRA che la pallina sia nell’anello.'],
+  calib:['Calibrazione del ritardo','Premi appena l’anello diventa ROSSO.']};
+function sceneApproachMenu(){
+  VRS.tok++; VRS.scene='amenu'; clearScene(); VRS.clear=[0,0,0]; VRS.tick=null; VRS.onTrigger=null; var z=-1.7;
+  panel(['9. Si avvicina','Premi il grilletto quando la pallina ENTRA nell’anello giallo.','Scegli la condizione (o la sequenza completa):'],0,0.5,z,0.9,0.2);
+  function sh9(id){ var sc=curScheda(); return !sc||SET.menuAll==='on'||sc.test.indexOf(id)>=0; }
+  if(sh9('t9A')) button('a1','A. Solo disparità',-0.42,0.2,z,0.4,0.06,function(){ approachStart(['disp']); });
+  if(sh9('t9B')) button('a2','B. Solo ingrandimento',0.42,0.2,z,0.4,0.06,function(){ approachStart(['loom']); });
+  if(sh9('t9C')) button('a3','C. Disparità + ingrandimento',-0.42,0.05,z,0.4,0.06,function(){ approachStart(['cong']); });
+  if(sh9('t9D')) button('a4','D. Conflitto',0.42,0.05,z,0.4,0.06,function(){ approachStart(['conf']); });
+  if(sh9('t9S')) button('a5','TUTTE E 4 in sequenza (consigliata)',0,-0.12,z,0.84,0.065,function(){ approachStart(['calib'].concat(a4Order())); },'#2e7d32');
+  if(!curScheda()||SET.menuAll==='on') button('a6','Versione precedente (nel prato)',0,-0.28,z,0.5,0.055,function(){ meadowStart('approach'); },'#6d6d6d');
+  button('am','Torna al menu',0,-0.45,z,0.3,0.06,sceneMenu);
+}
+var WIL=[['disp','loom','conf','cong'],['loom','cong','disp','conf'],['cong','conf','loom','disp'],['conf','disp','cong','loom']];   // quadrato latino bilanciato (Williams): A B D C, B C A D, C D B A, D A C B
+function a4Order(){ var m=SET.a4ord||'lat'; if(m==='fix') return ['disp','loom','cong','conf']; if(m==='rnd') return shuffle(['disp','loom','cong','conf']); var k=(+SET.a4cnt||0)%4; SET.a4cnt=k+1; saveSET(); return WIL[k].slice(); }
+function approachStart(list){ VRS.tok++; VRS.scene='app4'; A4={list:list,bi:0,res:[],seq:list.length>1,cond:null,k:0,cnt:0,bg:SET.bg,dots:null}; approachBlock(); }
+function approachBlock(){
+  VRS.tick=null; VRS.onTrigger=null;
+  if(A4.bi>=A4.list.length){ approachEnd(); return; }
+  var c=A4.list[A4.bi]; A4.cond=c; A4.k=0; A4.cnt=(c==='calib')?5:Math.max(6,Math.min(20,Math.round(+SET.a4n||12)));
+  clearScene(); VRS.clear=[0,0,0];
+  panel([A4_TXT[c][0],A4_TXT[c][1],'Prove: '+A4.cnt+' · inizia tra 4 secondi'],0,0.1,-1.7,0.9,0.28);
+  later(approachTrial,4000);
+}
+function approachTrial(){
+  VRS.tick=null; VRS.onTrigger=null; clearScene(); VRS.clear=[0,0,0];
+  if(A4.k>=A4.cnt){ A4.bi++; approachBlock(); return; }
+  var c=A4.cond; if(c==='calib'){ calibTrial(); return; }
+  a4bg(c);
+  var dR=1.6, ang=Math.random()*16-8, yA=Math.random()*6-3, x0=Math.tan(deg(ang)), y0=Math.tan(deg(yA));
+  var ringR=Math.tan(deg(3.0))*dR, aB=deg(2.2)*(1+(Math.random()*0.16-0.08)), rb=Math.tan(aB)*dR;     // anello 3 gradi, pallina 2,2 gradi a 1,6 m
+  var dS=4.2, v=0.5+Math.random()*0.3, tS=performance.now()+1000, mono=(c==='loom'), dt=(c==='conf')?(Math.random()<0.5?-1:1)*0.5:0, done=false;
+  var td=(dS-dR)/v;      // secondi dalla partenza al passaggio nell'anello, secondo la disparita'
+  panel(['Premi il grilletto quando la pallina ENTRA nell’anello','prova '+(A4.k+1)+' di '+A4.cnt],0,0.62,-2,0.85,0.13);
+  add({kind:'ring',x:x0*dR,y:y0*dR,z:-dR,w:ringR,h:ringR,col:[1,0.85,0.2,1],mono:mono});
+  var ball=add({kind:'disc',x:x0*dS,y:y0*dS,z:-dS,w:Math.tan(aB)*dS,h:Math.tan(aB)*dS,col:[0.95,0.95,0.95,1],mono:mono});
+  VRS.tick=function(now){ if(done) return; var t=Math.max(0,(now-tS)/1000), dz=dS-v*t;
+    if(dz<0.8){ done=true; approachRes({cond:c,mancata:true,velocita:+v.toFixed(2)}); return; }
+    var ds=(c==='conf')?Math.max(0.8,dS-v*(t+dt)):dz;
+    ball.x=x0*dz; ball.y=y0*dz; ball.z=-dz;
+    ball.w=ball.h=(c==='disp')?Math.tan(aB)*dz:((c==='conf')?rb*dz/ds:rb); };
+  VRS.onTrigger=function(){ if(done||performance.now()<tS) return; done=true;
+    var tp=(performance.now()-tS)/1000, e=(tp-td)*1000, d={cond:c,velocita:+v.toFixed(2),errore_ms:Math.round(e),errore_cm:Math.round(e/1000*v*100)};
+    if(c==='conf'){ d.dt_s=dt; d.peso_disparita=+((tp-(td-dt))/dt).toFixed(2); }
+    approachRes(d); };
+}
+// fondale del test 9: parete a punti (lontana, senza dati al centro) o prato; nella condizione B tutto e' piatto (uguale nei due occhi)
+function a4dots(){ if(A4&&A4.dots) return A4.dots; var rnd=mulberry(21), D=[]; while(D.length<90){ var ax=(rnd()*2-1)*45, ay=(rnd()*2-1)*30; if(Math.hypot(ax,ay)<14) continue; D.push({ax:ax,ay:ay,s:0.3+rnd()*0.3,g:0.25+rnd()*0.25}); } if(A4) A4.dots=D; return D; }
+function a4bg(c){
+  var mono=(c==='loom'), n0=OBJ.length;
+  if(SET.bg==='meadow') meadowBase();
+  else if(SET.bg==='dots'){ var dw=10; a4dots().forEach(function(d){ var r=Math.tan(deg(d.s/2))*dw; add({kind:'disc',x:Math.tan(deg(d.ax))*dw,y:Math.tan(deg(d.ay))*dw,z:-dw,w:r,h:r,col:[d.g,d.g,d.g,1]}); }); }
+  if(mono) for(var i=n0;i<OBJ.length;i++) OBJ[i].mono=true;
+}
+function approachPartial(){ if(VRS.scene==='app4'&&A4&&!A4.saved&&A4.res.some(function(r){ return r.cond!=='calib'; })) approachEnd(true); }
+function calibTrial(){
+  var ring=add({kind:'ring',x:0,y:0,z:-1.6,w:0.1,h:0.1,col:[1,0.85,0.2,1]});
+  panel(['Premi appena l’anello diventa ROSSO','prova '+(A4.k+1)+' di '+A4.cnt],0,0.62,-2,0.85,0.13);
+  var tCh=performance.now()+1200+Math.random()*2200, ch=false, done=false, tF=0;
+  VRS.tick=function(now){ if(!ch&&now>=tCh){ ch=true; tF=now; ring.col=[1,0.1,0.1,1]; } };
+  VRS.onTrigger=function(){ if(done) return; done=true; VRS.tick=null; VRS.onTrigger=null; var now=performance.now();
+    if(!ch){ clearScene(); panel(['Troppo presto','si ripete'],0,0,-2,0.3,0.1,{bg:'#cf222e'}); later(approachTrial,900); return; }
+    var rt=Math.round(now-tF); A4.res.push({cond:'calib',rt_ms:rt}); A4.k++; clearScene(); panel(['Tempo '+rt+' ms'],0,0,-2,0.3,0.1); later(approachTrial,700); };
+}
+function approachRes(d){
+  VRS.tick=null; VRS.onTrigger=null; d.giusta=(!d.mancata&&Math.abs(d.errore_cm)<=20); A4.res.push(d); A4.k++;
+  clearScene(); VRS.clear=[0,0,0];
+  var l1=d.mancata?'MANCATA':(d.giusta?'GIUSTO':'SBAGLIATO'), l2=d.mancata?'la pallina è passata senza il clic':(Math.abs(d.errore_ms)+' ms '+(d.errore_ms<0?'in anticipo':'in ritardo'));
+  if(d.cond==='conf'&&!d.mancata){ l1='Registrato'; l2=''; }
+  panel(l2?[l1,l2]:[l1],0,0,-2,0.3,0.1,{bg:l1==='GIUSTO'?'#1a7f37':((l1==='SBAGLIATO'||l1==='MANCATA')?'#cf222e':undefined)});
+  later(approachTrial,900);
+}
+function approachEnd(inc){
+  A4.saved=true;
+  var R=A4.res, cal=R.filter(function(r){ return r.cond==='calib'; }).map(function(r){ return r.rt_ms; }), rt0=cal.length?Math.round(median(cal)):null;
+  var out={}, parts=[], det=[], ord=A4.list.filter(function(c){ return c!=='calib'; }).map(function(c){ return A4_TXT[c][0].charAt(0); });
+  ['disp','loom','cong','conf'].forEach(function(c){
+    var a=R.filter(function(r){ return r.cond===c; }); if(!a.length) return;
+    var ok=a.filter(function(r){ return r.giusta; }).length, mi=a.filter(function(r){ return r.mancata; }).length, e=a.filter(function(r){ return !r.mancata; }).map(function(r){ return r.errore_ms; });
+    var bias=e.length?Math.round(median(e)):null, s2=sd(e); s2=(s2==null)?null:Math.round(s2);
+    var o={n:a.length,validi:e.length,giuste_20cm:ok,mancate:mi,bias_ms:bias,sd_ms:s2,mae_ms:e.length?Math.round(mean(e.map(function(x){ return Math.abs(x); }))):null};
+    if(c==='conf'){ o.conf=confStats(a); o.peso_disparita=o.conf.tot.w; }
+    out[c]=o;
+    parts.push(A4_TXT[c][0].replace(/^[A-D]\. /,'')+': bias '+(bias==null?'-':sgn(bias,' ms'))+', SD '+(s2==null?'-':s2+' ms')+' (validi '+e.length+(mi?', mancate '+mi:'')+', entro 20 cm '+ok+')'+(c==='conf'?confTxt(o.conf):''));
+    det.push(A4_TXT[c][0]+' - errori in ms (negativo = anticipo): '+a.map(function(r){ return r.mancata?'mancata':sgn(r.errore_ms); }).join(' ')+(c==='conf'?' · pesi disparità: '+a.map(function(r){ return r.peso_disparita; }).join(' '):''));
+  });
+  var advC=(out.loom&&out.cong&&out.loom.sd_ms!=null&&out.cong.sd_ms!=null)?out.loom.sd_ms-out.cong.sd_ms:null;
+  var advD=(out.loom&&out.disp&&out.loom.sd_ms!=null&&out.disp.sd_ms!=null)?out.loom.sd_ms-out.disp.sd_ms:null;
+  var txt=(inc?'INCOMPLETO (uscito prima della fine) | ':'')+'Ordine: '+ord.join(', ')+' | fondale: '+BG_NAME[A4.bg]+' | '+parts.join(' | ')
+    +(advC!=null?' | vantaggio binoculare (SD solo ingrandimento meno SD disparità+ingrandimento) '+sgn(advC,' ms'):'')
+    +(advD!=null?' | SD solo ingrandimento meno SD solo disparità '+sgn(advD,' ms'):'')
+    +(rt0!=null?' | ritardo di risposta (calibrazione, solo informativo) '+rt0+' ms':'');
+  det.push('Ordine delle condizioni: '+ord.join(', ')+' · fondale '+BG_NAME[A4.bg]+' · prove per condizione '+A4.cnt+(rt0!=null?' · calibrazione: mediana '+rt0+' ms su '+cal.length+' prove':''));
+  addResult((A4.list.length>1?'Si avvicina: 4 condizioni':'Si avvicina: '+A4_TXT[A4.list[0]][0])+(inc?' (INCOMPLETO)':''),txt,{prove:R,sintesi:out,rt0:rt0,vantaggio_sd_ms:advC,sd_loom_meno_disp_ms:advD,ordine:ord,fondale:A4.bg,prove_per_condizione:A4.cnt,dettaglio:det.join('\n')});
+  if(inc) return;
+  clearScene(); VRS.clear=[0,0,0];
+  var lines=['Si avvicina: fine'].concat(Object.keys(out).map(function(c){ return A4_TXT[c][0].replace(/^[A-D]\. /,'')+': bias '+(out[c].bias_ms==null?'-':sgn(out[c].bias_ms,' ms'))+', SD '+(out[c].sd_ms==null?'-':out[c].sd_ms+' ms'); }));
+  if(advC!=null) lines.push('Vantaggio binoculare (SD): '+sgn(advC,' ms')+' (positivo = i due occhi rendono più precisi)');
+  panel(lines,0,0.2,-1.6,0.95,0.32);
+  button('m','Torna al menu',0,-0.2,-1.6,0.3,0.07,sceneMenu);
+}
+
+// ---------------- 10. DICOPTICA A: coppie (una pallina per occhio, in due punti diversi) ----------------
+var DA=null;
+function sceneDicA(){
+  VRS.tok++; VRS.scene='dica'; clearScene(); VRS.clear=[0,0,0]; VRS.tick=null; VRS.onTrigger=null;
+  var plan=[]; for(var rep=0;rep<2;rep++){ var p=shuffle([0,1,2,3,4,5,6,7,8]), k=1+Math.floor(Math.random()*8); for(var i=0;i<9;i++) plan.push({od:p[i],os:p[(i+k)%9]}); }
+  shuffle(plan); DA={plan:plan,i:0,res:[]};
+  panel(['Dicoptica A: coppie','Compaiono DUE palline insieme: una la vede solo l’occhio destro, l’altra solo il sinistro.','Guarda la croce e colpisci tutte e due, in qualunque ordine.','Se ne vedi una sola, colpisci quella. Inizia tra 4 secondi.'],0,0,-1.8,0.9,0.28);
+  later(dicaNext,4000);
+}
+function dicaNext(){
+  VRS.onTrigger=null; clearScene(); VRS.clear=[0,0,0];
+  if(DA.i>=DA.plan.length){ dicaEnd(); return; }
+  gameBase();
+  var pl=DA.plan[DA.i], r=Math.tan(deg(1.8))*2, t0=performance.now(), hit={right:null,left:null}, done=false, timer=null;
+  function mk(eye,zi){ var zn=ZONES[zi], ax=zn[0]*14+(Math.random()*6-3), ay=zn[1]*9+(Math.random()*4-2);
+    var b=add({kind:'disc',x:Math.tan(deg(ax))*2,y:Math.tan(deg(ay))*2,z:-2,w:r,h:r,col:colFor(eye),eye:eye,hitScale:1.5});
+    b.click=function(){ if(hit[eye]!==null||done) return; hit[eye]=Math.round(performance.now()-t0); removeObj(b); if(hit.right!==null&&hit.left!==null) fin(); }; }
+  function fin(){ if(done) return; done=true; clearTimeout(timer); DA.res.push({od_zona:pl.od,os_zona:pl.os,od_rt:hit.right,os_rt:hit.left}); DA.i++; later(dicaNext,500+Math.random()*400); }
+  mk('right',pl.od); mk('left',pl.os);
+  timer=later(fin,4500);
+}
+function dicaEnd(){
+  var R=DA.res, n=R.length, hO=R.filter(function(r){ return r.od_rt!==null; }), hS=R.filter(function(r){ return r.os_rt!==null; }), both=R.filter(function(r){ return r.od_rt!==null&&r.os_rt!==null; }).length;
+  var rtO=hO.length?Math.round(median(hO.map(function(r){ return r.od_rt; }))):null, rtS=hS.length?Math.round(median(hS.map(function(r){ return r.os_rt; }))):null;
+  var mO={}, mS={}; R.forEach(function(r){ if(r.od_rt===null) mO[r.od_zona]=(mO[r.od_zona]||0)+1; if(r.os_rt===null) mS[r.os_zona]=(mS[r.os_zona]||0)+1; });
+  function lst(m){ var k=Object.keys(m); return k.length?k.map(function(z){ return zoneName(+z)+' '+m[z]; }).join(', '):'nessuna'; }
+  var det='Mancate della pallina vista dall’occhio DESTRO, per zona del campo: '+lst(mO)+'\nMancate della pallina vista dall’occhio SINISTRO, per zona del campo: '+lst(mS)+'\nTempi mediani: OD '+(rtO||'-')+' ms, OS '+(rtS||'-')+' ms';
+  var txt='coppie '+n+' · entrambe colpite '+both+'/'+n+' · OD '+hO.length+'/'+n+' ('+(rtO||'-')+' ms) · OS '+hS.length+'/'+n+' ('+(rtS||'-')+' ms) · colori: '+(SET.dCol==='white'?'bianche':'rossa a '+SET.dRed+', verde a '+(SET.dRed==='OD'?'OS':'OD')+' (guadagno verde '+calG().toFixed(2)+')');
+  addResult('Dicoptica A: coppie',txt,{prove:R,dettaglio:det,colori:SET.dCol,rossa:SET.dRed});
+  clearScene(); VRS.clear=[0,0,0];
+  panel(['Dicoptica A: fine','Entrambe colpite '+both+' su '+n,'OD '+hO.length+'/'+n+' · OS '+hS.length+'/'+n,'Mancate OD: '+lst(mO),'Mancate OS: '+lst(mS)],0,0.2,-1.6,0.9,0.3);
+  button('m','Torna al menu',0,-0.2,-1.6,0.3,0.07,sceneMenu);
+}
+
+// ---------------- 11. DICOPTICA B: sovrapposte (rossa e verde nello stesso punto) ----------------
+var DBB=null;
+var B_COL=[['R','Solo ROSSA'],['V','Solo VERDE'],['M','Mescolate'],['D','2 palline'],['A','Alternano']];
+var B_WHITE=[['U','Una sola'],['A','Alternano'],['D','2 palline'],['X','Altro']];
+function sceneDicB(){
+  VRS.tok++; VRS.scene='dicb'; clearScene(); VRS.clear=[0,0,0]; VRS.tick=null; VRS.onTrigger=null;
+  var plan=[]; for(var z=0;z<9;z++){ plan.push({z:z,red:'right'}); plan.push({z:z,red:'left'}); } shuffle(plan);
+  var long=SET.dbMode==='long';
+  DBB={plan:plan,i:0,res:[],col:SET.dCol!=='white',lock:SET.lock!=='off',exp:long?0:Math.round((+SET.dbExp||0.8)*1000),g:calG()};
+  panel(['Dicoptica B: sovrapposte','In ogni prova compare per un attimo UNA pallina nello stesso punto, una per ciascun occhio.',DBB.col?'Poi scegli il PRIMO colore che hai visto: solo rossa, solo verde, mescolate (giallo, bianco), due palline separate, alternano.':'Poi scegli cosa hai visto subito: una pallina sola, alternano, due palline separate, altro.',(DBB.exp?'La pallina resta '+(DBB.exp/1000).toFixed(1)+' s e poi sparisce: rispondi su quello che hai visto per primo.':'La pallina resta finché rispondi.')+' Inizia tra 4 secondi.'],0,0,-1.8,0.98,0.32);
+  later(dicbNext,4000);
+}
+function dicbNext(){
+  VRS.onTrigger=null; clearScene(); VRS.clear=[0,0,0];
+  if(DBB.i>=DBB.plan.length){ dicbEnd(); return; }
+  if(DBB.lock) gameBase();
+  var pl=DBB.plan[DBB.i], zn=ZONES[pl.z], ax=zn[0]*14+(Math.random()*6-3), ay=zn[1]*9+(Math.random()*4-2), r=Math.tan(deg(1.5))*2, t0=performance.now(), tq=t0, done=false, timer=null;
+  var x=Math.tan(deg(ax))*2, y=Math.tan(deg(ay))*2, redEye=pl.red, grnEye=(redEye==='right')?'left':'right';
+  var o1=add({kind:'disc',x:x,y:y,z:-2,w:r,h:r,col:DBB.col?RED:[1,1,1,1],eye:redEye});
+  var o2=add({kind:'disc',x:x,y:y,z:-2,w:r,h:r,col:DBB.col?greenC(DBB.g):[1,1,1,1],eye:grnEye});
+  var opts=DBB.col?B_COL:B_WHITE, nb=opts.length;
+  function ask(){ tq=performance.now(); removeObj(o1); removeObj(o2);
+    panel([DBB.exp?'Cosa hai visto per primo?':'Cosa vedi?'],0,0.78,-2,0.3,0.07,{size:130});
+    opts.forEach(function(o,i){ button('b'+o[0],o[1],(i-(nb-1)/2)*0.4,-0.95,-2,0.19,0.07,function(){ ans(o[0]); },'#37474f'); });
+    timer=later(function(){ ans('-'); },9000); }
+  function ans(code){ if(done) return; done=true; clearTimeout(timer); DBB.res.push({zona:pl.z,rossa:redEye,risposta:code,rt:Math.round(performance.now()-tq),esp_ms:DBB.exp}); DBB.i++; clearScene(); if(DBB.lock) gameBase(); later(dicbNext,600+Math.random()*400); }
+  if(DBB.exp) later(ask,DBB.exp); else ask2();
+  function ask2(){ var opts2=opts; panel(['Cosa vedi?'],0,0.78,-2,0.3,0.07,{size:130});
+    opts2.forEach(function(o,i){ button('b'+o[0],o[1],(i-(nb-1)/2)*0.4,-0.95,-2,0.19,0.07,function(){ ans(o[0]); },'#37474f'); }); timer=later(function(){ ans('-'); },9000); }
+}
+function dicbEnd(){
+  var R=DBB.res, c={}; R.forEach(function(r){ c[r.risposta]=(c[r.risposta]||0)+1; });
+  var odOnly=0, osOnly=0, red=0, grn=0;
+  if(DBB.col) R.forEach(function(r){ if(r.risposta==='R'){ red++; if(r.rossa==='right') odOnly++; else osOnly++; } else if(r.risposta==='V'){ grn++; if(r.rossa==='right') osOnly++; else odOnly++; } });
+  var iE=(odOnly+osOnly)?(odOnly-osOnly)/(odOnly+osOnly):null, iC=(red+grn)?(red-grn)/(red+grn):null, lab=DBB.col?B_COL:B_WHITE;
+  var txt='prove '+R.length+' · '+lab.map(function(o){ return o[1].toLowerCase()+' '+(c[o[0]]||0); }).join(', ')+(c['-']?' · senza risposta '+c['-']:'')
+    +(DBB.col?' · solo OD '+odOnly+', solo OS '+osOnly+' · indice dominanza occhio (OD-OS)/(OD+OS) '+(iE==null?'-':iE.toFixed(2))+' · indice colore (rossa-verde)/(rossa+verde) '+(iC==null?'-':iC.toFixed(2))+' · guadagno verde '+DBB.g.toFixed(2):' · palline bianche, una per occhio')+' · '+(DBB.exp?'esposizione '+(DBB.exp/1000).toFixed(1)+' s, primo percetto':'esposizione lunga')+' · cornice '+(DBB.lock?'sì':'no');
+  var byZ={}; R.forEach(function(r){ (byZ[r.zona]=byZ[r.zona]||[]).push(r.risposta+(r.rossa==='right'?'(rossa a OD)':'(rossa a OS)')); });
+  var det='Risposte per zona del campo (R solo rossa, V solo verde, M mescolate, A alternano, D due palline, U una sola, X altro):\n'+Object.keys(byZ).map(function(z){ return zoneName(+z)+': '+byZ[z].join(' '); }).join('\n');
+  addResult('Dicoptica B: sovrapposte',txt,{prove:R,dettaglio:det,colorate:DBB.col,cornice:DBB.lock,idx_occhio:iE,idx_colore:iC,g_verde:DBB.g,esp_ms:DBB.exp});
+  clearScene(); VRS.clear=[0,0,0];
+  var lines=['Dicoptica B: fine',lab.map(function(o){ return o[1]+' '+(c[o[0]]||0); }).join(' · ')];
+  if(DBB.col) lines.push('Solo OD '+odOnly+' · solo OS '+osOnly+' · indice occhio '+(iE==null?'-':iE.toFixed(2)),'Rossa '+red+' · verde '+grn+' · indice colore '+(iC==null?'-':iC.toFixed(2)));
+  panel(lines,0,0.2,-1.6,0.9,0.3);
+  button('m','Torna al menu',0,-0.2,-1.6,0.3,0.07,sceneMenu);
+}
+
+// ================= 12. CALIBRAZIONE COLORI =================
+// guadagno g del verde (0,03-1): il verde e' [0.12g, g, 0.12g]; il rosso resta pieno. g basso = il verde sembrava troppo forte.
+function calLine(){ var r=calRec(), m=r&&r.man, a=r&&r.auto, t='Calibrazione colori ('+(SET.subj||'senza nome')+'): ';
+  if(!m&&!a) return t+'non fatta · in uso guadagno verde '+calG().toFixed(2)+' ('+({sub:'soggetto',man:'manuale',auto:'automatica',val:'a mano',off:'spenta'}[SET.calUse]||'')+')';
+  t+=(m?'manuale g '+m.g.toFixed(2)+' (SD '+m.sd_pct+'%, '+m.n+' prove, '+m.date+')':'manuale non fatto')+' · '+(a?'automatica g '+a.g.toFixed(2)+' ('+a.rev+' inversioni, indice occhio '+(a.idx==null?'-':a.idx.toFixed(2))+', '+a.date+')':'automatica non fatta');
+  if(m&&a) t+=' · differenza tra i due metodi '+Math.round(Math.abs(Math.log(m.g/a.g))*100)+'%';
+  return t+' · in uso g '+calG().toFixed(2)+' ('+({sub:'soggetto',man:'manuale',auto:'automatica',val:'a mano',off:'spenta'}[SET.calUse]||'')+')'; }
+function calStore(kind,obj){ var j=SET.subj||''; SET.calMap=SET.calMap||{}; SET.calMap[j]=SET.calMap[j]||{}; SET.calMap[j][kind]=obj; saveSET(); }
+function sceneCal(){
+  VRS.tok++; VRS.scene='calmenu'; clearScene(); VRS.clear=[0,0,0]; VRS.tick=null; VRS.onTrigger=null;
+  panel(['12. Calibrazione colori rosso/verde',calLine(),'Il programma regola quanto è forte il verde rispetto al rosso, così nessuno dei due domina solo per luminosità.'],0,0.4,-1.7,0.98,0.26);
+  button('cm','A. Manuale: sfarfallio (flicker)',0,0.05,-1.7,0.5,0.07,calFlickStart,'#b26a00');
+  button('ca','B. Automatica: rivalità (scala)',0,-0.07,-1.7,0.5,0.07,calAutoStart,'#b26a00');
+  button('co','C. Schermata di sovrapposizione',0,-0.19,-1.7,0.5,0.07,calOvStart,'#b26a00');
+  button('bm','Torna al menu',0,-0.4,-1.7,0.3,0.06,sceneMenu,'#37474f');
+}
+// ---- A. flicker: rosso e verde si alternano nello stesso disco, visto da tutti e due gli occhi
+var CF=null;
+function flickHalf(){ var f=(VRS.fps&&VRS.fps.val)||90; return Math.max(1,Math.round(f/30)); }
+function calFlickStart(){
+  VRS.tok++; VRS.scene='calflick'; clearScene(); VRS.clear=[0,0,0]; VRS.onTrigger=null;
+  var st=shuffle([0.2,0.9,0.4,1,0.12,0.65]);
+  CF={i:0,n:st.length,starts:st,g:st[0],res:[],clicks:0,hf:flickHalf()};
+  panel(['A. Calibrazione manuale (flicker)','Vedrai un disco che cambia rapidamente tra rosso e verde, con tutti e due gli occhi.','Regola il VERDE finché lo sfarfallio sparisce o è minimo, poi premi OK.','Parte da luminosità diverse ogni volta: 6 ripetizioni. Inizia tra 5 secondi.'],0,0.1,-1.7,0.95,0.3);
+  later(calFlickTrial,5000);
+}
+function calFlickTrial(){
+  clearScene(); VRS.clear=[0,0,0]; VRS.onTrigger=null;
+  if(CF.i>=CF.n){ calFlickEnd(); return; }
+  CF.g=CF.starts[CF.i]; CF.clicks=0;
+  var d=add({kind:'disc',x:0,y:0.05,z:-2,w:0.09,h:0.09,col:RED});
+  VRS.tick=function(){ CF.hf=flickHalf(); var ph=Math.floor(VRS.fr/CF.hf)%2; d.col=ph?RED:greenC(CF.g); };
+  panel(['Prova '+(CF.i+1)+' di '+CF.n,'Regola il verde fino a non vedere sfarfallio'],0,0.5,-2,0.6,0.12);
+  var by=-0.32;
+  [['−−',0.8],['−',0.95],['+',1/0.95],['++',1/0.8]].forEach(function(b,k){ button('g'+k,'Verde '+b[0],(k-1.5)*0.27,by,-2,0.12,0.06,function(){ CF.g=Math.max(0.03,Math.min(1,CF.g*b[1])); CF.clicks++; },'#37474f'); });
+  button('ok','OK: non sfarfalla più',0,by-0.14,-2,0.28,0.065,function(){ CF.res.push({start:CF.starts[CF.i],g:+CF.g.toFixed(4),click:CF.clicks}); CF.i++; VRS.tick=null; later(calFlickTrial,500); },'#2e7d32');
+}
+function calFlickEnd(){
+  VRS.tick=null; clearScene();
+  var ls=CF.res.map(function(r){ return Math.log(r.g); }), m=ls.reduce(function(a,b){ return a+b; },0)/ls.length, v=ls.reduce(function(a,b){ return a+(b-m)*(b-m); },0)/Math.max(1,ls.length-1), sdp=Math.round(Math.sqrt(v)*100), g=Math.exp(m);
+  var vals=CF.res.map(function(r){ return r.g; }), freq=Math.round(((VRS.fps&&VRS.fps.val)||90)/(2*CF.hf));
+  calStore('man',{g:+g.toFixed(3),sd_pct:sdp,n:CF.res.length,date:new Date().toLocaleString('it-IT'),vals:vals,freq:freq});
+  addResult('Calibrazione colori: manuale (flicker)','guadagno verde '+g.toFixed(2)+' (media geometrica di '+vals.length+' prove, SD '+sdp+'%, min '+Math.min.apply(null,vals).toFixed(2)+', max '+Math.max.apply(null,vals).toFixed(2)+') · sfarfallio '+freq+' Hz · partenze '+CF.starts.map(function(x){ return x.toFixed(2); }).join(' '),{g:g,sd_pct:sdp,prove:CF.res,freq_hz:freq});
+  VRS.clear=[0,0,0];
+  panel(['Calibrazione manuale: fine','Guadagno del verde: '+g.toFixed(2),'Variabilità tra le prove: '+sdp+'%','Valori: '+vals.map(function(x){ return x.toFixed(2); }).join(' ')],0,0.2,-1.6,0.9,0.3);
+  button('m','Avanti',0,-0.2,-1.6,0.3,0.07,sceneCal);
+}
+// ---- B. automatica: rivalita' a scala, il rosso cambia occhio a caso, esposizione breve, primo percetto
+var CA=null;
+function calAutoStart(){
+  VRS.tok++; VRS.scene='calauto'; clearScene(); VRS.clear=[0,0,0]; VRS.tick=null; VRS.onTrigger=null;
+  CA={n:0,max:40,g:0.5,step:0.3,dir:0,rev:[],res:[],exp:800,lim:0};
+  panel(['B. Calibrazione automatica (rivalità)','Compare per un attimo una pallina: una per occhio, nello stesso punto, rossa e verde.','Dopo che sparisce scegli il PRIMO colore visto: rosso, verde, oppure mescolato/dubbio.','Il rosso passa a caso da un occhio all’altro. Circa 30-40 prove. Inizia tra 5 secondi.'],0,0.1,-1.7,0.95,0.3);
+  later(calAutoTrial,5000);
+}
+function calAutoTrial(){
+  VRS.onTrigger=null; clearScene(); VRS.clear=[0,0,0];
+  if(CA.n>=CA.max||CA.rev.length>=8){ calAutoEnd(); return; }
+  gameBase();
+  var red=Math.random()<0.5?'right':'left', grn=red==='right'?'left':'right', r=Math.tan(deg(1.25))*2, g=CA.g;
+  var o1=add({kind:'disc',x:0,y:0,z:-2,w:r,h:r,col:RED,eye:red}), o2=add({kind:'disc',x:0,y:0,z:-2,w:r,h:r,col:greenC(g),eye:grn}), done=false, timer=null;
+  later(function(){ removeObj(o1); removeObj(o2); panel(['Primo colore visto?'],0,0.4,-2,0.3,0.07,{size:130});
+    [['R','ROSSO','#b02a2a'],['V','VERDE','#2a7f2a'],['M','Mescolato / dubbio','#37474f']].forEach(function(o,i){ button('c'+o[0],o[1],(i-1)*0.42,-0.4,-2,0.19,0.08,function(){ ans(o[0]); },o[2]); });
+    timer=later(function(){ ans('-'); },9000); },CA.exp);
+  function ans(a){ if(done) return; done=true; clearTimeout(timer);
+    CA.res.push({n:CA.n,g:+g.toFixed(4),rossa:red,r:a}); CA.n++;
+    if(a==='R'||a==='V'){ var d=(a==='V')?-1:1; if(CA.dir&&d!==CA.dir){ CA.rev.push(Math.log(g)); CA.step=Math.max(0.05,CA.step*0.7); } CA.dir=d;
+      var ng=g*Math.exp(d*CA.step); if(ng>1){ ng=1; CA.lim++; } if(ng<0.03) ng=0.03; CA.g=ng; }
+    clearScene(); gameBase(); later(calAutoTrial,700+Math.random()*400); }
+}
+function calAutoEnd(){
+  clearScene(); VRS.clear=[0,0,0];
+  var rv=CA.rev.slice(-6), g;
+  if(rv.length>=2) g=Math.exp(rv.reduce(function(a,b){ return a+b; },0)/rv.length); else { var u=CA.res.slice(-6).map(function(r){ return Math.log(r.g); }); g=u.length?Math.exp(u.reduce(function(a,b){ return a+b; },0)/u.length):CA.g; }
+  var od=0, os=0; CA.res.forEach(function(r){ if(r.r==='R'){ if(r.rossa==='right') od++; else os++; } else if(r.r==='V'){ if(r.rossa==='right') os++; else od++; } });
+  var idx=(od+os)?(od-os)/(od+os):null, nm=CA.res.filter(function(r){ return r.r==='M'; }).length;
+  calStore('auto',{g:+g.toFixed(3),rev:CA.rev.length,n:CA.res.length,idx:idx,date:new Date().toLocaleString('it-IT')});
+  addResult('Calibrazione colori: automatica (rivalità)','guadagno verde '+g.toFixed(2)+' ('+CA.rev.length+' inversioni, '+CA.res.length+' prove, mescolato/dubbio '+nm+(CA.lim?', limite 1,0 raggiunto '+CA.lim+' volte':'')+') · percetto seguito: OD '+od+', OS '+os+' · indice dominanza occhio (OD-OS)/(OD+OS) '+(idx==null?'-':idx.toFixed(2)),{g:g,rev:CA.rev,prove:CA.res,idx_occhio:idx});
+  panel(['Calibrazione automatica: fine','Guadagno del verde: '+g.toFixed(2)+'  ('+CA.rev.length+' inversioni)','Percetto seguito: OD '+od+' · OS '+os+(idx==null?'':' · indice occhio '+idx.toFixed(2)),(CA.rev.length<4?'Poche inversioni: valore meno affidabile, ripeti.':'')],0,0.2,-1.6,0.9,0.3);
+  button('m','Avanti',0,-0.2,-1.6,0.3,0.07,sceneCal);
+}
+// ---- C. sovrapposizione: somma fisica (additiva) contro rosso e verde dicoptici
+var CO=null;
+function calOvStart(){
+  VRS.tok++; VRS.scene='calov'; clearScene(); VRS.clear=[0,0,0]; VRS.tick=null; VRS.onTrigger=null;
+  var plan=shuffle([{t:'sum'},{t:'dic',red:'right'},{t:'dic',red:'left'},{t:'sum'},{t:'dic',red:'right'},{t:'dic',red:'left'}]);
+  CO={plan:plan,i:0,res:[],g:calG()};
+  panel(['C. Sovrapposizione','Compare un disco: a volte rosso e verde sono sommati su tutti e due gli occhi (giallo fisico), a volte uno per occhio.','Dai un voto da 0 a 5: 0 = vedo solo rosso o solo verde (o alternano), 5 = vedo un giallo uniforme.','6 prove. Inizia tra 5 secondi.'],0,0.1,-1.7,0.95,0.3);
+  later(calOvTrial,5000);
+}
+function calOvTrial(){
+  clearScene(); VRS.clear=[0,0,0];
+  if(CO.i>=CO.plan.length){ calOvEnd(); return; }
+  gameBase(); var pl=CO.plan[CO.i], r=Math.tan(deg(2))*2, t0=performance.now(), done=false;
+  if(pl.t==='sum'){ add({kind:'disc',x:0,y:0,z:-2,w:r,h:r,col:RED,add:true}); add({kind:'disc',x:0,y:0,z:-2,w:r,h:r,col:greenC(CO.g),add:true}); }
+  else { var grn=pl.red==='right'?'left':'right'; add({kind:'disc',x:0,y:0,z:-2,w:r,h:r,col:RED,eye:pl.red}); add({kind:'disc',x:0,y:0,z:-2,w:r,h:r,col:greenC(CO.g),eye:grn}); }
+  panel(['Quanto giallo uniforme?','0 = niente (solo rosso o verde)  ·  5 = giallo uniforme'],0,0.5,-2,0.7,0.12);
+  for(var k=0;k<=5;k++) (function(k){ button('v'+k,''+k,(k-2.5)*0.17,-0.45,-2,0.07,0.07,function(){ if(done) return; done=true; CO.res.push({t:pl.t,rossa:pl.red||'',voto:k,rt:Math.round(performance.now()-t0)}); CO.i++; later(calOvTrial,500); },'#37474f'); })(k);
+}
+function calOvEnd(){
+  clearScene(); VRS.clear=[0,0,0];
+  function avg(f){ var a=CO.res.filter(f).map(function(r){ return r.voto; }); return a.length?a.reduce(function(x,y){ return x+y; },0)/a.length:null; }
+  var s=avg(function(r){ return r.t==='sum'; }), d=avg(function(r){ return r.t==='dic'; });
+  addResult('Calibrazione colori: sovrapposizione','voto medio giallo uniforme (0-5): somma fisica '+(s==null?'-':s.toFixed(1))+', dicoptica '+(d==null?'-':d.toFixed(1))+' · guadagno verde usato '+CO.g.toFixed(2)+' · voti: '+CO.res.map(function(r){ return (r.t==='sum'?'S':'D'+(r.rossa==='right'?'1':'2'))+r.voto; }).join(' '),{prove:CO.res,g:CO.g});
+  panel(['Sovrapposizione: fine','Somma fisica: voto medio '+(s==null?'-':s.toFixed(1)),'Dicoptica: voto medio '+(d==null?'-':d.toFixed(1)),'(ci aspettiamo la somma fisica alta e la dicoptica bassa)'],0,0.2,-1.6,0.9,0.3);
+  button('m','Avanti',0,-0.2,-1.6,0.3,0.07,sceneCal);
+}
+function calInfoUpd(){ var e=$('calInfo'); if(e) e.textContent=calLine(); }
+// ================= 13-16. RETICOLI =================
+var GP={t:false,s:false,a:false,b:false,seen:false,ev:{t:0,s:0,a:0,b:0}}, KEYMODE='', GR=null, AUD=null, TONE=null;
+function GPpoll(s){ var t=false,q=false,a=false,b=false,seen=false;
+  for(var i=0;i<s.inputSources.length;i++){ var g=s.inputSources[i].gamepad; if(!g||!g.buttons) continue; seen=true; var bt=g.buttons;
+    if(bt[0]&&bt[0].pressed) t=true; if(bt[1]&&bt[1].pressed) q=true; if(bt[4]&&bt[4].pressed) a=true; if(bt[5]&&bt[5].pressed) b=true; }
+  GP.t=t; GP.s=q; GP.a=a; GP.b=b; GP.seen=seen; }
+function buzz(ms){ try{ var s=xrSession; if(!s) return; for(var i=0;i<s.inputSources.length;i++){ var g=s.inputSources[i].gamepad; if(g&&g.hapticActuators&&g.hapticActuators[0]&&g.hapticActuators[0].pulse) g.hapticActuators[0].pulse(0.4,ms); } }catch(e){} }
+function toneOn(){ window.__tone=(window.__tone||0)+1; if(SET.grFb==='off') return;
+  try{ if(!AUD) AUD=new (window.AudioContext||window.webkitAudioContext)(); if(AUD.state==='suspended') AUD.resume(); if(!TONE){ var o=AUD.createOscillator(), g=AUD.createGain(); o.frequency.value=520; g.gain.value=0.04; o.connect(g); g.connect(AUD.destination); o.start(); TONE={o:o}; } }catch(e){}
+  if(SET.grFb==='both') buzz(30); }
+function toneOff(){ if(TONE){ try{ TONE.o.stop(); }catch(e){} TONE=null; } }
+function grRad(){ return Math.tan(deg((+SET.grSize||4)/2))*2; }
+function grFreq(){ return (+SET.grCpd||1.5)*(+SET.grSize||4)/2; }
+function grMk(eye,col){ var r=grRad(); return {kind:'grat',x:0,y:0,z:-2,w:r,h:r,col:col,eye:eye,gp:[0,grFreq(),0,(+SET.grCon||100)/100]}; }
+function grShow(o,on){ var k=OBJ.indexOf(o); if(on&&k<0) OBJ.unshift(o); if(!on&&k>=0) OBJ.splice(k,1); }
+function grBase(){ var r=grRad(); add({kind:'ring',x:0,y:0,z:-2,w:r*1.16,h:r*1.16,col:[0.55,0.55,0.55,1]}); add({kind:'disc',x:0,y:0,z:-2,w:0.0035,h:0.0035,col:[1,1,1,1]}); }
+function grMsg(lines){ if(GR&&GR.txt){ try{ gl.deleteTexture(GR.txt.tex); }catch(e){} removeObj(GR.txt); GR.txt=null; } if(lines&&GR) GR.txt=panel(lines,0,0.3,-1.7,0.8,0.14+0.03*lines.length); }
+function grOther(e){ return e==='right'?'left':'right'; }
+function grState(){ if(KEYMODE==='cycle') return (GR&&GR.cyc)||'U'; if(GP.a||(GP.t&&GP.s)) return 'T'; if(GP.t) return 'R'; if(GP.s) return 'G'; return 'U'; }
+function grHold(){ if(KEYMODE==='cycle') return !!(GR&&GR.hold); return GP.t||GP.a; }
+function grAbort(now){ if(GP.b){ if(!GR.bT) GR.bT=now; else if(now-GR.bT>2000){ GR.bT=0; return true; } } else GR.bT=0; return false; }
+function grIntro(title,lines,starts){ VRS.tok++; VRS.scene='grintro'; clearScene(); VRS.clear=[0,0,0]; VRS.tick=null; VRS.onTrigger=null; toneOff();
+  panel([title].concat(lines),0,0.3,-1.7,1.05,0.1+0.045*(lines.length+1));
+  starts.forEach(function(st,i){ button('s'+i,st[0],0,-0.2-i*0.15,-1.7,0.42,0.06,function(){ if(!KEYMODE) sceneGrKeys(st[1]); else st[1](); },'#2e7d32'); });
+  button('k','Prova dei tasti',0,-0.2-starts.length*0.15,-1.7,0.25,0.05,function(){ sceneGrKeys(function(){ grIntro(title,lines,starts); }); },'#37474f');
+  button('bm','Torna al menu',0,-0.2-starts.length*0.15-0.12,-1.7,0.25,0.05,sceneMenu,'#37474f'); }
+function sceneGrKeys(next){ VRS.tok++; VRS.scene='grkeys'; clearScene(); VRS.clear=[0,0,0]; VRS.onTrigger=null; GP.ev={t:0,s:0,a:0,b:0};
+  panel(['Prova dei tasti','Premi un tasto alla volta: il pallino diventa verde.','Servono GRILLETTO, LATERALE (grip) e A/X.'],0,0.5,-1.7,0.9,0.2);
+  var names=[['t','GRILLETTO (indice)'],['s','LATERALE (grip, medio)'],['a','A oppure X'],['b','B oppure Y (2 s = interrompe)']], dots={};
+  names.forEach(function(n,i){ var y=0.25-i*0.1; panel([n[1]],-0.2,y,-1.7,0.34,0.065); dots[n[0]]=add({kind:'disc',x:0.2,y:y,z:-1.7,w:0.03,h:0.03,col:[0.25,0.25,0.25,1]}); });
+  VRS.tick=function(){ ['t','s','a','b'].forEach(function(k){ if(GP[k]) GP.ev[k]=1; dots[k].col=GP[k]?[0.1,0.9,0.2,1]:(GP.ev[k]?[0.1,0.45,0.15,1]:[0.25,0.25,0.25,1]); }); };
+  button('ok','I tasti funzionano',-0.27,-0.25,-1.7,0.25,0.065,function(){ KEYMODE='gp'; VRS.tick=null; next(); },'#2e7d32');
+  button('no','Solo grilletto',0.27,-0.25,-1.7,0.25,0.065,function(){ KEYMODE='cycle'; VRS.tick=null; next(); },'#b26a00'); }
+function grColMode(){ return SET.dCol!=='white'; }
+function grStats(evs,dur){ var tm={R:0,G:0,T:0,U:0}, n={R:0,G:0,T:0,U:0}, f10={R:0,G:0,T:0,U:0}, l10={R:0,G:0,T:0,U:0}, lo=Math.max(0,dur-10000), i, a, b, s;
+  for(i=0;i<evs.length;i++){ a=evs[i].t; b=(i+1<evs.length?evs[i+1].t:dur); s=evs[i].s; tm[s]+=b-a; n[s]++; f10[s]+=Math.max(0,Math.min(b,10000)-Math.min(a,10000)); l10[s]+=Math.max(0,b-Math.max(a,lo)); }
+  var fp=null; for(i=0;i<evs.length;i++) if(evs[i].s!=='U'){ fp={s:evs[i].s,t:evs[i].t}; break; }
+  return {tm:tm,n:n,f10:f10,l10:l10,fp:fp,sw:Math.max(0,evs.length-1),dur:dur}; }
+function pct(x,t){ return t>0?Math.round(100*x/t):0; }
+function grPerc(cf,col,st){ if(col) return st==='R'?{eye:cf.re,ori:cf.ro,c:'R'}:{eye:grOther(cf.re),ori:180-cf.ro,c:'G'};
+  return st==='R'?{eye:cf.oe,ori:45,c:'R'}:{eye:grOther(cf.oe),ori:135,c:'G'}; }
+// ---- 13. TEST
+function grIntroTest(){ var col=grColMode(), B=+SET.grBlock||40, P=+SET.grPause||20;
+  grIntro('13. Reticoli test (sperimentale)',['Un disco con righe: una riga per occhio, stesso punto, righe ferme.',col?'Rosso (135 gradi) e verde (45 gradi). GRILLETTO = vedo righe rosse, LATERALE = verdi,':'Righe bianche, una per occhio. GRILLETTO = righe a 45 gradi, LATERALE = a 135 gradi,','A/X (o tutti e due insieme) = le vedo insieme, niente = non so. Tieni premuto finché dura.','4 blocchi da '+B+' s, pause da '+P+' s. Guarda sempre il puntino. B/Y 2 s = interrompe.'],[['INIZIA il test',sceneGrTest]]); }
+function sceneGrTest(){
+  VRS.tok++; VRS.scene='grtest'; clearScene(); VRS.clear=[0.22,0.22,0.22]; VRS.tick=null; VRS.onTrigger=null; toneOff();
+  var col=grColMode(), cf=col?[{re:'right',ro:135},{re:'right',ro:45},{re:'left',ro:135},{re:'left',ro:45}]:[{oe:'right'},{oe:'left'},{oe:'right'},{oe:'left'}];
+  shuffle(cf);
+  var oR=grMk('right',[1,1,1,1]), oL=grMk('left',[1,1,1,1]);
+  GR={kind:'test',col:col,cf:cf,bi:-1,seg:'lead',t0:null,dur:6000,B:(+SET.grBlock||40)*1000,P:(+SET.grPause||20)*1000,res:[],cur:'U',evs:[],oR:oR,oL:oL,g:calG(),active:true,saved:false,cyc:'U',txt:null,rem:-1,key:KEYMODE};
+  grBase(); grMsg(['Preparati','Guarda il puntino al centro']);
+  VRS.onTrigger=(KEYMODE==='cycle')?function(){ if(GR&&GR.seg==='run') GR.cyc={U:'R',R:'G',G:'T',T:'U'}[GR.cyc||'U']; }:null;
+  VRS.tick=grTestTick;
+}
+function grSetBlock(cf){ var oR=GR.oR, oL=GR.oL, a, b, ra, rb;
+  if(GR.col){ a=(cf.re==='right')?oR:oL; b=(a===oR)?oL:oR; a.col=RED; b.col=greenC(GR.g); a.gp[0]=deg(cf.ro); b.gp[0]=deg(180-cf.ro); }
+  else { a=(cf.oe==='right')?oR:oL; b=(a===oR)?oL:oR; a.col=[1,1,1,1]; b.col=[1,1,1,1]; a.gp[0]=deg(45); b.gp[0]=deg(135); }
+  grShow(oR,true); grShow(oL,true); }
+function grTestTick(now){
+  if(!GR||!GR.active||GR.kind!=='test') return; if(GR.t0==null) GR.t0=now; var el=now-GR.t0;
+  if(grAbort(now)){ grTestEnd(true); return; }
+  if(GR.seg==='run'){ var st=grState(); if(st!==GR.cur){ GR.evs.push({t:Math.round(el),s:st}); GR.cur=st; } if(el>=GR.B) grBlockEnd(); return; }
+  var rem=Math.ceil((GR.dur-el)/1000); if(rem!==GR.rem){ GR.rem=rem; grMsg([GR.seg==='lead'?'Preparati':'Pausa','Il prossimo blocco parte tra '+Math.max(0,rem)+' s']); }
+  if(el>=GR.dur){ GR.bi++; if(GR.bi>=GR.cf.length){ grTestEnd(false); return; } GR.seg='run'; GR.t0=now; GR.cur=grState(); GR.evs=[{t:0,s:GR.cur}]; VRS.clear=[0,0,0]; grMsg(null); grSetBlock(GR.cf[GR.bi]); }
+}
+function grBlockEnd(){ GR.res.push({cf:GR.cf[GR.bi],evs:GR.evs,st:grStats(GR.evs,GR.B)}); grShow(GR.oR,false); grShow(GR.oL,false); GR.cur='U';
+  if(GR.bi>=GR.cf.length-1){ grTestEnd(false); return; } GR.seg='pause'; GR.t0=null; GR.dur=GR.P; GR.rem=-1; VRS.clear=[0.22,0.22,0.22]; }
+function grTestEnd(partial){
+  if(!GR||GR.saved) return; GR.saved=true; GR.active=false; VRS.tick=null; VRS.onTrigger=null;
+  if(partial&&GR.seg==='run'&&GR.t0!=null){ var el=Math.round(performance.now()-GR.t0); if(el>3000&&GR.evs.length) GR.res.push({cf:GR.cf[GR.bi],evs:GR.evs,st:grStats(GR.evs,Math.min(el,GR.B)),parz:true}); }
+  var R=GR.res, col=GR.col, tot={R:0,G:0,T:0,U:0}, od=0, os=0, cR=0, cG=0, o45=0, o135=0, sw=[], ep=0, epn=0, f10={R:0,G:0,T:0,U:0}, l10={R:0,G:0,T:0,U:0}, fps=[], det=[];
+  R.forEach(function(r,i){ var st=r.st; ['R','G','T','U'].forEach(function(k){ tot[k]+=st.tm[k]; f10[k]+=st.f10[k]; l10[k]+=st.l10[k]; });
+    ['R','G'].forEach(function(k){ var pc=grPerc(r.cf,col,k); if(pc.eye==='right') od+=st.tm[k]; else os+=st.tm[k]; if(col){ if(k==='R') cR+=st.tm[k]; else cG+=st.tm[k]; } if(pc.ori===45) o45+=st.tm[k]; else o135+=st.tm[k]; });
+    sw.push(st.sw); ep+=st.tm.R+st.tm.G; epn+=st.n.R+st.n.G; fps.push(st.fp?(st.fp.s+' '+(st.fp.t/1000).toFixed(1)+'s'):'-');
+    var d=GR.col?('rossa '+(r.cf.re==='right'?'OD':'OS')+' a '+r.cf.ro+'°'):('45° a '+(r.cf.oe==='right'?'OD':'OS')+', 135° all\'altro');
+    det.push('Blocco '+(i+1)+(r.parz?' (INCOMPLETO)':'')+' ('+d+', '+Math.round(st.dur/1000)+' s): '+(col?'rosso':'45°')+' '+pct(st.tm.R,st.dur)+'%, '+(col?'verde':'135°')+' '+pct(st.tm.G,st.dur)+'%, insieme '+pct(st.tm.T,st.dur)+'%, incerto '+pct(st.tm.U,st.dur)+'% · alternanze '+st.sw+' · primo percetto '+(st.fp?(st.fp.s==='R'?(col?'rosso':'45°'):(col?'verde':'135°'))+' dopo '+(st.fp.t/1000).toFixed(1)+' s':'nessuno'));
+  });
+  var T=tot.R+tot.G+tot.T+tot.U, n1=od+os, n2=cR+cG, n3=o45+o135;
+  function ix(a,b){ return (a+b)>0?((a-b)/(a+b)).toFixed(2):'-'; }
+  var f1=f10.R+f10.G+f10.T+f10.U, l1=l10.R+l10.G+l10.T+l10.U;
+  var lab=col?['rosso','verde']:['45°','135°'];
+  var txt='Reticoli test ('+(col?'colore, guadagno verde '+GR.g.toFixed(2):'bianco')+(partial?', INCOMPLETO':'')+'): '+R.length+' blocchi · '+lab[0]+' '+pct(tot.R,T)+'%, '+lab[1]+' '+pct(tot.G,T)+'%, insieme '+pct(tot.T,T)+'%, incerto '+pct(tot.U,T)+'% · indice occhio (OD-OS) '+ix(od,os)+(col?' · indice colore (rosso-verde) '+ix(cR,cG):'')+' · indice orientamento (135-45) '+ix(o135,o45)+' · alternanze per blocco '+sw.join(',')+' · durata media epoca '+(epn?(ep/epn/1000).toFixed(1)+' s':'-')+' · primi 10 s: '+lab[0]+' '+pct(f10.R,f1)+'%, '+lab[1]+' '+pct(f10.G,f1)+'%, insieme '+pct(f10.T,f1)+'% · ultimi 10 s: '+lab[0]+' '+pct(l10.R,l1)+'%, '+lab[1]+' '+pct(l10.G,l1)+'%, insieme '+pct(l10.T,l1)+'% · primi percetti '+fps.join(', ')+' · disco '+SET.grSize+'°, '+SET.grCpd+' cicli/grado, contrasto '+SET.grCon+'% · tasti '+GR.key;
+  addResult('Reticoli test'+(partial?' (INCOMPLETO)':''),txt,{blocchi:R,dettaglio:det.join('\n'),colore:col,g_verde:GR.g,tasti:GR.key,idx_occhio:n1?(od-os)/n1:null,idx_colore:n2?(cR-cG)/n2:null,idx_orient:n3?(o135-o45)/n3:null});
+  clearScene(); VRS.clear=[0,0,0];
+  panel(['Reticoli test: fine'+(partial?' (interrotto)':''),lab[0]+' '+pct(tot.R,T)+'% · '+lab[1]+' '+pct(tot.G,T)+'% · insieme '+pct(tot.T,T)+'% · incerto '+pct(tot.U,T)+'%','Indice occhio '+ix(od,os)+(col?' · indice colore '+ix(cR,cG):'')+' · alternanze '+sw.join(',')],0,0.2,-1.6,0.95,0.26);
+  button('m','Torna al menu',0,-0.2,-1.6,0.3,0.07,sceneMenu);
+}
+// ---- 14-16. ESERCIZIO, SCORRIMENTO, ROTAZIONE
+function grIntroEx(){ grIntro('14. Reticoli esercizio (sperimentale)',['Righe rosse e verdi (o bianche), una per occhio. Ogni '+(+SET.grSwap||2)+' s il disegno passa all\'altro occhio.','TIENI PREMUTO il GRILLETTO (o A/X) finché vedi le due righe INSIEME; rilascia se non le vedi.','Il segnale è solo un suono (e vibrazione): sul disegno non cambia nulla.','Durata '+(+SET.grDur||3)+' min, contrasto '+(SET.grLadder==='on'?'a gradini':'fisso')+'. B/Y 2 s = interrompe.'],[['INIZIA',function(){ sceneGrEx('ex'); }]]); }
+function grIntroDrift(){ grIntro('15. RETICOLO A SCORRIMENTO (sperimentale)',['Come l\'esercizio 14, ma le righe scorrono lentamente ('+(+SET.grDrift||0.2)+' cicli/s).','TIENI PREMUTO il GRILLETTO (o A/X) finché vedi le due righe INSIEME.','Segnale solo con suono e vibrazione. B/Y 2 s = interrompe.'],[['INIZIA',function(){ sceneGrEx('drift'); }]]); }
+function grIntroRot(){ grIntro('16. Reticoli rotazione (sperimentale)',['Le righe ruotano lentamente ('+(+SET.grRot||1)+' gradi/s).','Sensi opposti: le righe si avvicinano fino a coincidere e tornano indietro (si registra a quale differenza di angolo le vedi fuse).','Stesso senso: ruotano insieme, la differenza resta 90 gradi.','TIENI PREMUTO il GRILLETTO (o A/X) quando le vedi fuse o insieme. Consigliato il bianco.'],[['Sensi OPPOSTI (consigliato)',function(){ sceneGrEx('rot','opp'); }],['Stesso senso',function(){ sceneGrEx('rot','same'); }]]); }
+function sceneGrEx(kind,rmode){
+  VRS.tok++; VRS.scene='grex'; clearScene(); VRS.clear=[0,0,0]; VRS.tick=null; VRS.onTrigger=null; toneOff();
+  var col=grColMode(), oR=grMk('right',[1,1,1,1]), oL=grMk('left',[1,1,1,1]), steps=[100,70,50,35,25,18];
+  var start=(SET.grStart==='OS')?'left':'right';
+  GR={kind:kind,rmode:rmode||'',col:col,oR:oR,oL:oL,g:calG(),t0:null,last:null,dur:(+SET.grDur||3)*60000,swap:(+SET.grSwap||2)*1000,k:-1,start:start,aEye:start,swaps:0,
+    series:[],h:false,hs:0,ladder:SET.grLadder==='on',steps:steps,stepHold:steps.map(function(){ return 0; }),phase:[0,0],active:true,saved:false,txt:null,key:KEYMODE,hold:false,bT:0,tone:false,baseCon:(+SET.grCon||100)/100};
+  grShow(oR,true); grShow(oL,true); grBase(); grExApply();
+  VRS.onTrigger=(KEYMODE==='cycle')?function(){ GR.hold=!GR.hold; }:null;
+  VRS.tick=grExTick;
+}
+function grExApply(){ var a=(GR.aEye==='right')?GR.oR:GR.oL, b=(a===GR.oR)?GR.oL:GR.oR; if(GR.col){ a.col=RED; b.col=greenC(GR.g); } else { a.col=[1,1,1,1]; b.col=[1,1,1,1]; } GR.a=a; GR.b=b; }
+function grRotAng(t){ var w=+SET.grRot||1;
+  if(GR.rmode==='same') return {r:135+w*t,g:45+w*t,d:90,conv:null};
+  var H=45/w, u=(t%(2*H))/H, tri=u<=1?u:2-u; return {r:135-45*tri,g:45+45*tri,d:90-90*tri,conv:u<=1}; }
+function grExTick(now){
+  if(!GR||!GR.active||GR.kind==='test') return; if(GR.t0==null){ GR.t0=now; GR.last=now; } var el=now-GR.t0, dt=(now-GR.last)/1000; GR.last=now;
+  if(grAbort(now)){ grExEnd(true); return; }
+  if(el>=GR.dur){ grExEnd(false); return; }
+  var k=Math.floor(el/GR.swap);
+  if(GR.kind!=='rot'&&k!==GR.k){ GR.k=k; GR.aEye=(k%2===0)?GR.start:grOther(GR.start); if(k>0) GR.swaps++; grExApply(); }
+  if(GR.k<0) GR.k=0;
+  var si=GR.ladder?Math.min(GR.steps.length-1,Math.floor(el/(GR.dur/GR.steps.length))):-1, con=GR.ladder?GR.steps[si]/100:GR.baseCon; GR.oR.gp[3]=con; GR.oL.gp[3]=con; GR.si=si;
+  var ang=null;
+  if(GR.kind==='rot'){ ang=grRotAng(el/1000); GR.a.gp[0]=deg(ang.r); GR.b.gp[0]=deg(ang.g); }
+  else { GR.a.gp[0]=deg(135); GR.b.gp[0]=deg(45); }
+  if(GR.kind==='drift'){ var dr=+SET.grDrift||0.2; GR.a.gp[2]=(GR.a.gp[2]+dr*dt)%1; GR.b.gp[2]=(GR.b.gp[2]+dr*dt)%1; }
+  var h=grHold();
+  if(h&&!GR.h){ GR.h=true; GR.hs=el; GR.hd=ang?ang.d:null; GR.hc=ang?ang.conv:null; GR.hsi=si; toneOn(); }
+  else if(!h&&GR.h){ grExSeries(el,ang); }
+  if(GR.h&&si>=0) GR.stepHold[si]+=dt;
+}
+function grExSeries(el,ang){ GR.h=false; toneOff(); var len=el-GR.hs; if(len>=150) GR.series.push({t:Math.round(GR.hs),len:Math.round(len),d_inizio:GR.hd==null?null:Math.round(GR.hd*10)/10,d_fine:ang?Math.round(ang.d*10)/10:null,conv_inizio:GR.hc,gradino:GR.hsi}); }
+function grExEnd(partial){
+  if(!GR||GR.saved) return; GR.saved=true; GR.active=false; VRS.tick=null; VRS.onTrigger=null; toneOff();
+  var el=GR.t0==null?0:Math.min(GR.dur,performance.now()-GR.t0);
+  if(GR.h) grExSeries(el,GR.kind==='rot'?grRotAng(el/1000):null);
+  var L=GR.series.map(function(x){ return x.len; }), tot=L.reduce(function(a,b){ return a+b; },0), med=median(L), mx=L.length?Math.max.apply(null,L):0, name={ex:'Reticoli esercizio',drift:'Reticolo a scorrimento',rot:'Reticoli rotazione'}[GR.kind]+(partial?' (INCOMPLETO)':'');
+  var txt=name+' ('+(GR.col?'colore, guadagno verde '+GR.g.toFixed(2):'bianco')+'): '+(el/60000).toFixed(1)+' min · insieme '+(tot/1000).toFixed(1)+' s ('+pct(tot,el)+'%) · serie '+L.length+' · mediana '+(med==null?'-':(med/1000).toFixed(1)+' s')+' · massima '+(mx/1000).toFixed(1)+' s';
+  if(GR.kind!=='rot') txt+=' · cambio ogni '+(GR.swap/1000)+' s ('+GR.swaps+' cambi), parte rosso a '+(GR.start==='right'?'OD':'OS');
+  if(GR.kind==='drift') txt+=' · scorrimento '+SET.grDrift+' cicli/s';
+  var dati={serie:GR.series,tot_ms:tot,tempo_ms:Math.round(el),cambi:GR.swaps,tasti:GR.key,colore:GR.col,g_verde:GR.g};
+  if(GR.kind==='rot'){ var cs=GR.series.filter(function(x){ return x.conv_inizio===true&&x.d_inizio!=null; }).map(function(x){ return x.d_inizio; }), bs=GR.series.filter(function(x){ return x.d_fine!=null&&x.conv_inizio!==null; }).map(function(x){ return x.d_fine; });
+    var mc=median(cs), mb=median(bs); txt+=' · '+(GR.rmode==='opp'?'sensi opposti':'stesso senso')+', '+SET.grRot+' gradi/s'+(GR.rmode==='opp'?' · differenza angolo all\'inizio della fusione (mediana) '+(mc==null?'-':Math.round(mc)+'°')+' · al rilascio '+(mb==null?'-':Math.round(mb)+'°'):''); dati.d_inizio_med=mc; dati.d_fine_med=mb; dati.modo=GR.rmode; }
+  if(GR.ladder){ var sh=GR.stepHold.map(function(x,i){ return GR.steps[i]+'%: '+x.toFixed(1)+' s'; }); txt+=' · contrasto a gradini, tempo insieme per gradino '+sh.join(', '); dati.gradini=GR.stepHold; }
+  else txt+=' · contrasto '+SET.grCon+'% fisso';
+  txt+=' · disco '+SET.grSize+'°, '+SET.grCpd+' cicli/grado · tasti '+GR.key;
+  addResult(name,txt,dati);
+  clearScene(); VRS.clear=[0,0,0];
+  panel([name+': fine','Insieme '+(tot/1000).toFixed(1)+' s ('+pct(tot,el)+'%) · serie '+L.length,'Mediana '+(med==null?'-':(med/1000).toFixed(1)+' s')+' · massima '+(mx/1000).toFixed(1)+' s'],0,0.2,-1.6,0.95,0.24);
+  button('m','Torna al menu',0,-0.2,-1.6,0.3,0.07,sceneMenu);
+}
+function grPartial(){ if(GR&&GR.active&&!GR.saved){ if(GR.kind==='test') grTestEnd(true); else grExEnd(true); } }
+
+// ---------------- raggi e clic ----------------
+function rayFromPose(m){ return {o:[m[12],m[13],m[14]],d:[-m[8],-m[9],-m[10]]}; }
+function hitTest(ray){
+  var best=null;
+  OBJ.forEach(function(o){ if(!o.click) return; var dz=ray.d[2]; if(Math.abs(dz)<1e-6) return; var t=(o.z-ray.o[2])/dz; if(t<=0) return;
+    var x=ray.o[0]+ray.d[0]*t, y=ray.o[1]+ray.d[1]*t, s=o.hitScale||1, inside;
+    if(o.kind==='disc'||o.kind==='sphere') inside=Math.hypot((x-o.x)/(o.w*s),(y-o.y)/(o.h*s))<=1; else inside=Math.abs(x-o.x)<=o.w*s&&Math.abs(y-o.y)<=o.h*s;
+    if(inside&&(!best||t<best.t)) best={o:o,t:t,x:x,y:y}; });
+  return best;
+}
+function inputType(src){ if(!src) return '?'; if(src.hand||((src.profiles||[]).join(' ').toLowerCase().indexOf('hand')>=0)) return 'mani'; if(src.targetRayMode==='screen') return 'schermo'; if(src.targetRayMode==='gaze') return 'sguardo'; return 'controller'; }
+function onSelect(ev){ var ty=inputType(ev.inputSource); VRS.inp=VRS.inp||{}; VRS.inp[ty]=(VRS.inp[ty]||0)+1;
+  if(VRS.onTrigger){ VRS.onTrigger(); return; } var r=RAYS[ev.inputSource.handedness||'x']; if(!r) return; var h=hitTest(r); if(h&&h.o.click) h.o.click(); }
+
+// ---------------- disegno ----------------
+// sfera: il quadrato si gira verso l'occhio che guarda (altrimenti, vista dall'alto o di lato, diventa un ovale)
+function sphereM(o,V){ var t0=V[12],t1=V[13],t2=V[14], ex=-(V[0]*t0+V[1]*t1+V[2]*t2), ey=-(V[4]*t0+V[5]*t1+V[6]*t2), ez=-(V[8]*t0+V[9]*t1+V[10]*t2);
+  var zx=ex-o.x, zy=ey-o.y, zz=ez-o.z, n=Math.hypot(zx,zy,zz)||1; zx/=n; zy/=n; zz/=n;
+  var xx=zz, xy=0, xz=-zx, m=Math.hypot(xx,xz)||1; xx/=m; xz/=m;                 // x = su x z
+  var yx=zy*xz-zz*xy, yy=zz*xx-zx*xz, yz=zx*xy-zy*xx;                              // y = z x x
+  return [xx*o.w,xy*o.w,xz*o.w,0, yx*o.h,yy*o.h,yz*o.h,0, zx,zy,zz,0, o.x,o.y,o.z,1]; }
+function drawObj(o,P,Vm){
+  var M=o.M||((o.kind==='sphere'&&Vm)?sphereM(o,Vm):[o.w,0,0,0, 0,o.h,0,0, 0,0,1,0, o.x,o.y,o.z,1]);
+  gl.uniformMatrix4fv(U.M,false,M);
+  var mode=o.kind==='disc'?1:(o.kind==='text'?2:(o.kind==='ring'?3:(o.kind==='tex4'?4:(o.kind==='sphere'?5:(o.kind==='blob'?6:(o.kind==='grat'?7:0))))));
+  gl.uniform2fv(U.uvs,o.uvs||[1,1]); gl.blendFunc(gl.SRC_ALPHA,o.add?gl.ONE:gl.ONE_MINUS_SRC_ALPHA);
+  gl.uniform1i(U.mode,mode); gl.uniform4fv(U.col,o.col||[1,1,1,1]); gl.uniform4fv(U.gp,o.gp||[0,0,0,0]);
+  if(o.tex){ gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,o.tex); gl.uniform1i(U.tex,0); }
+  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+}
+function bindQuad(){ gl.bindBuffer(gl.ARRAY_BUFFER,quadBuf); gl.enableVertexAttribArray(U.p); gl.vertexAttribPointer(U.p,3,gl.FLOAT,false,20,0); gl.enableVertexAttribArray(U.uv); gl.vertexAttribPointer(U.uv,2,gl.FLOAT,false,20,12); }
+function drawRays(){
+  Object.keys(RAYS).forEach(function(k){ var r=RAYS[k], h=hitTest(r), len=h?h.t:3, e=[r.o[0]+r.d[0]*len,r.o[1]+r.d[1]*len,r.o[2]+r.d[2]*len];
+    gl.bindBuffer(gl.ARRAY_BUFFER,lineBuf); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([r.o[0],r.o[1],r.o[2],0,0,e[0],e[1],e[2],0,0]),gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(U.p,3,gl.FLOAT,false,20,0); gl.vertexAttribPointer(U.uv,2,gl.FLOAT,false,20,12);
+    gl.uniformMatrix4fv(U.M,false,ID); gl.uniform1i(U.mode,0); gl.uniform4fv(U.col,h?[1,0.85,0.2,1]:[0.6,0.75,1,1]); gl.drawArrays(gl.LINES,0,2);
+    bindQuad();
+    var dz=e[2]; gl.uniformMatrix4fv(U.M,false,[0.012,0,0,0,0,0.012,0,0,0,0,1,0,e[0],e[1],e[2]+0.002,1]); gl.uniform1i(U.mode,1); gl.uniform4fv(U.col,h?[1,0.85,0.2,1]:[0.6,0.75,1,1]); gl.drawArrays(gl.TRIANGLE_STRIP,0,4); });
+}
+function quatYawPitch(q){ var x=q.x,y=q.y,z=q.z,w=q.w; var yaw=Math.atan2(2*(w*y+x*z),1-2*(y*y+x*x))*180/Math.PI; var s=2*(w*x-y*z); var pitch=Math.asin(Math.max(-1,Math.min(1,s)))*180/Math.PI; return [yaw,pitch]; }
+function onXRFrame(t,frame){
+  var s=frame.session; s.requestAnimationFrame(onXRFrame);
+  var pose=frame.getViewerPose(refSpace); if(!pose) return;
+  // fps
+  VRS.fr=(VRS.fr||0)+1; var F=VRS.fps; if(!F.t0) F.t0=t; F.n++; if(t-F.t0>=2000){ F.val=Math.round(F.n*1000/(t-F.t0)); F.n=0; F.t0=t; }
+  // IPD dalla distanza tra le due viste
+  if(pose.views.length>=2){ var a=pose.views[0].transform.position, b=pose.views[1].transform.position; VRS.ipd=Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z); }
+  if(VRS.tick) VRS.tick(performance.now());
+  if(VRS.scene==='thr'&&TH&&TH.pos){ var hp=pose.transform.position; if(hp) TH.pos.push([hp.x,hp.y,hp.z]); }
+  if(VRS.scene==='game'&&GM){ var yp=quatYawPitch(pose.transform.orientation); GM.yaw.push(yp[0]); GM.pitch.push(yp[1]); }
+  // controller
+  GPpoll(s);
+  RAYS={}; JOINTS=[]; for(var i=0;i<s.inputSources.length;i++){ var src=s.inputSources[i];
+    if(src.hand){ try{ for(var pr of src.hand.entries()){ var jp=frame.getJointPose(pr[1],refSpace); if(jp){ var pp=jp.transform.position; JOINTS.push({x:pp.x,y:pp.y,z:pp.z,r:jp.radius,tip:(pr[0]==='index-finger-tip'||pr[0]==='thumb-tip')}); } } }catch(e){} }
+    if(!src.targetRaySpace) continue; var rp=frame.getPose(src.targetRaySpace,refSpace); if(rp) RAYS[src.handedness||('x'+i)]=rayFromPose(rp.transform.matrix); }
+  var layer=s.renderState.baseLayer; gl.bindFramebuffer(gl.FRAMEBUFFER,layer.framebuffer);
+  var cc=VRS.clear||[0,0,0]; gl.clearColor(cc[0],cc[1],cc[2],1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  gl.useProgram(prog); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL);
+  bindQuad();
+  var headInv=pose.transform.inverse.matrix;
+  pose.views.forEach(function(v){ var vp=layer.getViewport(v); gl.viewport(vp.x,vp.y,vp.width,vp.height);
+    var Vv=v.transform.inverse.matrix; gl.uniformMatrix4fv(U.P,false,v.projectionMatrix); gl.uniformMatrix4fv(U.V,false,Vv);
+    var eye=v.eye==='right'?'right':(v.eye==='left'?'left':'both');
+    // disegno dal piu' lontano al piu' vicino
+    OBJ.slice().sort(function(p,q){ return (q.bg?1:0)-(p.bg?1:0) || p.z-q.z; }).forEach(function(o){ if(o.eye==='both'||o.eye===eye||eye==='both'){ gl.uniformMatrix4fv(U.V,false,o.mono?headInv:Vv); drawObj(o,null,o.mono?headInv:Vv); } });
+    gl.uniformMatrix4fv(U.V,false,Vv); drawJoints(); drawRays(); });
+}
+function readSettings(){ ['dCol','dRed','cues','thrMode','thrMan','factor','nearPct','subj','hands','lock','bg','a4n','shape','headWarn','headBad','thrPolicy','a4ord','menuAll','calUse','calVal','dbMode','dbExp','grSize','grCpd','grCon','grBlock','grPause','grSwap','grDur','grLadder','grStart','grDrift','grRot','grFb'].forEach(function(k){ if($(k)) SET[k]=$(k).value; }); saveSET(); syncThrUI(); }
+function startVR(){
+  readSettings();
+  if(!navigator.xr){ $('vrMsg').textContent='Questo browser non offre la realtà virtuale (WebXR).'; return; }
+  navigator.xr.requestSession('immersive-vr',{optionalFeatures:(SET.hands==='off'?['local']:['local','hand-tracking'])}).then(function(s){
+    xrSession=s; try{ INFO.vrFeat=s.enabledFeatures?Array.prototype.slice.call(s.enabledFeatures).join(', '):'non dichiarate'; }catch(e){ INFO.vrFeat='?'; } renderSum(); if(!gl) initGL();
+    var p=gl.makeXRCompatible?gl.makeXRCompatible():Promise.resolve();
+    return p.then(function(){ s.updateRenderState({baseLayer:new XRWebGLLayer(s,gl)}); return s.requestReferenceSpace('local'); }).then(function(r){
+      refSpace=r; s.addEventListener('select',onSelect); s.addEventListener('end',function(){ try{ approachPartial(); }catch(e){} try{ grPartial(); }catch(e){} xrSession=null; clearScene(); $('vrMsg').textContent='Sei uscito dalla VR. I risultati sono qui sotto.'; renderRes(); });
+      VRS.fps={n:0,t0:0,val:null}; sceneMenu(); s.requestAnimationFrame(onXRFrame); $('vrMsg').textContent='VR avviata.'; });
+  }).catch(function(e){ $('vrMsg').innerHTML='<span class="bad">Non riesco ad avviare la VR: '+esc(e.message||e)+'</span>'; addResult('Avvio VR','errore: '+(e.message||e)); });
+}
+$('btnVR').addEventListener('click',startVR);
+</script>
+</body>
+</html>
