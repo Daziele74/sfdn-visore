@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SFDN Gioco v0.2</title>
+<title>SFDN Gioco v0.2.1</title>
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--ink:#1d2330;--mut:#667085;--acc:#1f6feb;--ok:#1a7f37;--bad:#cf222e;--line:#d0d7de;--warn:#fff4d6}
 *{box-sizing:border-box}
@@ -36,10 +36,30 @@ details.adv summary{cursor:pointer;font-weight:bold;font-size:20px}
 fieldset{border:1px solid var(--line);border-radius:10px;margin:8px 0;padding:8px 14px}
 legend{font-weight:bold;padding:0 6px}
 label.row{display:block;margin:7px 0}
+[hidden]{display:none!important}
+.fld{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:9px 0}
+.fld>label{min-width:290px;max-width:360px;font-weight:600}
+.fld .ctl{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.fld .u{color:var(--mut)}
+.fld input[type=number],.fld input:not([type]),.fld input[type=text],.fld select{height:42px;font-size:19px}
+button.st{width:42px;height:42px;padding:0;margin:0;font-size:26px;line-height:1;border-radius:8px}
+button.ib{width:42px;height:42px;padding:0;margin:0 0 0 4px;border-radius:50%;font:italic bold 24px Georgia,serif;background:#eef5ff;border:2px solid #1f6feb;color:#1f6feb}
+button.ib.on{background:#1f6feb;color:#fff}
+.expl{flex-basis:100%;background:#eef5ff;border:1px solid #9bbcf0;border-radius:10px;padding:6px 14px;font-size:17px}
+.expl p{margin:5px 0}.expl p.et{font-weight:bold;color:#12408f}
+.fld.mod{background:var(--warn);border-radius:8px;box-shadow:0 0 0 3px var(--warn)}
+.dirtyMsg{background:#ffe08a;border:2px solid #d9a400;border-radius:8px;padding:6px 12px;font-weight:bold;margin:8px 0}
+.inuse{background:#f1f8f1;border:2px solid #1a7f37;border-radius:10px;padding:8px 14px;margin:6px 0 10px;font-size:17px}
+.inuse b{display:block;color:#1a7f37;margin-bottom:2px}
+.durgrp{display:inline-flex;flex-wrap:wrap;gap:6px}
+button.dur{min-width:84px;height:46px;padding:0 12px;margin:0;font-size:19px}
+button.dur.on{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:bold}
+button.arm{background:#ffe08a;border-color:#d9a400;font-weight:bold}
+button.applyBtn{background:#1a7f37;color:#fff;border-color:#1a7f37;font-weight:bold}
 </style>
 </head>
 <body>
-<header><h1>SFDN &middot; Gioco <small>v0.2 &middot; due giochi (sperimentale)</small></h1></header>
+<header><h1>SFDN &middot; Gioco <small>v0.2.1 &middot; due giochi (sperimentale)</small></h1></header>
 <main>
  <div class="card warn">
   <h2>Prima di cominciare</h2>
@@ -60,55 +80,71 @@ label.row{display:block;margin:7px 0}
 
  <div class="card">
   <h2>1. Giocatore e impostazioni comuni (valgono per i due giochi)</h2>
-  <p>Nome o codice <input id="sNome" placeholder="nome o codice" style="width:260px"> <span id="visInfo" class="hint"></span></p>
-  <p>Mano dominante <select id="sMano"><option value="R">destra (predefinita)</option><option value="L">sinistra</option></select> <span class="hint">Gioco 1: palloncini con la mano dominante, ape con l’altra. Gioco 2: colpisce la mano dominante. Per i mancini basta scegliere sinistra.</span></p>
-  <p>Limite vicino <select id="sProfilo"><option value="comodo">facile (2,5 m)</option><option value="medio">medio (1,5 m, predefinito)</option><option value="impegnativo">impegnativo (0,8 m)</option><option value="libero">valore libero</option></select>
-   <input type="number" id="sNear" min="0.4" max="6" step="0.1" style="width:90px"> m (da 0,4 a 6) <br><span id="nearHint" class="hint"></span></p>
-  <p>Durata <input type="number" id="sDur" min="1" max="10" step="1" style="width:80px"> minuti (da 1 a 10)</p>
-  <p>Indizi di profondità <select id="sIndizi"><option value="facile">facili: ombra, grandezza prospettica, pavimento a punti (predefinito)</option><option value="difficile">difficili: grandezza angolare costante, niente ombre né pavimento</option></select></p>
-  <p>Voce <select id="sVoce"><option value="on">sì (se i file audio ci sono; altrimenti solo toni)</option><option value="off">no, solo toni</option></select></p>
-  <p>Email dei risultati <input id="sMail" placeholder="vuoto = quella del Visore, se c'è" style="width:340px"><br><span class="hint">L’indirizzo resta solo su questo dispositivo e non è scritto nel programma.</span></p>
+  <p class="hint">Il pulsante <b>i</b> accanto a ogni casella spiega, in modo semplice, cosa fa e cosa succede se la cambi.</p>
+  <div class="fld" data-f="sNome"><label for="sNome">Nome o codice</label><span class="ctl"><input id="sNome" placeholder="nome o codice" style="width:260px"></span><span id="visInfo" class="hint"></span></div>
+  <div class="fld" data-f="sMano"><label for="sMano">Mano dominante</label><span class="ctl"><select id="sMano"><option value="R">destra (predefinita)</option><option value="L">sinistra</option></select></span><span class="hint">Gioco 1: palloncini con la mano dominante, ape con l’altra. Gioco 2: colpisce la mano dominante. Per i mancini basta scegliere sinistra.</span></div>
+  <div class="fld" data-f="sProfilo"><label for="sProfilo">Profilo del limite vicino</label><span class="ctl"><select id="sProfilo"><option value="comodo">facile (2,5 m)</option><option value="medio">medio (1,5 m, predefinito)</option><option value="impegnativo">impegnativo (0,8 m)</option><option value="libero">valore libero</option></select></span></div>
+  <div class="fld" data-f="sNear"><label for="sNear">Limite vicino</label><span class="ctl"><input type="number" id="sNear" min="0.4" max="6" step="0.1" style="width:90px"><span class="u">m (da 0,4 a 6)</span></span><span id="nearHint" class="hint"></span></div>
+  <div class="fld" data-f="sDur"><label>Durata della partita</label><span class="ctl"><span id="durGrp" class="durgrp"></span><input type="hidden" id="sDur"></span></div>
+  <div class="fld" data-f="sIndizi"><label for="sIndizi">Indizi di profondità</label><span class="ctl"><select id="sIndizi"><option value="facile">facili: ombra, grandezza prospettica, pavimento a punti (predefinito)</option><option value="difficile">difficili: grandezza angolare costante, niente ombre né pavimento</option></select></span></div>
+  <div class="fld" data-f="sVoce"><label for="sVoce">Voce</label><span class="ctl"><select id="sVoce"><option value="on">sì (se i file audio ci sono; altrimenti solo toni)</option><option value="off">no, solo toni</option></select></span></div>
+  <div class="fld" data-f="sMail"><label for="sMail">Email dei risultati</label><span class="ctl"><input id="sMail" placeholder="vuoto = quella del Visore, se c'è" style="width:340px"></span><span class="hint">L’indirizzo resta solo su questo dispositivo e non è scritto nel programma.</span></div>
  </div>
 
  <div class="card">
   <h2 class="g1t">2. Gioco 1 &middot; APE ROSSA</h2>
-  <fieldset><legend>BASE</legend>
-   <label class="row">Compiti <select id="sCompito"><option value="both">palloncini + ape (predefinito)</option><option value="balloons">solo palloncini</option><option value="ape">solo ape</option></select></label>
-   <label class="row">Palloncini <select id="sBaMode"><option value="caduta">a caduta: scendono, vanno colpiti prima del terreno (predefinito)</option><option value="fermi">fermi: restano finché colpiti</option></select></label>
-   <label class="row">Velocità dei palloncini <select id="sAdatt"><option value="on">adattiva: scende se ne cadono troppi, risale se li colpisci (predefinita)</option><option value="off">costante</option></select></label>
+  <div id="inUse" class="inuse"></div>
+  <div id="advDirtyTop" class="dirtyMsg" hidden>Modificato, non ancora applicato (apri AVANZATE e premi APPLICA)</div>
+  <p><button type="button" id="btnReset">RIPRISTINA PREDEFINITI</button> <span class="hint">Riporta i parametri di gioco ai valori predefiniti. Nome, email e partite salvate non si toccano.</span></p>
+  <p id="advMsg" class="hint"></p>
+  <fieldset><legend>BASE (si applicano subito)</legend>
+   <div class="fld" data-f="sCompito"><label for="sCompito">Compiti</label><span class="ctl"><select id="sCompito"><option value="both">palloncini + ape (predefinito)</option><option value="balloons">solo palloncini</option><option value="ape">solo ape</option></select></span></div>
+   <div class="fld" data-f="sBaMode"><label for="sBaMode">Palloncini</label><span class="ctl"><select id="sBaMode"><option value="caduta">a caduta: scendono, vanno colpiti prima del terreno (predefinito)</option><option value="fermi">fermi: restano finché colpiti</option></select></span></div>
+   <div class="fld" data-f="sAdatt"><label for="sAdatt">Velocità dei palloncini</label><span class="ctl"><select id="sAdatt"><option value="on">adattiva: cambia da sola (predefinita)</option><option value="off">costante</option></select></span></div>
    <p class="hint" style="margin:2px 0 6px">Profilo del limite vicino, mano dominante, durata e indizi: nelle impostazioni comuni qui sopra.</p>
    <p style="margin:6px 0 2px"><b>Suoni</b> (separati, toni WebAudio)</p>
-   <label class="row">Suoni di esito (giusto, troppo presto, mancata, palloncino) <select id="sEsito"><option value="on">accesi (predefinito)</option><option value="off">spenti</option></select></label>
-   <label class="row">Suono di apparizione dell’ape <select id="sAppar"><option value="off">spento (predefinito)</option><option value="on">acceso</option></select></label>
-   <label class="row">Suono del segnale rosso <select id="sSegn"><option value="off">spento (predefinito)</option><option value="on">acceso</option></select> <span class="hint">se acceso, il giocatore può rispondere al suono senza guardare l’ape</span></label>
+   <div class="fld" data-f="sEsito"><label for="sEsito">Suoni di esito (giusto, troppo presto, mancata, palloncino)</label><span class="ctl"><select id="sEsito"><option value="on">accesi (predefinito)</option><option value="off">spenti</option></select></span></div>
+   <div class="fld" data-f="sAppar"><label for="sAppar">Suono di apparizione dell’ape</label><span class="ctl"><select id="sAppar"><option value="off">spento (predefinito)</option><option value="on">acceso</option></select></span></div>
+   <div class="fld" data-f="sSegn"><label for="sSegn">Suono del segnale rosso</label><span class="ctl"><select id="sSegn"><option value="off">spento (predefinito)</option><option value="on">acceso</option></select></span><span class="hint">se acceso, il giocatore può rispondere al suono senza guardare l’ape</span></div>
   </fieldset>
-  <details class="adv" id="adv"><summary>AVANZATE (tutti gli altri parametri)</summary>
+  <details class="adv" id="adv"><summary>AVANZATE (tutti gli altri parametri: si applicano col pulsante APPLICA)</summary>
+   <p><button type="button" class="applyBtn" id="btnApply">APPLICA</button> <span id="advDirty" class="dirtyMsg" hidden>Modificato, non ancora applicato</span></p>
    <fieldset><legend>Palloncini</legend>
-    <label class="row">Palloncini insieme <input type="number" id="sNBal" min="3" max="5" step="1" style="width:70px"> (da 3 a 5)</label>
-    <label class="row">Velocità di caduta V0 (anche tetto) <input type="number" id="sV0" min="0.05" max="1.5" step="0.05" style="width:90px"> m/s (lenta = 0,25)</label>
-    <label class="row">Gradino di velocità <input type="number" id="sVStep" min="5" max="40" step="1" style="width:80px"> % di V0 (circa 15)</label>
-    <label class="row">Scende dopo <input type="number" id="sNDown" min="1" max="20" step="1" style="width:70px"> palloncini a terra · risale dopo <input type="number" id="sNUp" min="1" max="30" step="1" style="width:70px"> colpiti</label>
-    <label class="row">Velocità minima <input type="number" id="sVMin" min="10" max="90" step="5" style="width:80px"> % di V0</label>
-    <label class="row">Velocità sul tabellone (per l’operatore) <select id="sShowV"><option value="on">sì, in piccolo (predefinito)</option><option value="off">no, il giocatore non la vede</option></select></label>
+    <div class="fld" data-f="sNBal"><label for="sNBal">Palloncini insieme</label><span class="ctl"><input type="number" id="sNBal" min="3" max="8" step="1" style="width:70px"><span class="u">(da 3 a 8)</span></span><span class="hint">con più palloncini si rimpiccioliscono un po’, tutti dello stesso fattore</span></div>
+    <div class="fld" data-f="sRedMax"><label for="sRedMax">Riduzione massima</label><span class="ctl"><input type="number" id="sRedMax" min="20" max="100" step="5" style="width:80px"><span class="u">% della grandezza normale (minimo)</span></span></div>
+    <div class="fld" data-f="sV0"><label for="sV0">Velocità di caduta V0 (partenza)</label><span class="ctl"><input type="number" id="sV0" min="0.05" max="10" step="0.05" style="width:90px"><span class="u">m/s (lenta = 0,25)</span></span><span class="hint">Sopra circa 3 m/s quasi non si riesce a colpire.</span></div>
+    <div class="fld" data-f="sTetto"><label for="sTetto">Tetto della velocità</label><span class="ctl"><select id="sTetto"><option value="B">B: può salire oltre V0 fino alla massima (predefinito)</option><option value="A">A: il tetto è V0 (come prima)</option></select></span></div>
+    <div class="fld" data-f="sVMax"><label for="sVMax">Velocità massima (tetto B)</label><span class="ctl"><input type="number" id="sVMax" min="0.05" max="10" step="0.1" style="width:90px"><span class="u">m/s</span></span><span id="capNote" class="hint"></span></div>
+    <div class="fld" data-f="sVStep"><label for="sVStep">Gradino di velocità</label><span class="ctl"><input type="number" id="sVStep" min="5" max="100" step="5" style="width:80px"><span class="u">% di V0 (circa 15)</span></span></div>
+    <div class="fld" data-f="sNUp"><label for="sNUp">Sale dopo N colpiti di fila</label><span class="ctl"><input type="number" id="sNUp" min="1" max="30" step="1" style="width:70px"><span class="u">palloncini</span></span></div>
+    <div class="fld" data-f="sNDown"><label for="sNDown">Scende dopo M a terra di fila</label><span class="ctl"><input type="number" id="sNDown" min="1" max="20" step="1" style="width:70px"><span class="u">palloncini</span></span></div>
+    <div class="fld" data-f="sVMin"><label for="sVMin">Velocità minima</label><span class="ctl"><input type="number" id="sVMin" min="10" max="90" step="5" style="width:80px"><span class="u">% di V0</span></span></div>
+    <div class="fld" data-f="sShowV"><label for="sShowV">Velocità sul tabellone (per l’operatore)</label><span class="ctl"><select id="sShowV"><option value="on">sì, in piccolo (predefinito)</option><option value="off">no, il giocatore non la vede</option></select></span></div>
    </fieldset>
    <fieldset><legend>Ape</legend>
-    <label class="row">Compare ogni <input type="number" id="sApeMin" min="2" max="60" step="1" style="width:70px"> - <input type="number" id="sApeMax" min="2" max="90" step="1" style="width:70px"> secondi (a caso)</label>
-    <label class="row">Velocità di avvicinamento <input type="number" id="sApeVel" min="0.1" max="2" step="0.1" style="width:80px"> m/s · variazione casuale <input type="number" id="sApeVar" min="0" max="40" step="5" style="width:70px"> % (di velocità e di distanza di partenza)</label>
-    <label class="row">Finestra rossa <input type="number" id="sApeWin" min="0.5" max="6" step="0.5" style="width:80px"> s</label>
-    <label class="row">Area di colpo minima dell’ape <input type="number" id="sApeAng" min="1" max="5" step="0.5" style="width:80px"> gradi</label>
-    <label class="row">Campo comodo: orizzontale ± <input type="number" id="sFAz" min="10" max="45" step="5" style="width:70px"> gradi, verticale ± <input type="number" id="sFEl" min="5" max="30" step="5" style="width:70px"> gradi</label>
-    <label class="row">Settori: <input type="number" id="sSecAz" min="1" max="8" step="1" style="width:60px"> in orizzontale per <input type="number" id="sSecEl" min="1" max="4" step="1" style="width:60px"> in verticale</label>
+    <div class="fld" data-f="sApeMin"><label for="sApeMin">Compare ogni, almeno</label><span class="ctl"><input type="number" id="sApeMin" min="2" max="60" step="1" style="width:70px"><span class="u">secondi</span></span></div>
+    <div class="fld" data-f="sApeMax"><label for="sApeMax">Compare ogni, al massimo</label><span class="ctl"><input type="number" id="sApeMax" min="2" max="90" step="1" style="width:70px"><span class="u">secondi (a caso tra i due)</span></span></div>
+    <div class="fld" data-f="sApeVel"><label for="sApeVel">Velocità di avvicinamento</label><span class="ctl"><input type="number" id="sApeVel" min="0.1" max="2" step="0.1" style="width:80px"><span class="u">m/s</span></span></div>
+    <div class="fld" data-f="sApeVar"><label for="sApeVar">Variazione casuale</label><span class="ctl"><input type="number" id="sApeVar" min="0" max="40" step="5" style="width:70px"><span class="u">% (di velocità e di distanza di partenza)</span></span></div>
+    <div class="fld" data-f="sApeWin"><label for="sApeWin">Finestra rossa</label><span class="ctl"><input type="number" id="sApeWin" min="0.5" max="6" step="0.5" style="width:80px"><span class="u">s</span></span></div>
+    <div class="fld" data-f="sApeAng"><label for="sApeAng">Area di colpo minima dell’ape</label><span class="ctl"><input type="number" id="sApeAng" min="1" max="5" step="0.5" style="width:80px"><span class="u">gradi</span></span></div>
+    <div class="fld" data-f="sFAz"><label for="sFAz">Campo comodo, orizzontale ±</label><span class="ctl"><input type="number" id="sFAz" min="10" max="45" step="5" style="width:70px"><span class="u">gradi</span></span></div>
+    <div class="fld" data-f="sFEl"><label for="sFEl">Campo comodo, verticale ±</label><span class="ctl"><input type="number" id="sFEl" min="5" max="30" step="5" style="width:70px"><span class="u">gradi</span></span></div>
+    <div class="fld" data-f="sSecAz"><label for="sSecAz">Settori in orizzontale</label><span class="ctl"><input type="number" id="sSecAz" min="1" max="8" step="1" style="width:60px"></span></div>
+    <div class="fld" data-f="sSecEl"><label for="sSecEl">Settori in verticale</label><span class="ctl"><input type="number" id="sSecEl" min="1" max="4" step="1" style="width:60px"></span></div>
    </fieldset>
    <fieldset><legend>Mani</legend>
-    <label class="row">Una mano sola <select id="sUna"><option value="off">no: due mani (predefinito)</option><option value="on">sì: un raggio colpisce palloncini e ape</option></select></label>
+    <div class="fld" data-f="sUna"><label for="sUna">Una mano sola</label><span class="ctl"><select id="sUna"><option value="off">no: due mani (predefinito)</option><option value="on">sì: un raggio colpisce palloncini e ape</option></select></span></div>
    </fieldset>
+   <p><button type="button" class="applyBtn" id="btnApply2">APPLICA</button> <span class="hint">Finché non premi APPLICA, il gioco usa ancora le impostazioni vecchie e in VR il pulsante GIOCA del gioco 1 resta spento.</span></p>
   </details>
  </div>
 
  <div class="card">
   <h2 class="g2t">3. Gioco 2 &middot; APE E PALLONCINO</h2>
-  <p>Facilitazione colore <select id="sColore"><option value="off">spenta: tutti i palloncini rossi (predefinita)</option><option value="on">accesa: il palloncino più vicino è azzurro</option></select></p>
-  <p>Sosta dell’ape sul palloncino <input type="number" id="sStay" min="0.5" max="5" step="0.5" style="width:80px"> s &middot; volo dell’ape <input type="number" id="sFlight" min="2" max="8" step="0.5" style="width:80px"> s</p>
+  <div class="fld" data-f="sColore"><label for="sColore">Facilitazione colore</label><span class="ctl"><select id="sColore"><option value="off">spenta: tutti i palloncini rossi (predefinita)</option><option value="on">accesa: il palloncino più vicino è azzurro</option></select></span></div>
+  <div class="fld" data-f="sStay"><label for="sStay">Sosta dell’ape sul palloncino</label><span class="ctl"><input type="number" id="sStay" min="0.5" max="5" step="0.5" style="width:80px"><span class="u">s</span></span></div>
+  <div class="fld" data-f="sFlight"><label for="sFlight">Volo dell’ape</label><span class="ctl"><input type="number" id="sFlight" min="2" max="8" step="0.5" style="width:80px"><span class="u">s</span></span></div>
  </div>
 
  <div class="card">
@@ -121,12 +157,13 @@ label.row{display:block;margin:7px 0}
  <div class="card">
   <h2>5. Entra nel gioco</h2>
   <p><button class="primary big" id="btnVR">ENTRA IN VR</button></p>
+  <p id="vrWarn" class="dirtyMsg" hidden>Ci sono modifiche non applicate nelle AVANZATE: in VR il pulsante GIOCA del gioco 1 resta spento. Premi APPLICA prima di entrare.</p>
   <p id="vrMsg" class="hint"></p>
   <h3 style="margin:10px 0 4px">Istruzioni per l’operatore</h3>
   <ul class="hint">
-   <li><b>Gioco 1, APE ROSSA:</b> palloncini blu a distanze diverse (cadono; vanno colpiti prima che tocchino il terreno). Con la mano dominante si colpiscono i palloncini. L’ape arriva da lontano e al limite vicino diventa <b>ROSSA e pulsa</b>: solo allora va colpita, con l’altra mano. Colpo prima del rosso = «troppo presto»; nessun colpo nella finestra = omissione (-1 punto). Un colpo sul tipo sbagliato di bersaglio è ignorato e registrato.</li>
+   <li><b>Gioco 1, APE ROSSA:</b> da 3 a 8 palloncini blu a distanze diverse (cadono; vanno colpiti prima che tocchino il terreno). Velocità adattiva: sale dopo N palloncini colpiti <b>di fila</b>, scende dopo M palloncini a terra <b>di fila</b>; con il tetto B può salire oltre la velocità di partenza fino alla massima. Con la mano dominante si colpiscono i palloncini. L’ape arriva da lontano e al limite vicino diventa <b>ROSSA e pulsa</b>: solo allora va colpita, con l’altra mano. Colpo prima del rosso = «troppo presto»; nessun colpo nella finestra = omissione (-1 punto). Un colpo sul tipo sbagliato di bersaglio è ignorato e registrato.</li>
    <li><b>Gioco 2, APE E PALLONCINO:</b> 5 palloncini sospesi. L’ape vola verso il più vicino e si posa. Il giocatore lo colpisce con il raggio e il <b>grilletto</b> quando l’ape è sopra. Se non lo colpisce in tempo, l’ape lo fa scoppiare (si perde un punto). Colpo con l’ape ancora in volo = «troppo presto»; altro palloncino = errore.</li>
-   <li><b>Tasti:</b> grilletto = colpire &middot; <b>A o X</b> = pausa e ripresa &middot; <b>B o Y tenuto 2 secondi</b> = ferma la partita.</li>
+   <li><b>Tasti:</b> grilletto = colpire &middot; <b>A o X</b> = pausa e ripresa &middot; <b>B o Y tenuto 2 secondi</b> = stop di emergenza (la partita finisce e compare il riepilogo) &middot; <b>tasto laterale (grip) tenuto 5 secondi</b>, di una mano o dell’altra, anche in pausa = interrompe, salva la partita come «interrotta» e torna al menu dei giochi (mentre lo tieni premuto compare un cerchio che si riempie).</li>
    <li>Niente oggetti più vicini del limite scelto. Nessuna vibrazione (non disponibile nel visore).</li>
    <li><b>Suono del segnale rosso:</b> è spento di proposito. Se lo accendi, il giocatore può rispondere al suono senza guardare l’ape: il tempo di reazione non misura più la vista.</li>
    <li><b>Cosa misura il gioco 1:</b> inseguimento di vergenza e tempismo. Il raggio colpisce per direzione, quindi la profondità non è necessaria per centrare i bersagli. L’ape con la mano non dominante può avere tempi più lenti per motivi motori e non solo visivi. La velocità adattiva rende le sedute confrontabili solo con la velocità costante.</li>
@@ -145,9 +182,9 @@ label.row{display:block;margin:7px 0}
 <canvas id="xrCanvas"></canvas>
 <script>
 "use strict";
-// SFDN Gioco v0.2: gioco 1 "Ape rossa" e gioco 2 "Ape e palloncino" (il v0.1, invariato). Un solo file, offline, nessuna libreria.
+// SFDN Gioco v0.2.1: gioco 1 "Ape rossa" e gioco 2 "Ape e palloncino" (il v0.1, invariato). Un solo file, offline, nessuna libreria.
 // Codice adattato dal Visore v0.6.2 (vedi references/lineage.md nel workspace del gioco). Sperimentale, non validato.
-var VERSION='SFDN Gioco v0.2';
+var VERSION='SFDN Gioco v0.2.1';
 var $=function(id){return document.getElementById(id);};
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function deg(a){ return a*Math.PI/180; }
@@ -165,19 +202,22 @@ var DEF={
   nBall:5, farMin:5, farExtra:2.5, apeStartExtra:4, gapStep:0.35, margin:0.05,
   easyR:0.18, easyMaxAng:9, hardAng:2.4, easyApe:0.22, hardApe:2.2, hitScale:1.25,
   azMax:30, elMin:-4, elMax:14, floorY:-1.2, boardD:10, uiD:2.5,
-  stopHoldMs:2000, resultMs:900, firstMs:1500, quasiMs:500,
+  stopHoldMs:2000, exitHoldMs:5000, resultMs:900, firstMs:1500, quasiMs:500,
   pts:10, bonus:5, bonusMax:25, burst:1,
   tone:0.15, voiceGain:1.0, voiceCool:4000,
   profiles:{comodo:2.5,medio:1.5,impegnativo:0.8},
   g1:{pulseAmp:0.15, pulseHz:2.5, faceDeg:15, hardRefD:4, groundEl:-12, elTopMin:8, firstApeS:5, respawnS:0.5, fadeS:0.4, leaveS:0.4,
-      ptsBall:1, ptsApe:5, ptsOmis:1, floorClear:0.35, freezeS:1.0, startFreezeS:1.5, apeStartExtra:2, apeGapEnd:2, bobAmp:0.02}
+      ptsBall:1, ptsApe:5, ptsOmis:1, floorClear:0.35, freezeS:1.0, startFreezeS:1.5, apeStartExtra:2, apeGapEnd:2, bobAmp:0.02,
+      fillMax:0.85, hitMinDeg:2, laneMarginDeg:0.5, slotInner:0.15, spawnRetryS:0.15, ringEl:34, ringD:2.5, ringR:0.16}
 };
 // impostazioni modificabili dall'utente (pagina 2D)
 var SETDEF={nome:'',mano:'R',profilo:'medio',near:1.5,durMin:3,indizi:'facile',colore:'off',stay:2,flight:4,voce:'on',mailTo:'',
   // gioco 1 "Ape rossa": base
   compito:'both',baMode:'caduta',adatt:'on',snEsito:'on',snAppar:'off',snSegn:'off',
   // gioco 1: avanzate
-  v0:0.25,vStep:15,nDown:4,nUp:8,vMin:30,nBal:4,apeMin:10,apeMax:20,apeVel:0.5,apeVar:20,apeWin:2.5,apeAng:2,fAz:30,fEl:20,secAz:4,secEl:2,una:'off',showV:'on'};
+  v0:0.25,tetto:'B',vMax:1.0,vStep:15,nDown:4,nUp:8,vMin:30,nBal:4,redMax:60,apeMin:10,apeMax:20,apeVel:0.5,apeVar:20,apeWin:2.5,apeAng:2,fAz:30,fEl:20,secAz:4,secEl:2,una:'off',showV:'on'};
+var DURS=[0.5,1,2,3,5,10];      // durate fisse in minuti (0,5 = 30 secondi)
+function durLbl(m){ return m<1?Math.round(m*60)+' s':(Math.round(m*10)/10).toString().replace('.',',')+' min'; }
 var SET={}; (function(){ for(var k in SETDEF) SET[k]=SETDEF[k]; })();
 var KEY='SFDN_gioco_visore', KEY_IMP='SFDN_gioco_visore_imp', VKEY='SFDN_test_visore';   // VKEY: Visore, SOLA LETTURA
 var STORE=true;
@@ -194,7 +234,7 @@ function normSET(){
   var n=parseFloat(String(SET.near).replace(',','.')); if(!isFinite(n)) n=DEF.profiles.medio;
   SET.nearRaw=n; SET.near=clamp(Math.round(n*100)/100,0.4,6);
   SET.profilo='libero'; for(var pk in DEF.profiles) if(Math.abs(DEF.profiles[pk]-SET.near)<1e-9) SET.profilo=pk;
-  SET.durMin=clamp(Math.round(num(SET.durMin,3)),1,10);
+  (function(){ var m=clamp(num(SET.durMin,3),0.5,10), best=DURS[0]; DURS.forEach(function(d){ if(Math.abs(d-m)<Math.abs(best-m)-1e-9) best=d; }); SET.durMin=best; })();   // solo le durate fisse (30 s, 1, 2, 3, 5, 10 minuti); un valore vecchio va alla piu' vicina (a parita' la piu' corta)
   SET.indizi=(SET.indizi==='difficile')?'difficile':'facile';
   SET.colore=(SET.colore==='on')?'on':'off';
   SET.stay=clamp(num(SET.stay,2),0.5,5);
@@ -205,12 +245,15 @@ function normSET(){
   SET.compito=(SET.compito==='balloons'||SET.compito==='ape')?SET.compito:'both';
   SET.baMode=(SET.baMode==='fermi')?'fermi':'caduta';
   ['adatt','snEsito','snAppar','snSegn','una','showV'].forEach(function(k){ SET[k]=(SET[k]==='on')?'on':(SET[k]==='off'?'off':SETDEF[k]); });
-  SET.v0=clamp(num(SET.v0,0.25),0.05,1.5);
-  SET.vStep=clamp(num(SET.vStep,15),5,40);
+  SET.v0=clamp(num(SET.v0,0.25),0.05,10);
+  SET.tetto=(SET.tetto==='A')?'A':'B';
+  SET.vMax=clamp(num(SET.vMax,1),0.05,10);
+  SET.vStep=clamp(num(SET.vStep,15),5,100);
   SET.nDown=clamp(Math.round(num(SET.nDown,4)),1,20);
   SET.nUp=clamp(Math.round(num(SET.nUp,8)),1,30);
   SET.vMin=clamp(num(SET.vMin,30),10,90);
-  SET.nBal=clamp(Math.round(num(SET.nBal,4)),3,5);
+  SET.nBal=clamp(Math.round(num(SET.nBal,4)),3,8);
+  SET.redMax=clamp(Math.round(num(SET.redMax,60)),20,100);
   SET.apeMin=clamp(num(SET.apeMin,10),2,60);
   SET.apeMax=clamp(num(SET.apeMax,20),SET.apeMin,90);
   SET.apeVel=clamp(num(SET.apeVel,0.5),0.1,2);
@@ -243,15 +286,19 @@ function nomeEff(){ return (SET.nome||'').trim()||VIS.nome||''; }
 function mailEff(){ return (SET.mailTo||'').trim()||VIS.mail||''; }
 
 // ---------------- pagina 2D: impostazioni ----------------
-// campi della pagina: [id, chiave di SET]. Valgono per i due giochi; i campi del gioco 1 sono nel riquadro BASE e AVANZATE.
+// campi della pagina: [id, chiave di SET, avanzato]. Valgono per i due giochi; i campi AVANZATI (3o elemento = 1) non si applicano da soli: serve il pulsante APPLICA.
 var FIELDS=[['sNome','nome'],['sMano','mano'],['sIndizi','indizi'],['sColore','colore'],['sDur','durMin'],['sStay','stay'],['sFlight','flight'],['sVoce','voce'],['sMail','mailTo'],['sNear','near'],
   ['sCompito','compito'],['sBaMode','baMode'],['sAdatt','adatt'],['sEsito','snEsito'],['sAppar','snAppar'],['sSegn','snSegn'],
-  ['sV0','v0'],['sVStep','vStep'],['sNDown','nDown'],['sNUp','nUp'],['sVMin','vMin'],['sNBal','nBal'],['sApeMin','apeMin'],['sApeMax','apeMax'],['sApeVel','apeVel'],['sApeVar','apeVar'],['sApeWin','apeWin'],['sApeAng','apeAng'],
-  ['sFAz','fAz'],['sFEl','fEl'],['sSecAz','secAz'],['sSecEl','secEl'],['sUna','una'],['sShowV','showV']];
-function applySettings(){
+  ['sV0','v0',1],['sTetto','tetto',1],['sVMax','vMax',1],['sVStep','vStep',1],['sNDown','nDown',1],['sNUp','nUp',1],['sVMin','vMin',1],['sNBal','nBal',1],['sRedMax','redMax',1],['sApeMin','apeMin',1],['sApeMax','apeMax',1],['sApeVel','apeVel',1],['sApeVar','apeVar',1],['sApeWin','apeWin',1],['sApeAng','apeAng',1],
+  ['sFAz','fAz',1],['sFEl','fEl',1],['sSecAz','secAz',1],['sSecEl','secEl',1],['sUna','una',1],['sShowV','showV',1]];
+var ADV_DIRTY=false;
+function vCapOf(){ return SET.tetto==='B'?Math.max(SET.vMax,SET.v0):SET.v0; }          // tetto effettivo della velocita' (m/s)
+function advChanged(){                  // almeno un campo AVANZATO e' diverso dal valore applicato
+  return FIELDS.some(function(f){ if(!f[2]) return false; var e=$(f[0]); if(!e) return false; var v=SET[f[1]]; return (typeof v==='number')?Math.abs(num(e.value,NaN)-v)>1e-9||!isFinite(num(e.value,NaN)):String(e.value)!==String(v); }); }
+function applySettings(keepAdv){
   normSET();
-  FIELDS.forEach(function(f){ var e=$(f[0]); if(e) e.value=SET[f[1]]; });
-  $('sProfilo').value=SET.profilo; nearHint();
+  FIELDS.forEach(function(f){ if(keepAdv&&f[2]&&ADV_DIRTY) return; var e=$(f[0]); if(e) e.value=SET[f[1]]; });
+  $('sProfilo').value=SET.profilo; nearHint(); if(typeof uiRefresh==='function') uiRefresh();
 }
 function nearHint(){
   var t='';
@@ -260,16 +307,80 @@ function nearHint(){
   else if(SET.near>=2.5) t+='Limite comodo: i palloncini restano lontani.';
   $('nearHint').textContent=t;
 }
+// i campi BASE e comuni si applicano subito; gli AVANZATI restano come scritti finche' non si preme APPLICA
 function readSettings(){
-  FIELDS.forEach(function(f){ var e=$(f[0]); if(e) SET[f[1]]=e.value; });
-  normSET(); saveSET(); applySettings();
+  FIELDS.forEach(function(f){ if(f[2]) return; var e=$(f[0]); if(e) SET[f[1]]=e.value; });
+  normSET(); saveSET(); applySettings(true);
+}
+// APPLICA: legge i campi avanzati, li porta nei limiti (dicendo quali ha corretto), salva e aggiorna la riga delle impostazioni in uso
+function fldLabel(id){ var e=$(id), r=e&&e.closest?e.closest('.fld'):null, l=r?r.querySelector('label'):null; return l?l.textContent.replace(/\s+/g,' ').trim():id; }
+function applyAdv(){
+  var raw={}; FIELDS.forEach(function(f){ if(!f[2]) return; var e=$(f[0]); if(e){ raw[f[1]]=e.value; SET[f[1]]=e.value; } });
+  normSET(); saveSET();
+  var fix=[]; FIELDS.forEach(function(f){ if(!f[2]||!(f[1] in raw)) return; var v=SET[f[1]]; if(typeof v==='number'){ var x=num(raw[f[1]],NaN); if(!isFinite(x)||Math.abs(x-v)>1e-9) fix.push('«'+fldLabel(f[0])+'»: '+(isFinite(x)?String(x).replace('.',','):'vuoto')+' portato a '+String(v).replace('.',',')); } });
+  ADV_DIRTY=false; applySettings(false);
+  var m=$('advMsg'); if(m) m.innerHTML=fix.length?'<b>Applicato.</b> Valori corretti perché fuori dai limiti: '+esc(fix.join('; '))+'.':'<b>Applicato</b> e salvato.';
+  return fix;
+}
+// RIPRISTINA: parametri di gioco ai valori predefiniti; non toccano mai nome, email e dati
+function resetDefaults(){ for(var k in SETDEF) if(k!=='nome'&&k!=='mailTo') SET[k]=SETDEF[k]; normSET(); saveSET(); ADV_DIRTY=false; applySettings(false); var m=$('advMsg'); if(m) m.innerHTML='<b>Valori predefiniti ripristinati</b> (nome, email e partite salvate non sono state toccate).'; }
+// riga "IMPOSTAZIONI IN USO": quelle applicate davvero (SET), per la pagina e per il menu VR
+function inUseLines(){
+  var comp=SET.compito==='both'?'palloncini + ape':(SET.compito==='balloons'?'solo palloncini':'solo ape'), cap=vCapOf(), f2=function(v){ return fmt(v,2); };
+  return ['Compiti: '+comp+' · palloncini '+(SET.baMode==='fermi'?'fermi':'a caduta')+' · limite vicino '+fmt(SET.near,1)+' m · durata '+durLbl(SET.durMin),
+    'Palloncini: '+SET.nBal+' insieme · V0 '+f2(SET.v0)+' m/s · tetto '+SET.tetto+(SET.tetto==='A'?' (uguale a V0)':' (massima '+f2(SET.vMax)+' m/s'+(Math.abs(cap-SET.vMax)>1e-9?', vale '+f2(cap):'')+')'),
+    'Velocità '+(SET.adatt==='on'?'adattiva':'costante')+': gradino '+SET.vStep+'% · sale dopo '+SET.nUp+' colpiti di fila · scende dopo '+SET.nDown+' a terra di fila · minimo '+SET.vMin+'%',
+    'Ape: '+fmt(SET.apeVel,1)+' m/s (±'+SET.apeVar+'%) · finestra rossa '+fmt(SET.apeWin,1)+' s · compare ogni '+SET.apeMin+'-'+SET.apeMax+' s'];
 }
 $('sProfilo').addEventListener('change',function(){ var p=$('sProfilo').value; if(p in DEF.profiles) $('sNear').value=DEF.profiles[p]; readSettings(); });
 $('sNear').addEventListener('change',function(){
   var v=parseFloat(String($('sNear').value).replace(',','.')); var m=null;
   for(var k in DEF.profiles) if(Math.abs(DEF.profiles[k]-v)<1e-9) m=k;
   $('sProfilo').value=m||'libero'; readSettings(); });
-FIELDS.forEach(function(f){ if(f[0]!=='sNear') $(f[0]).addEventListener('change',readSettings); });
+FIELDS.forEach(function(f){ var e=$(f[0]); if(!e) return;
+  if(f[2]){ var mk=function(){ ADV_DIRTY=advChanged(); if(typeof uiRefresh==='function') uiRefresh(); }; e.addEventListener('change',mk); e.addEventListener('input',mk); }
+  else if(f[0]!=='sNear') e.addEventListener('change',readSettings); });
+// ================= pagina 2D: pulsanti "i", "−" e "+", durata, APPLICA, RIPRISTINA, riga delle impostazioni in uso =================
+// Le spiegazioni delle caselle stanno in references/spiegazioni-caselle.md (una sola fonte): tools/build_gioco.py le inserisce qui al posto di {}.
+var EXPL={"sNome":{"t":"Nome o codice","p":[["Cosa fa.","Serve a scrivere chi sta giocando, così le partite si riconoscono nei risultati."],["Se lo scrivi.","Il nome finisce nei risultati e nella mail, e il gioco ricorda i record di quella persona."],["Se lo lasci vuoto.","Il gioco usa il nome del Visore, se c'è. Altrimenti le partite restano senza nome."],["Esempio.","Scrivi un codice come «A12». Meglio un codice che il nome vero, se vuoi proteggere la privacy."]]},"sMano":{"t":"Mano dominante","p":[["Cosa fa.","Dice qual è la mano che il giocatore usa meglio, quella con cui scrive."],["Se scegli destra.","Nel gioco 1 i palloncini si colpiscono con la mano destra e l'ape con la sinistra. Nel gioco 2 colpisce la destra."],["Se scegli sinistra.","Si scambiano le mani: i palloncini con la sinistra, l'ape con la destra."],["Esempio.","Un bambino mancino sceglie «sinistra», così la mano forte fa il lavoro più frequente, cioè i palloncini."]]},"sProfilo":{"t":"Profilo del limite vicino","p":[["Cosa fa.","È una scorciatoia per scegliere quanto vicino possono arrivare gli oggetti agli occhi: facile, medio o impegnativo."],["Se vai verso «facile».","Gli oggetti restano lontani (2,5 metri): occhi più rilassati, meno fatica."],["Se vai verso «impegnativo».","Gli oggetti arrivano più vicini (0,8 metri): gli occhi devono girare di più verso il naso, è più faticoso."],["Esempio.","Per la prima volta si parte da «medio» (1,5 metri). «Valore libero» si usa quando scrivi tu i metri nella casella accanto."]]},"sNear":{"t":"Limite vicino","p":[["Cosa fa.","Dice quanti metri al minimo devono restare tra gli occhi e qualsiasi oggetto del gioco. Nessun oggetto lo supera mai."],["Se lo alzi.","Gli oggetti restano più lontani: gioco più comodo, ma anche meno allenante."],["Se lo abbassi.","Gli oggetti arrivano più vicino: gli occhi lavorano di più, ma si può sentire fatica o vedere doppio."],["Esempio.","Con 1,5 l'ape si ferma a un metro e mezzo dal naso. Con 0,8 si ferma quasi a un braccio di distanza."]]},"sDur":{"t":"Durata della partita","p":[["Cosa fa.","Sceglie quanto dura la partita, con i pulsanti 30 secondi, 1, 2, 3, 5 o 10 minuti."],["Se scegli più tempo.","La partita è più lunga: più palloncini e più passaggi dell'ape, ma gli occhi si stancano di più."],["Se scegli meno tempo.","La partita è corta: va bene per provare o per chi si stanca presto."],["Esempio.","Per provare un'impostazione nuova bastano 30 secondi. Per una partita vera si parte da 3 minuti."]]},"sIndizi":{"t":"Indizi di profondità","p":[["Cosa fa.","Decide quanti aiuti ci sono per capire quanto è lontano un oggetto."],["Se scegli «facili».","Ci sono ombre, un pavimento a puntini e gli oggetti lontani sembrano più piccoli, come nella vita vera."],["Se scegli «difficili».","Tutti gli oggetti sembrano grandi uguale e non ci sono ombre né pavimento: per capire la distanza bisogna usare davvero i due occhi."],["Esempio.","Con «facili» capisci che un palloncino è lontano perché è piccolo. Con «difficili» non lo capisci dalla grandezza."]]},"sVoce":{"t":"Voce","p":[["Cosa fa.","Accende o spegne le frasi registrate («Bravo!», «Troppo presto!»)."],["Se scegli «sì».","Si sentono le frasi quando i file audio ci sono. Se un file manca si sente un suono semplice."],["Se scegli «no».","Si sentono solo suoni semplici, senza parole."],["Esempio.","Per un bambino che si distrae con le parole, si può scegliere «no» e lasciare solo i suoni."]]},"sMail":{"t":"Email dei risultati","p":[["Cosa fa.","È l'indirizzo a cui preparare la mail con i risultati, quando premi «Invia i risultati per email»."],["Se lo scrivi.","La mail si prepara già con quell'indirizzo. Resta solo su questo dispositivo."],["Se lo lasci vuoto.","Il gioco prova a usare l'indirizzo del Visore. Se non c'è, chiede di scriverlo."],["Esempio.","Scrivi l'indirizzo di chi deve leggere i risultati, poi controlli la mail e premi Invia."]]},"sCompito":{"t":"Compiti","p":[["Cosa fa.","Sceglie che cosa bisogna fare: solo palloncini, solo ape, oppure tutte e due le cose insieme."],["Se scegli «palloncini + ape».","Si colpiscono i palloncini e, quando l'ape diventa rossa, anche l'ape. È il gioco completo."],["Se scegli «solo palloncini» o «solo ape».","Si fa una cosa sola: più semplice, utile per imparare o per misurare una cosa alla volta."],["Esempio.","Se vuoi vedere solo quanto è veloce a rispondere al rosso, scegli «solo ape»."]]},"sBaMode":{"t":"Palloncini (a caduta o fermi)","p":[["Cosa fa.","Decide se i palloncini scendono verso il terreno o se restano fermi in aria."],["Se scegli «a caduta».","I palloncini scendono piano e vanno colpiti prima che tocchino il terreno. C'è un po' di fretta."],["Se scegli «fermi».","Restano lì finché non li colpisci: nessuna fretta, e la velocità non conta."],["Esempio.","Per imparare i comandi si usano i palloncini fermi. Per allenarsi sul serio, a caduta."]]},"sAdatt":{"t":"Velocità dei palloncini","p":[["Cosa fa.","Dice se la velocità dei palloncini cambia da sola durante la partita."],["Se scegli «adattiva».","Se ne colpisci tanti di fila i palloncini vanno più veloci. Se ne cadono tanti di fila vanno più piano."],["Se scegli «costante».","La velocità non cambia mai, così le partite si possono confrontare fra loro."],["Esempio.","Con «adattiva» il gioco segue il giocatore. Con «costante» lo metti sempre alla stessa prova."]]},"sEsito":{"t":"Suoni di esito","p":[["Cosa fa.","Accende o spegne i suoni che dicono come è andata: colpito, a terra, troppo presto, ape giusta."],["Se li accendi.","Ogni cosa ha un suono diverso e il giocatore capisce subito se ha fatto bene."],["Se li spegni.","Il gioco è silenzioso: ci si accorge dell'esito solo guardando."],["Esempio.","Un «pop» quando un palloncino scoppia e un suono basso quando cade a terra."]]},"sAppar":{"t":"Suono di apparizione dell'ape","p":[["Cosa fa.","Fa suonare un piccolo suono quando l'ape compare in lontananza."],["Se lo accendi.","Il giocatore sa che l'ape sta arrivando anche se guarda altrove."],["Se lo spegni.","L'ape arriva in silenzio e bisogna accorgersene guardando."],["Esempio.","Se spegni il suono, il giocatore deve tenere gli occhi aperti per vedere l'ape che spunta."]]},"sSegn":{"t":"Suono del segnale rosso","p":[["Cosa fa.","Fa suonare un suono nel momento in cui l'ape diventa rossa."],["Se lo accendi.","Il giocatore può rispondere al suono senza guardare l'ape: il tempo di reazione non misura più la vista."],["Se lo spegni.","Si risponde solo vedendo il rosso, e la misura è quella giusta per la vista."],["Esempio.","Si accende solo per capire se un bambino che non vede bene il rosso riesce con un aiuto in più."]]},"sNBal":{"t":"Palloncini insieme","p":[["Cosa fa.","Dice quanti palloncini ci sono nello stesso momento, da 3 a 8."],["Se lo alzi.","Ci sono più palloncini da guardare e colpire. Per farli stare tutti si rimpiccioliscono un po', tutti nello stesso modo. Se ancora non ci stanno, il gioco ne usa uno in meno e lo scrive nei risultati."],["Se lo abbassi.","Ce ne sono meno, restano più grandi e il gioco è più facile."],["Esempio.","Con 4 palloncini è come all'inizio. Con 8 è affollato e i palloncini sono più piccoli."]]},"sRedMax":{"t":"Riduzione massima","p":[["Cosa fa.","Dice quanto possono rimpicciolirsi i palloncini quando ce ne sono tanti, come percentuale della grandezza normale."],["Se lo alzi.","I palloncini si rimpiccioliscono meno. Se non ci stanno, il gioco usa più spesso un palloncino in meno."],["Se lo abbassi.","I palloncini possono diventare molto piccoli per far stare tutti, e sono più difficili da vedere."],["Esempio.","Con 60 i palloncini possono ridursi fino al 60% della grandezza normale, non di più."]]},"sV0":{"t":"Velocità di caduta V0 (partenza)","p":[["Cosa fa.","È quanto in fretta scendono i palloncini all'inizio, in metri al secondo. È anche il punto da cui parte la velocità adattiva."],["Se la alzi.","Scendono più veloci, come sassi. Sopra circa 3 metri al secondo quasi non si riesce più a colpirli."],["Se la abbassi.","Scendono più piano, come foglie."],["Esempio.","Con 0,25 hai tempo di sistemarti. Con 2 devi essere molto pronto."]]},"sTetto":{"t":"Tetto della velocità","p":[["Cosa fa.","Dice se la velocità può salire oltre quella di partenza."],["Se scegli «B».","Se il giocatore è bravo la velocità sale anche oltre V0, fino alla velocità massima. Serve a cercare il limite vero."],["Se scegli «A».","La velocità non supera mai V0: può solo scendere e tornare a V0."],["Esempio.","Con V0 uguale a 0,25 e tetto B, un giocatore bravo può arrivare fino a 1 metro al secondo. Con tetto A resta a 0,25 al massimo."]]},"sVMax":{"t":"Velocità massima (tetto B)","p":[["Cosa fa.","È il limite più alto che la velocità può raggiungere con il tetto B, in metri al secondo."],["Se la alzi.","I palloncini possono diventare molto veloci. Il gioco non mette un limite finto: si vede dove il giocatore non ce la fa più."],["Se la abbassi.","La velocità smette di salire prima. Se la metti sotto V0, vale V0 e il gioco lo scrive accanto alla casella."],["Esempio.","Con massima 1 la velocità arriva al massimo a 1 metro al secondo, anche se il giocatore è bravissimo."]]},"sVStep":{"t":"Gradino di velocità","p":[["Cosa fa.","Dice di quanto cambia la velocità a ogni salita o discesa, come percentuale di V0."],["Se lo alzi.","La velocità fa salti grandi: il gioco si adatta in fretta ma meno dolcemente."],["Se lo abbassi.","I salti sono piccoli e la velocità cambia piano piano."],["Esempio.","Con V0 uguale a 1 e gradino 15, ogni cambio sposta la velocità di 0,15 metri al secondo."]]},"sNUp":{"t":"Sale dopo N colpiti di fila","p":[["Cosa fa.","Dice quanti palloncini consecutivi bisogna colpire, senza farne cadere nessuno, perché la velocità salga di un gradino."],["Se lo alzi.","Bisogna essere bravi più a lungo prima di andare più veloci: la velocità sale più di rado."],["Se lo abbassi.","Basta poco per andare più veloci: la velocità sale spesso."],["Esempio.","Con 8, se colpisci 8 palloncini senza farne cadere neanche uno, la velocità sale. Se uno cade, si ricomincia a contare."]]},"sNDown":{"t":"Scende dopo M a terra di fila","p":[["Cosa fa.","Dice quanti palloncini consecutivi devono cadere a terra, senza colpirne nessuno, perché la velocità scenda di un gradino."],["Se lo alzi.","Il gioco aspetta di più prima di rallentare: il giocatore resta in difficoltà più a lungo."],["Se lo abbassi.","Il gioco rallenta presto, dopo poche cadute."],["Esempio.","Con 4, se cadono 4 palloncini uno dopo l'altro la velocità scende. Una caduta sola, in mezzo a tanti colpiti, non fa scendere nulla."]]},"sVMin":{"t":"Velocità minima","p":[["Cosa fa.","È il limite più basso a cui può scendere la velocità, come percentuale di V0."],["Se lo alzi.","La velocità non scende troppo: il gioco resta più sfidante anche per chi sbaglia."],["Se lo abbassi.","La velocità può diventare molto lenta, per aiutare chi fa fatica."],["Esempio.","Con V0 uguale a 1 e minimo 30, i palloncini non vanno mai più piano di 0,3 metri al secondo."]]},"sShowV":{"t":"Velocità sul tabellone","p":[["Cosa fa.","Decide se scrivere in piccolo, sul tabellone, la velocità dei palloncini in questo momento."],["Se scegli «sì».","L'operatore può leggerla durante la partita, ma anche il giocatore la vede."],["Se scegli «no».","Il giocatore non vede il numero e non si distrae. La velocità si legge poi nei risultati."],["Esempio.","Se il giocatore si agita vedendo il numero salire, conviene scegliere «no»."]]},"sApeMin":{"t":"Compare ogni, almeno","p":[["Cosa fa.","È il tempo minimo, in secondi, che passa tra la fine di un passaggio dell'ape e l'arrivo del successivo."],["Se lo alzi.","L'ape si fa vedere di rado: più tempo per i palloncini e meno occasioni di rispondere."],["Se lo abbassi.","L'ape torna presto: più passaggi in una partita."],["Esempio.","Con 10 e massimo 20, l'ape arriva ogni 10 fino a 20 secondi, scelti a caso."]]},"sApeMax":{"t":"Compare ogni, al massimo","p":[["Cosa fa.","È il tempo massimo, in secondi, tra un passaggio dell'ape e il successivo. Non può essere minore del minimo."],["Se lo alzi.","Ci sono pause più lunghe e imprevedibili tra un'ape e l'altra."],["Se lo abbassi.","I tempi diventano più regolari e l'ape si fa vedere più spesso."],["Esempio.","Se minimo e massimo sono uguali, l'ape arriva sempre alla stessa distanza di tempo."]]},"sApeVel":{"t":"Velocità di avvicinamento","p":[["Cosa fa.","Dice quanto in fretta l'ape si avvicina, in metri al secondo."],["Se la alzi.","L'ape arriva svelta: gli occhi devono girare verso il naso più in fretta, ed è più difficile."],["Se la abbassi.","L'ape arriva piano, e c'è più tempo per prepararsi."],["Esempio.","Con 0,5 l'ape percorre cinque metri in dieci secondi. Con 1 ci mette la metà."]]},"sApeVar":{"t":"Variazione casuale","p":[["Cosa fa.","Cambia un po', a caso, la velocità dell'ape e la distanza da cui parte, così non è sempre uguale."],["Se la alzi.","Ogni passaggio è più diverso dagli altri e meno prevedibile."],["Se la abbassi.","I passaggi si somigliano di più. A zero sono tutti uguali."],["Esempio.","Con 20 per cento, un'ape che dovrebbe andare a 0,5 metri al secondo può andare tra 0,4 e 0,6."]]},"sApeWin":{"t":"Finestra rossa","p":[["Cosa fa.","È il tempo, in secondi, in cui l'ape resta rossa e si può colpire."],["Se la alzi.","C'è più tempo per rispondere: più facile, meno omissioni."],["Se la abbassi.","C'è poco tempo e bisogna essere pronti: più difficile."],["Esempio.","Con 2,5 secondi hai il tempo di mirare. Con 1 secondo devi colpire quasi subito."]]},"sApeAng":{"t":"Area di colpo minima dell'ape","p":[["Cosa fa.","Dice quanto grande è la zona intorno all'ape in cui il raggio la colpisce, misurata in gradi di visione."],["Se la alzi.","Il raggio colpisce l'ape anche se la manca un po': più facile, anche per mani poco ferme."],["Se la abbassi.","Bisogna mirare con più precisione."],["Esempio.","Con 2 gradi la zona è larga circa quanto due dita tenute a braccio teso."]]},"sFAz":{"t":"Campo comodo, orizzontale","p":[["Cosa fa.","Dice quanto a destra e a sinistra, in gradi, possono comparire palloncini e ape."],["Se lo alzi.","Gli oggetti possono stare più lontano ai lati: bisogna girare di più la testa o gli occhi."],["Se lo abbassi.","Gli oggetti stanno più al centro, davanti a te."],["Esempio.","Con 30 gradi, a due metri di distanza gli oggetti stanno in una fascia larga più di due metri."]]},"sFEl":{"t":"Campo comodo, verticale","p":[["Cosa fa.","Dice quanto in alto e in basso, in gradi, possono comparire palloncini e ape."],["Se lo alzi.","Gli oggetti arrivano più in alto: bisogna alzare lo sguardo."],["Se lo abbassi.","Gli oggetti restano più vicini all'altezza degli occhi."],["Esempio.","Con 20 gradi non devi mai guardare troppo in su, e il collo non si stanca."]]},"sSecAz":{"t":"Settori in orizzontale","p":[["Cosa fa.","Divide il campo in tante strisce da sinistra a destra. L'ape cambia ogni volta striscia di partenza e di arrivo."],["Se lo alzi.","Ci sono più strisce, più direzioni diverse, e l'ape è più imprevedibile."],["Se lo abbassi.","Ci sono meno direzioni e l'ape si ripete più spesso."],["Esempio.","Con 4 strisce e 2 file ci sono 8 settori. L'ape non usa quelli degli ultimi due passaggi."]]},"sSecEl":{"t":"Settori in verticale","p":[["Cosa fa.","Divide il campo in file dall'alto al basso. Insieme alle strisce dà il numero dei settori."],["Se lo alzi.","Ci sono più file: l'ape può arrivare da più altezze diverse."],["Se lo abbassi.","Meno altezze diverse, ape più prevedibile."],["Esempio.","Con 1 fila l'ape arriva sempre più o meno all'altezza degli occhi. Con 2 file, a volte più in alto e a volte più in basso."]]},"sUna":{"t":"Una mano sola","p":[["Cosa fa.","Dice se si gioca con un solo controller, che colpisce sia i palloncini sia l'ape."],["Se scegli «sì».","Un solo raggio fa tutto. L'ape ha la precedenza se il raggio è sull'ape."],["Se scegli «no».","Servono due mani: una per i palloncini e l'altra per l'ape."],["Esempio.","Se un bambino riesce a usare bene una mano sola, si sceglie «sì»."]]},"sColore":{"t":"Facilitazione colore (gioco 2)","p":[["Cosa fa.","Nel gioco 2 può colorare di azzurro il palloncino più vicino, per aiutare a trovarlo."],["Se scegli «accesa».","Il palloncino più vicino è azzurro e gli altri sono rossi: l'aiuto è grande."],["Se scegli «spenta».","Tutti i palloncini sono rossi e bisogna capire da soli qual è il più vicino."],["Esempio.","Si accende all'inizio per imparare, poi si spegne per allenarsi davvero."]]},"sStay":{"t":"Sosta dell'ape sul palloncino (gioco 2)","p":[["Cosa fa.","Nel gioco 2 è il tempo, in secondi, in cui l'ape sta posata sul palloncino prima di farlo scoppiare."],["Se lo alzi.","C'è più tempo per colpire il palloncino: più facile."],["Se lo abbassi.","L'ape scoppia il palloncino presto: bisogna essere veloci."],["Esempio.","Con 2 secondi hai il tempo di mirare. Con 0,5 devi colpire quasi subito."]]},"sFlight":{"t":"Volo dell'ape (gioco 2)","p":[["Cosa fa.","Nel gioco 2 è il tempo, in secondi, che l'ape impiega a volare fino al palloncino."],["Se lo alzi.","L'ape vola più piano e c'è più tempo per capire dove andrà."],["Se lo abbassi.","L'ape vola più in fretta e arriva subito."],["Esempio.","Con 4 secondi l'ape ci mette un po'. Con 2 arriva quasi di colpo."]]}};
+function explHtml(id){
+  var x=EXPL[id]; if(!x) return '<p>Spiegazione non disponibile.</p>';
+  return '<p class="et">'+esc(x.t)+'</p>'+x.p.map(function(q){ return '<p><b>'+esc(q[0])+'</b> '+esc(q[1])+'</p>'; }).join(''); }
+function mkBtn(cls,txt,id,label){ var b=document.createElement('button'); b.type='button'; b.className=cls; b.textContent=txt; if(id) b.id=id; if(label) b.setAttribute('aria-label',label); return b; }
+function stepNum(inp,dir){
+  var step=parseFloat(inp.step)||1, mn=parseFloat(inp.min), mx=parseFloat(inp.max), dec=(String(step).split('.')[1]||'').length, k=Math.pow(10,dec+2);
+  var v=num(inp.value,isFinite(mn)?mn:0); v=Math.round((v+dir*step)*k)/k; if(isFinite(mn)) v=Math.max(mn,v); if(isFinite(mx)) v=Math.min(mx,v);
+  inp.value=v; inp.dispatchEvent(new Event('change')); }
+// ogni casella (.fld) riceve: "−" e "+" se e' un numero, il pulsante "i" grande e il riquadro della spiegazione (si apre e si chiude con lo stesso pulsante)
+function buildFlds(){
+  Array.prototype.forEach.call(document.querySelectorAll('.fld'),function(row){
+    var id=row.getAttribute('data-f'), ctl=row.querySelector('.ctl'), inp=row.querySelector('input[type=number]');
+    if(inp){ var m=mkBtn('st','−','m_'+inp.id,'diminuisci'), p=mkBtn('st','+','p_'+inp.id,'aumenta'); m.onclick=function(){ stepNum(inp,-1); }; p.onclick=function(){ stepNum(inp,1); }; inp.before(m); inp.after(p); }
+    var ib=mkBtn('ib','i','i_'+id,'spiegazione'), ex=document.createElement('div'); ex.className='expl'; ex.id='x_'+id; ex.hidden=true; ex.innerHTML=explHtml(id);
+    ib.setAttribute('aria-expanded','false');
+    ib.onclick=function(){ var open=ex.hidden; ex.hidden=!open; ib.setAttribute('aria-expanded',open?'true':'false'); ib.classList.toggle('on',open); };
+    (ctl||row.lastElementChild).after(ib); row.appendChild(ex); }); }
+// durata: pulsanti fissi 30 s, 1, 2, 3, 5, 10 minuti (il campo vero e' nascosto)
+function buildDur(){
+  var g=$('durGrp'); if(!g) return;
+  DURS.forEach(function(m){ var b=mkBtn('dur',durLbl(m),'dur_'+m); b.setAttribute('data-m',m); b.onclick=function(){ $('sDur').value=m; $('sDur').dispatchEvent(new Event('change')); }; g.appendChild(b); }); }
+function uiRefresh(){
+  var d=ADV_DIRTY;
+  ['advDirty','advDirtyTop'].forEach(function(i){ var e=$(i); if(e) e.hidden=!d; });
+  FIELDS.forEach(function(f){ if(!f[2]) return; var e=$(f[0]); if(!e||!e.closest) return; var row=e.closest('.fld'); if(!row) return;
+    var v=SET[f[1]], ch=(typeof v==='number')?!(Math.abs(num(e.value,NaN)-v)<=1e-9):String(e.value)!==String(v); row.classList.toggle('mod',ch); });
+  Array.prototype.forEach.call(document.querySelectorAll('button.dur'),function(b){ b.classList.toggle('on',Math.abs(parseFloat(b.getAttribute('data-m'))-SET.durMin)<1e-9); });
+  var u=$('inUse'); if(u) u.innerHTML='<b>'+esc(inUseLines()[0])+'</b>'+inUseLines().slice(1).map(esc).join('<br>')+(d?'<br><span class="bad">Ci sono modifiche non ancora applicate: queste sono le impostazioni vecchie.</span>':'');
+  var c=$('capNote'); if(c){ var v0=num($('sV0').value,SET.v0), vm=num($('sVMax').value,SET.vMax), tt=$('sTetto').value, eff=(tt==='B')?Math.max(vm,v0):v0;
+    c.textContent=(tt==='B'&&vm<v0-1e-9)?'La massima è minore di V0: il tetto effettivo è V0 ('+fmt(v0,2)+' m/s).':'Tetto effettivo: '+fmt(eff,2)+' m/s.'; }
+  var w=$('vrWarn'); if(w) w.hidden=!d; }
+function btnResetClick(){
+  var b=$('btnReset');
+  if(!b.getAttribute('data-arm')){ b.setAttribute('data-arm','1'); b.textContent='Conferma: ripristina i predefiniti'; b.classList.add('arm'); setTimeout(function(){ b.removeAttribute('data-arm'); b.textContent='RIPRISTINA PREDEFINITI'; b.classList.remove('arm'); },6000); return; }
+  b.removeAttribute('data-arm'); b.textContent='RIPRISTINA PREDEFINITI'; b.classList.remove('arm'); resetDefaults(); }
+buildFlds(); buildDur();
+Array.prototype.forEach.call(document.querySelectorAll('.applyBtn'),function(b){ b.addEventListener('click',applyAdv); });
+$('btnReset').addEventListener('click',btnResetClick);
 // ================= AUDIO: toni (WebAudio) e voci (file 01-12: 01-07 gioco 2, 08-12 gioco 1) =================
 // I toni funzionano gia' nel Pico (Visore rfBeep). Le voci sono opzionali: se i file mancano o non si decodificano, restano i toni.
 var AUD=null;
@@ -449,12 +560,12 @@ function drawRays(){ if(VRS.noRay) return;
     bindQuad();
     if(e0.hit){ gl.uniformMatrix4fv(U.M,false,[0.012,0,0,0,0,0.012,0,0,0,0,1,0,e[0],e[1],e[2],1]); gl.uniform1i(U.mode,1); gl.uniform4fv(U.col,col); gl.drawArrays(gl.TRIANGLE_STRIP,0,4); } });
 }
-// tasti: A/X (indice 4) e B/Y (indice 5)
-var GP={t:false,a:false,b:false,seen:false};
-function GPpoll(s){ var t=false,a=false,b=false,seen=false;
-  for(var i=0;i<s.inputSources.length;i++){ var g=s.inputSources[i].gamepad; if(!g||!g.buttons) continue; seen=true; var bt=g.buttons;
-    if(bt[0]&&bt[0].pressed) t=true; if(bt[4]&&bt[4].pressed) a=true; if(bt[5]&&bt[5].pressed) b=true; }
-  GP.t=t; GP.a=a; GP.b=b; GP.seen=seen; }
+// tasti: grilletto (indice 0), tasto laterale/grip (indice 1), A/X (indice 4) e B/Y (indice 5)
+var GP={t:false,a:false,b:false,g:false,seen:false};
+function GPpoll(s){ var t=false,a=false,b=false,g=false,seen=false;
+  for(var i=0;i<s.inputSources.length;i++){ var gp=s.inputSources[i].gamepad; if(!gp||!gp.buttons) continue; seen=true; var bt=gp.buttons;
+    if(bt[0]&&bt[0].pressed) t=true; if(bt[1]&&bt[1].pressed) g=true; if(bt[4]&&bt[4].pressed) a=true; if(bt[5]&&bt[5].pressed) b=true; }
+  GP.t=t; GP.a=a; GP.b=b; GP.g=g; GP.seen=seen; }
 
 function onXRFrame(t,frame){
   var s=frame.session; s.requestAnimationFrame(onXRFrame);
@@ -467,6 +578,7 @@ function onXRFrame(t,frame){
   GPpoll(s);
   RAYS={}; for(var i=0;i<s.inputSources.length;i++){ var src=s.inputSources[i]; if(!src.targetRaySpace) continue; var rp=frame.getPose(src.targetRaySpace,refSpace);
     if(rp){ var rw=rayFromPose(rp.transform.matrix); RAYS[src.handedness||('x'+i)]={o:toLocalPt(rw.o),d:toLocalDir(rw.d)}; } }
+  if(typeof gripTick==='function') gripTick(performance.now());                // uscita col tasto laterale tenuto 5 s (vale per i due giochi, anche in pausa)
   if(VRS.tick) VRS.tick(performance.now());
   var layer=s.renderState.baseLayer; gl.bindFramebuffer(gl.FRAMEBUFFER,layer.framebuffer);
   var cc=VRS.clear||[0,0,0]; gl.clearColor(cc[0],cc[1],cc[2],1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
@@ -724,11 +836,35 @@ function apeTexG(k,tone){ if(tone==='y') return apeTex(k); var key='g1ape'+tone+
   var cols=(tone==='r1')?['#e8101c','#ff4d4d','#4a0008']:['#a30010','#d93030','#2a0004'];
   return TEXC[key]=texCanvas(apeDraw(k,cols[0],cols[1],cols[2]),false); }
 
+// ---------------- piano dei palloncini: UN fattore di riduzione unico e il numero effettivo ----------------
+// Ogni palloncino occupa una "corsia" di azimut larga quanto la sua area di colpo (raggio angolare, mai sotto il minimo dell'ape) e le corsie dei palloncini vivi non si toccano.
+// Il fattore vale per TUTTI i palloncini (grandezze relative e indizi di profondita' restano coerenti) e resta fisso per la partita: e' il piu' grande, tra 100% e la riduzione massima,
+// per cui n palloncini (uno per fascia di profondita', nel caso peggiore) occupano al massimo l'85% del campo. Se anche al minimo non ci stanno si usa un palloncino in meno.
+function h1AngR(f,d){ return Math.max(Math.atan(f*brad(d)*DEF.hitScale/d),deg(DEF.g1.hitMinDeg))*180/Math.PI; }      // raggio angolare (gradi) dell'area di colpo a distanza d
+function h1CosEl(dmin,fall){ var hi=fall?SET.fEl:DEF.elMax, lo=fall?(easy()?Math.atan(DEF.floorY/dmin)*180/Math.PI:DEF.g1.groundEl):DEF.elMin; return Math.cos(deg(Math.max(Math.abs(hi),Math.abs(lo)))); }
+function h1Plan(dmin,dmax,nSet,fAz,fall){
+  var G1=DEF.g1, fMin=SET.redMax/100, cosE=h1CosEl(dmin,fall), avail=G1.fillMax*2*fAz;
+  for(var n=nSet;n>=1;n--){ var step=(dmax-dmin)/n;
+    for(var k=0;;k++){ var f=Math.max(fMin,1-k*0.01), tot=0;
+      for(var i=0;i<n;i++) tot+=2*h1AngR(f,dmin+(i+G1.slotInner)*step)/cosE+G1.laneMarginDeg;
+      if(tot<=avail+1e-9) return {f:Math.round(f*1000)/1000,n:n,nSet:nSet,cosE:cosE,tot:tot,avail:avail};
+      if(f<=fMin+1e-12) break; } }
+  return {f:fMin,n:1,nSet:nSet,cosE:cosE,tot:0,avail:avail}; }
+// azimut libero per un palloncino di raggio angolare rho: uniforme sull'unione degli intervalli ammessi (o null se non c'e' posto)
+function h1FindAz(rho,others){
+  var C=H.cfg, A=C.fAz, forb=others.map(function(b){ var w=(rho+b.rho)/C.cosE+DEF.g1.laneMarginDeg; return [b.az-w,b.az+w]; }).sort(function(p,q){ return p[0]-q[0]; }), segs=[], cur=-A;
+  forb.forEach(function(x){ if(cur>=A) return; if(x[0]>cur) segs.push([cur,Math.min(x[0],A)]); cur=Math.max(cur,x[1]); });
+  if(cur<A) segs.push([cur,A]);
+  segs=segs.filter(function(q){ return q[1]-q[0]>0.05; }); if(!segs.length) return null;
+  var tot=segs.reduce(function(a,q){ return a+q[1]-q[0]; },0), r=Math.random()*tot;
+  for(var i=0;i<segs.length;i++){ var L=segs[i][1]-segs[i][0]; if(r<=L||i===segs.length-1) return segs[i][0]+Math.min(r,L); r-=L; }
+  return null; }
+
 // ---------------- configurazione della partita ----------------
 function h1Cfg(){
-  var near=SET.near, dmin=minCenter(near+DEF.margin), dmax=Math.max(DEF.farMin,near+DEF.farExtra), n=SET.nBal, step=(dmax-dmin)/n, V0=SET.v0, fall=SET.baMode==='caduta', G1=DEF.g1;
-  return {near:near,dmin:dmin,dmax:dmax,DMIN:dmin,n:n,step:step,gapMin:DEF.gapStep*step,easy:easy(),fall:fall,
-    V0:V0,vMin:V0*SET.vMin/100,vStep:V0*SET.vStep/100,nDown:SET.nDown,nUp:SET.nUp,ad:fall&&SET.adatt==='on',
+  var near=SET.near, dmin=minCenter(near+DEF.margin), dmax=Math.max(DEF.farMin,near+DEF.farExtra), V0=SET.v0, fall=SET.baMode==='caduta', G1=DEF.g1, plan=h1Plan(dmin,dmax,SET.nBal,SET.fAz,fall), n=plan.n, step=(dmax-dmin)/n;
+  return {near:near,dmin:dmin,dmax:dmax,DMIN:dmin,n:n,nSet:SET.nBal,plan:plan,red:plan.f,cosE:plan.cosE,step:step,easy:easy(),fall:fall,
+    V0:V0,vCap:vCapOf(),vMax:SET.vMax,tetto:SET.tetto,vMin:V0*SET.vMin/100,vStep:V0*SET.vStep/100,nDown:SET.nDown,nUp:SET.nUp,ad:fall&&SET.adatt==='on',
     balls:SET.compito!=='ape',ape:SET.compito!=='balloons',apeMin:SET.apeMin,apeMax:SET.apeMax,apeVel:SET.apeVel,apeVar:SET.apeVar/100,win:SET.apeWin,apeAng:SET.apeAng,
     far:Math.max(DEF.farMin,near+2),fAz:SET.fAz,fEl:SET.fEl,secAz:SET.secAz,secEl:SET.secEl,una:SET.una==='on',showV:SET.showV==='on',
     snE:SET.snEsito==='on',snA:SET.snAppar==='on',snS:SET.snSegn==='on',durS:(window.__test&&window.__test.durS)||SET.durMin*60,
@@ -745,26 +881,32 @@ function h1Role(hand){
 
 // ---------------- palloncini ----------------
 function h1MkBalloon(initial){
-  var C=H.cfg, G1=DEF.g1, live=H.balloons.filter(function(b){ return b.state==='live'; }), best=null, bs=-1e9;
-  for(var k=0;k<80;k++){ var d=C.dmin+Math.random()*(C.dmax-C.dmin), az=(Math.random()*2-1)*C.fAz, gap=1e9, sep=1e9;
-    live.forEach(function(b){ gap=Math.min(gap,Math.abs(b.d0-d)); sep=Math.min(sep,Math.abs(b.az-az)); });
-    var sc=(gap>=C.gapMin?1000:gap*100)+Math.min(sep,40); if(sc>bs){ bs=sc; best={d:d,az:az}; } }
-  var d=best.d, az=best.az, b={id:++H.bid,d0:d,az:az,ph:Math.random()*6.28,state:'live',tSpawn:H.elapsed,fadeFrom:initial?-9:H.elapsed,v0:C.fall?H.v:null,ape:H.ape?H.ape.phase!=='idle':false};
+  var C=H.cfg, G1=DEF.g1, f=C.red, live=H.balloons.filter(function(b){ return b.state==='live'; }), used={}, free=[], pick=null, i;
+  live.forEach(function(b){ used[b.slot]=1; }); for(i=0;i<C.n;i++) if(!used[i]) free.push(i); shuffle(free);
+  for(var q=0;q<free.length&&!pick;q++){ var sl=free[q], d=C.dmin+(sl+G1.slotInner+(1-2*G1.slotInner)*Math.random())*C.step, rho=h1AngR(f,d), az=h1FindAz(rho,H.balloons);      // le corsie contano anche i palloncini che stanno scomparendo
+    if(az!=null) pick={sl:sl,d:d,az:az,rho:rho}; }
+  if(!pick) return null;                                                        // nessun posto libero senza toccare gli altri: si riprova subito dopo
+  var d=pick.d, az=pick.az, b={id:++H.bid,d0:d,az:az,slot:pick.sl,rho:pick.rho,ph:Math.random()*6.28,state:'live',tSpawn:H.elapsed,fadeFrom:initial?-9:H.elapsed,fadeS:Math.max(0.03,G1.fadeS*h1K()),v0:C.fall?H.v:null,ape:H.ape?H.ape.phase!=='idle':false};
+  b.r=f*brad(d);
   if(C.fall){
     var elTop=G1.elTopMin+Math.random()*Math.max(0,C.fEl-G1.elTopMin), prog=initial?Math.random()*0.6:0;
-    b.r=brad(d);
     if(C.easy){ var yTop=d*Math.tan(deg(elTop)), yEnd=DEF.floorY+b.r; b.y=yTop-prog*(yTop-yEnd); b.x=Math.sin(deg(az))*d; b.z=-Math.cos(deg(az))*d; b.el=Math.atan2(b.y,d)*180/Math.PI; }
     else { b.el=elTop-prog*(elTop-C.touchEl(az)); var u=dirOf(az,b.el); b.x=u[0]*d; b.y=u[1]*d; b.z=u[2]*d; }
   } else {
-    var el=DEF.elMin+Math.random()*(DEF.elMax-DEF.elMin), P=balloonPos(d,az,el); b.r=P.r; b.x=P.x; b.y=P.y; b.z=P.z; b.el=P.el;
+    var el=DEF.elMin+Math.random()*(DEF.elMax-DEF.elMin), u2=dirOf(az,el);
+    if(C.easy){ var ymin=DEF.floorY+b.r+0.15; if(u2[1]*d<ymin){ el=Math.asin(clamp(ymin/d,-1,1))*180/Math.PI; u2=dirOf(az,el); } }
+    b.x=u2[0]*d; b.y=u2[1]*d; b.z=u2[2]*d; b.el=el;
   }
   b.obj=add({kind:'sphere',x:b.x,y:b.y,z:b.z,w:b.r,h:b.r,col:[BLUE1[0],BLUE1[1],BLUE1[2],0]});
   if(C.easy) b.sh=add({kind:'blob',M:[b.r*1.6,0,0,0, 0,0,-b.r*0.7,0, 0,1,0,0, b.x,DEF.floorY+0.003,b.z,1],x:b.x,y:DEF.floorY,z:b.z,w:b.r,h:b.r,col:[0,0,0,0]});
   H.balloons.push(b); return b; }
+// a velocita' alta la comparsa non deve diventare un limite artificiale: dissolvenza e attesa dopo un colpo/caduta si accorciano in proporzione (identiche a 0,25 m/s o meno)
+function h1K(){ return (H.cfg.fall)?Math.min(1,0.25/Math.max(H.v,0.05)):1; }
 function h1Dist(b){ return Math.hypot(b.obj.x,b.obj.y,b.obj.z); }
-function h1RayBalloon(ray,scale){
-  if(!H) return null; var best=null;
-  H.balloons.forEach(function(b){ if(b.state!=='live'||b.obj.col[3]<0.6) return; var R=b.r*(scale||DEF.hitScale), o=b.obj, cx=o.x-ray.o[0], cy=o.y-ray.o[1], cz=o.z-ray.o[2];
+function h1RayBalloon(ray,scale,guard){
+  if(!H) return null; var best=null, gA=Math.tan(deg(DEF.g1.hitMinDeg));
+  H.balloons.forEach(function(b){ if(b.state!=='live'||b.obj.col[3]<0.6) return; var o=b.obj, R=b.r*(scale||DEF.hitScale); if(guard) R=Math.max(R,Math.hypot(o.x,o.y,o.z)*gA);       // l'area di colpo non scende sotto il minimo angolare (come per l'ape)
+    var cx=o.x-ray.o[0], cy=o.y-ray.o[1], cz=o.z-ray.o[2];
     var t=cx*ray.d[0]+cy*ray.d[1]+cz*ray.d[2]; if(t<0) return; var d2=cx*cx+cy*cy+cz*cz-t*t; if(d2>R*R) return;
     var th=t-Math.sqrt(R*R-d2); if(!best||th<best.t) best={b:b,t:th}; });
   return best; }
@@ -779,21 +921,23 @@ function h1Pop(b,now){
   if(b.sh){ dropObj(b.sh); b.sh=null; } }
 function h1Done(b){ if(b.frags) b.frags.forEach(function(f){ dropObj(f.o); }); dropObj(b.obj); if(b.sh) dropObj(b.sh); var k=H.balloons.indexOf(b); if(k>=0) H.balloons.splice(k,1); }
 function h1HitBalloon(b,now){
-  var C=H.cfg; h1Row(b,'colpito'); H.cnt.colpiti++; H.score+=DEF.g1.ptsBall; h1Pop(b,now); H.nextSpawn=Math.max(H.nextSpawn,H.elapsed+0.4);
+  var C=H.cfg; h1Row(b,'colpito'); H.cnt.colpiti++; H.score+=DEF.g1.ptsBall; h1Pop(b,now); H.nextSpawn=Math.max(H.nextSpawn,H.elapsed+0.4*h1K());
   if(C.snE) snd('g1_pop'); h1Count('colpito'); h1Board(true); }
 function h1Land(b,now){
   var C=H.cfg; b.state='land'; b.tLand=now; if(C.easy){ b.y=DEF.floorY+b.r; b.obj.y=b.y; }
-  h1Row(b,'terra'); H.cnt.terra++; H.nextSpawn=Math.max(H.nextSpawn,H.elapsed+0.4);
+  h1Row(b,'terra'); H.cnt.terra++; H.nextSpawn=Math.max(H.nextSpawn,H.elapsed+0.4*h1K());
   if(H.pass&&H.ape.phase!=='idle'){ H.pass.terraApe++; H.cnt.terra_ape++; if(H.ape.phase==='red'){ H.pass.terraWin++; H.cnt.terra_finestra++; } }
   if(C.snE) snd('g1_terra'); h1Count('terra'); h1Board(true); }
 
 // ---------------- velocita' adattiva (solo palloncini a caduta) ----------------
 function h1SetSpeed(nv,why){ var C=H.cfg, old=H.v; H.v=nv; H.vHist.push([H.elapsed,nv]);
-  H.vChanges.push({t:r1(H.elapsed),da:r3(old),a:r3(nv),motivo:why,a_terra:H.nT,colpiti:H.nC}); H.nT=0; H.nC=0; }
+  H.vChanges.push({t:r1(H.elapsed),da:r3(old),a:r3(nv),motivo:why,a_terra_di_fila:H.nT,colpiti_di_fila:H.nC}); H.nT=0; H.nC=0; }
+// regola "di fila": un palloncino colpito conta come colpito di fila e azzera le cadute di fila; uno a terra conta come caduta di fila e azzera i colpiti di fila.
+// N colpiti di fila = sale di un gradino (fino al tetto); M a terra di fila = scende di un gradino (fino al minimo); dopo ogni cambio i due contatori ripartono da zero.
 function h1Count(kind){
   var C=H.cfg; if(!C.fall||!C.ad) return;
-  if(kind==='terra'){ H.nT++; if(H.nT>=C.nDown&&H.v>C.vMin+1e-9) h1SetSpeed(Math.max(C.vMin,H.v-C.vStep),'scende'); }
-  else { H.nC++; if(H.nC>=C.nUp&&H.v<C.V0-1e-9) h1SetSpeed(Math.min(C.V0,H.v+C.vStep),'sale'); } }
+  if(kind==='terra'){ H.nC=0; H.nT++; if(H.nT>=C.nDown&&H.v>C.vMin+1e-9) h1SetSpeed(Math.max(C.vMin,H.v-C.vStep),'scende'); }
+  else { H.nT=0; H.nC++; if(H.nC>=C.nUp&&H.v<C.vCap-1e-9) h1SetSpeed(Math.min(C.vCap,H.v+C.vStep),'sale'); } }
 function h1VelAvg(){ var hist=H.vHist, end=H.elapsed, a=Math.max(0,end-60); if(end<=a+1e-9) return H.v; var s=0;
   for(var i=0;i<hist.length;i++){ var t0=hist[i][0], t1=(i+1<hist.length)?hist[i+1][0]:end, lo=Math.max(t0,a), hi=Math.min(t1,end); if(hi>lo) s+=hist[i][1]*(hi-lo); }
   return s/(end-a); }
@@ -805,14 +949,14 @@ function h1BalloonTick(b,dt,now){
     b.frags.forEach(function(f){ var o=f.o; o.x+=f.v[0]*d2; o.y+=f.v[1]*d2; o.z+=f.v[2]*d2; o.col[3]=Math.max(0,1-t/500); });
     if(t>=520) h1Done(b); return; }
   if(b.state==='land'){ var k=Math.min(1,(now-b.tLand)/350); b.obj.h=b.r*(1-0.45*k); b.obj.w=b.r*(1+0.25*k); b.obj.col[3]=1-k; if(b.sh) b.sh.col[3]=0.45*(1-k); if(k>=1) h1Done(b); return; }
-  var al=Math.min(1,Math.max(0,(H.elapsed-b.fadeFrom)/DEF.g1.fadeS));
+  var al=Math.min(1,Math.max(0,(H.elapsed-b.fadeFrom)/b.fadeS));
   if(C.fall){
     if(C.easy){ b.y-=H.v*dt; b.obj.y=b.y; b.el=Math.atan2(b.y,b.d0)*180/Math.PI; if(b.y<=DEF.floorY+b.r){ h1Land(b,now); return; } }
     else { b.el-=(H.v/DEF.g1.hardRefD)*180/Math.PI*dt; var u=dirOf(b.az,b.el); b.obj.x=b.x=u[0]*b.d0; b.obj.y=b.y=u[1]*b.d0; b.obj.z=b.z=u[2]*b.d0; if(b.el<=C.touchEl(b.az)){ h1Land(b,now); return; } }
   } else b.obj.y=b.y+bobY(b,now);
   b.alpha=al; b.obj.col[3]=al; if(b.sh) b.sh.col[3]=0.45*al; }
 function h1Refill(){ var C=H.cfg; if(!C.balls) return; var live=H.balloons.filter(function(b){ return b.state==='live'; }).length;
-  if(live<C.n&&H.elapsed>=H.nextSpawn){ h1MkBalloon(false); H.nextSpawn=H.elapsed+DEF.g1.respawnS; } }
+  if(live<C.n&&H.elapsed>=H.nextSpawn){ if(h1MkBalloon(false)) H.nextSpawn=H.elapsed+Math.max(0.04,DEF.g1.respawnS*h1K()); else { H.spawnDelays++; H.nextSpawn=H.elapsed+DEF.g1.spawnRetryS; } } }
 
 // ---------------- ape: settori, percorso, rosso ----------------
 function h1Sector(idx){ var C=H.cfg, i=idx%C.secAz, j=Math.floor(idx/C.secAz), w=2*C.fAz/C.secAz, h=2*C.fEl/C.secEl; return {az:-C.fAz+(i+0.5)*w,el:-C.fEl+(j+0.5)*h,w:w,h:h,i:i,j:j}; }
@@ -885,7 +1029,7 @@ function h1OnTrigger(ev){
   if(!H||H.state!=='run'||H.freeze>0) return;
   var src=ev.inputSource, hand=src&&src.handedness, role=h1Role(hand); if(!role) return;
   var ray=RAYS[hand]||RAYS[Object.keys(RAYS)[0]]; if(!ray) return;
-  var now=performance.now(), C=H.cfg, a=H.ape, hb=C.balls?h1RayBalloon(ray,DEF.hitScale):null, ha=h1RayApe(ray,1);
+  var now=performance.now(), C=H.cfg, a=H.ape, hb=C.balls?h1RayBalloon(ray,DEF.hitScale,true):null, ha=h1RayApe(ray,1);
   if(role==='balloon'){
     if(!C.balls){ H.ign.mano_inattiva++; return; }
     if(ha&&!hb){ H.ign.ape_con_mano_palloncini++; return; }                 // l'ape con la mano dei palloncini: ignorato e registrato, senza penalita'
@@ -916,7 +1060,7 @@ function h1Start(){
   readSettings(); var now=performance.now(), first=!(H&&H.sessions);
   setScene('play1',SKY); VRS.onTrigger=h1OnSelect; VRS.onTriggerStart=h1OnStart; VRS.tick=h1Tick; VRS.noSel=now+500; VRS.rayEnd=h1RayEnd; VRS.rayCol=h1RayCol;
   var C=h1Cfg(), G1=DEF.g1;
-  H={cfg:C,state:'run',last:now,elapsed:0,durS:C.durS,freeze:G1.startFreezeS,balloons:[],bid:0,rows:[],passes:[],pn:0,discarded:0,v:C.V0,nT:0,nC:0,vHist:[[0,C.V0]],vChanges:[],unaEff:false,
+  H={cfg:C,state:'run',last:now,elapsed:0,durS:C.durS,freeze:G1.startFreezeS,balloons:[],bid:0,rows:[],passes:[],pn:0,discarded:0,v:C.V0,nT:0,nC:0,vHist:[[0,C.V0]],vChanges:[],unaEff:false,spawnDelays:0,uscita:null,
     cnt:{colpiti:0,terra:0,terra_ape:0,terra_finestra:0,presto:0,giusti:0,omissioni:0,mancato_pall:0,mancato_ape:0},
     ign:{ape_con_mano_palloncini:0,palloncino_con_mano_ape:0,mano_inattiva:0,ape_senza_ape:0,dopo_finestra:0},
     score:0,minObs:1e9,aPrev:GP.a,bT:0,saved:false,boardKey:'',sessions:(H&&H.sessions||0)+1,mem:[],startSeen:{},nextApe:G1.firstApeS,nextSpawn:0,pass:null,ape:null};
@@ -943,7 +1087,7 @@ function h1Tick(now){
   if(GP.b&&H.state!=='end'){ if(!H.bT) H.bT=now; else if(now-H.bT>=DEF.stopHoldMs){ H.bT=0; h1Finish('interrotta'); return; } } else H.bT=0;
   if(H.state==='pause'||H.state==='end') return;
   var dt=Math.min(0.1,(now-H.last)/1000); H.last=now;
-  if(H.freeze>0){ H.freeze-=dt; H.balloons.forEach(function(b){ if(b.state==='live'){ b.obj.col[3]=Math.min(1,Math.max(0,(H.elapsed-b.fadeFrom)/DEF.g1.fadeS)); if(b.sh) b.sh.col[3]=0.45*b.obj.col[3]; } }); return; }
+  if(H.freeze>0){ H.freeze-=dt; H.balloons.forEach(function(b){ if(b.state==='live'){ b.obj.col[3]=Math.min(1,Math.max(0,(H.elapsed-b.fadeFrom)/b.fadeS)); if(b.sh) b.sh.col[3]=0.45*b.obj.col[3]; } }); return; }
   H.elapsed+=dt; if(H.elapsed>=H.durS){ h1Finish('tempo'); return; }
   H.balloons.slice().forEach(function(b){ h1BalloonTick(b,dt,now); });
   h1Refill(); h1ApeTick(dt,now);
@@ -980,7 +1124,10 @@ function h1Save(why){
     modalita:C.fall?'caduta':'fermi',compiti:comp,mano_dominante:dom,mano_palloncini:C.balls?dom:null,mano_ape:C.ape?(C.una?dom:non):null,una_mano:C.una,una_mano_effettiva:!!H.unaEff,
     indizi:SET.indizi,limite_m:C.near,profilo:SET.profilo,durata_prevista_s:Math.round(C.durS),durata_s:r1(E),voce:SET.voce,voci_decodificate:voPronte(),
     suoni:{esito:C.snE,apparizione:C.snA,segnale:C.snS},punti:H.score,
-    palloncini:{modalita:C.fall?'caduta':'fermi',v_iniziale_ms:C.fall?r3(C.V0):null,tetto_ms:C.fall?r3(C.V0):null,adattiva:C.ad,passo_pct:C.ad?SET.vStep:null,n_giu:C.ad?C.nDown:null,n_su:C.ad?C.nUp:null,minimo_pct:C.ad?SET.vMin:null,
+    uscita_laterale:H.uscita==='laterale',
+    palloncini:{modalita:C.fall?'caduta':'fermi',v_iniziale_ms:C.fall?r3(C.V0):null,tetto:C.fall?C.tetto:null,tetto_ms:C.fall?r3(C.vCap):null,vel_max_impostata_ms:C.fall?r3(C.vMax):null,vel_max_raggiunta_ms:C.fall?r3(Math.max.apply(null,H.vHist.map(function(q){ return q[1]; }))):null,
+      adattiva:C.ad,passo_pct:C.ad?SET.vStep:null,n_colpiti_di_fila_su:C.ad?C.nUp:null,m_a_terra_di_fila_giu:C.ad?C.nDown:null,minimo_pct:C.ad?SET.vMin:null,
+      n_insieme_impostato:C.nSet,n_insieme_effettivo:C.balls?C.n:0,fattore_riduzione:C.balls?C.red:null,riduzione_max_pct:SET.redMax,comparse_rimandate:H.spawnDelays,
       comparsi:H.bid,colpiti:H.cnt.colpiti,a_terra:H.cnt.terra,mancati:H.cnt.mancato_pall,tempo_medio_ms:tms.length?Math.round(mean(tms)):null,tempo_sd_ms:tms.length>2?Math.round(sd(tms)):null,
       prof_colpiti_min_m:dh.length?Math.min.apply(null,dh):null,prof_colpiti_max_m:dh.length?Math.max.apply(null,dh):null,prof_colpiti_media_m:dh.length?r2(mean(dh)):null,
       vel_raggiunta_ms:C.fall?r3(h1VelAvg()):null,vel_finale_ms:C.fall?r3(H.v):null,cambi_velocita:H.vChanges,a_terra_con_ape:H.cnt.terra_ape,a_terra_in_finestra:H.cnt.terra_finestra},
@@ -993,15 +1140,58 @@ function h1Finish(why){
   if(!H||H.state==='end') return; H.state='end'; VRS.tick=null; VRS.onTrigger=null; VRS.onTriggerStart=null;
   var p=h1Save(why); snd('fine'); say(6,{interrupt:true}); sceneEnd1(p); }
 function h1Partial(){ if(H&&H.state!=='end'&&!H.saved&&(H.rows.length||H.passes.length||H.cnt.mancato_pall||H.cnt.presto)){ H.state='end'; h1Save('uscita VR'); } else if(H&&H.state!=='end'){ H.state='end'; } }
+// ================= USCITA COL TASTO LATERALE (grip) tenuto 5 secondi, nei due giochi =================
+// Interrompe la partita, la salva come "interrotta" (uscita_laterale: true) e torna al menu dei giochi con il messaggio "Partita interrotta e salvata".
+// Il gioco 2 (40-game.js) non e' toccato: l'uscita passa da qui, dal ciclo del motore. B o Y tenuto 2 s resta lo stop di emergenza dei giochi (finisce e mostra il riepilogo).
+// Mentre il tasto e' premuto compare un cerchio che si riempie, in alto sopra il campo dei bersagli (mai rosso, mai davanti ai bersagli).
+var GRIP={t0:0,ring:null,disc:null};
+var HOME_MSG='';
+function gripActive(){
+  if(VRS.tick===h1Tick&&H&&H.state!=='end') return 'g1';
+  if(VRS.tick===gTick&&G&&G.state!=='end') return 'g2';
+  return null; }
+function gripDrop(list,o){ if(!list) return; var k=list.indexOf(o); if(k>=0) list.splice(k,1); }
+function gripClear(){
+  [GRIP.ring,GRIP.disc].forEach(function(o){ if(!o) return; gripDrop(OBJ,o); if(H) gripDrop(H.world,o); if(G) gripDrop(G.world,o); });
+  GRIP.ring=GRIP.disc=null; }
+function gripShow(f){
+  var G1=DEF.g1, y=Math.tan(deg(G1.ringEl))*G1.ringD, z=-G1.ringD, R=G1.ringR;
+  if(!GRIP.ring){ GRIP.ring=add({kind:'ring',x:0,y:y,z:z,w:R,h:R,col:[0.92,0.96,1,0.95]}); GRIP.disc=add({kind:'disc',x:0,y:y,z:z,w:0.001,h:0.001,col:[0.92,0.97,1,0.85]}); }
+  else if(OBJ.indexOf(GRIP.ring)<0){ OBJ.push(GRIP.ring,GRIP.disc); }               // la scena e' cambiata (pausa): il cerchio segue
+  GRIP.disc.w=GRIP.disc.h=Math.max(0.001,R*0.84*f); }
+function gripTick(now){
+  var g=gripActive();
+  if(!g||!GP.g){ GRIP.t0=0; if(GRIP.ring) gripClear(); return; }
+  if(!GRIP.t0) GRIP.t0=now;
+  var f=Math.min(1,(now-GRIP.t0)/DEF.exitHoldMs); gripShow(f);
+  if(f>=1){ GRIP.t0=0; gripClear(); exitLateral(g); } }
+function freeWorld(w){ if(w) w.forEach(function(o){ if(o.tex&&!o.tex.keep&&gl) gl.deleteTexture(o.tex); }); }
+function exitLateral(g){
+  if(g==='g1'){
+    H.uscita='laterale'; H.state='end'; VRS.tick=null; VRS.onTrigger=null; VRS.onTriggerStart=null; freeWorld(H.world); H.world=null;
+    h1Save('interrotta'); }
+  else {
+    G.state='end'; VRS.tick=null; VRS.onTrigger=null; freeWorld(G.world); G.world=null;
+    var p=gSave('interrotta'); if(p){ p.uscita_laterale=true; saveDB(); renderRes(); } }
+  snd('fine'); HOME_MSG='Partita interrotta e salvata'; sceneHome(); }
 // ================= SCENE VR (home, menu dei giochi, Prova audio, fine) e pagina 2D =================
 function setScene(name,clear){ VRS.tok=(VRS.tok||0)+1; VRS.scene=name; clearScene(); VRS.clear=clear||MENU_BG; VRS.tick=null; VRS.onTrigger=null; VRS.onTriggerStart=null; VRS.noRay=false; VRS.rayEnd=null; VRS.rayCol=null; VRS.reS=true; VRS.noSel=performance.now()+600; }
-function setTxt(){ return 'Limite vicino '+fmt(SET.near,1)+' m ('+SET.profilo+') · '+SET.durMin+' min · indizi '+SET.indizi+' · mano '+(SET.mano==='L'?'sinistra':'destra')+' · colore '+(SET.colore==='on'?'sì':'no')+' · voce '+(SET.voce==='on'?(voPronte()+'/'+VO.length):'no'); }
-function setTxt1(){ return ['Limite vicino '+fmt(SET.near,1)+' m ('+SET.profilo+') · '+SET.durMin+' min · indizi '+SET.indizi,'palloncini '+(SET.baMode==='fermi'?'fermi':'a caduta')+' · '+(SET.compito==='both'?'palloncini + ape':(SET.compito==='balloons'?'solo palloncini':'solo ape'))+(SET.baMode==='caduta'&&SET.compito!=='ape'?' · velocità '+(SET.adatt==='on'?'adattiva':'costante'):'')]; }
+function setTxt(){ return 'Limite vicino '+fmt(SET.near,1)+' m ('+SET.profilo+') · '+durLbl(SET.durMin)+' · indizi '+SET.indizi+' · mano '+(SET.mano==='L'?'sinistra':'destra')+' · colore '+(SET.colore==='on'?'sì':'no')+' · voce '+(SET.voce==='on'?(voPronte()+'/'+VO.length):'no'); }
+// riga "IMPOSTAZIONI IN USO" del menu del gioco 1 (righe corte per leggerle nel visore); la stessa informazione e' nella pagina (inUseLines)
+function inUseVR(){
+  var comp=SET.compito==='both'?'palloncini + ape':(SET.compito==='balloons'?'solo palloncini':'solo ape'), cap=vCapOf(), f2=function(v){ return fmt(v,2); };
+  return ['IMPOSTAZIONI IN USO',
+    comp+' · palloncini '+(SET.baMode==='fermi'?'fermi':'a caduta')+' · limite '+fmt(SET.near,1)+' m · '+durLbl(SET.durMin),
+    SET.nBal+' palloncini · V0 '+f2(SET.v0)+' m/s · tetto '+SET.tetto+(SET.tetto==='A'?' (uguale a V0)':' (massima '+f2(SET.vMax)+(Math.abs(cap-SET.vMax)>1e-9?', vale '+f2(cap):'')+')'),
+    'velocità '+(SET.adatt==='on'?'adattiva':'costante')+' · gradino '+SET.vStep+'% · minimo '+SET.vMin+'%',
+    'sale dopo '+SET.nUp+' colpiti di fila · scende dopo '+SET.nDown+' a terra di fila',
+    'ape '+fmt(SET.apeVel,1)+' m/s ±'+SET.apeVar+'% · finestra '+fmt(SET.apeWin,1)+' s · ogni '+SET.apeMin+'-'+SET.apeMax+' s']; }
 var AUD_BACK=null, AUD_PAGE=0;
 // scena iniziale: i due giochi
 function sceneHome(){
   setScene('home'); var D=-DEF.uiD;
   panel(['SFDN Gioco · scegli il gioco','Sperimentale, non validato. Supervisione sempre.'],0,0.82,D,1.3,0.2);
+  if(HOME_MSG){ panel([HOME_MSG],0,1.22,D,0.8,0.1,{bg:'rgba(26,127,55,0.95)',size:56}); HOME_MSG=''; }
   button('g1','1  APE ROSSA',0,0.4,D,0.75,0.14,function(){ sceneMenu1(); },'#1f6feb');
   button('g2','2  APE E PALLONCINO',0,0.12,D,0.75,0.14,function(){ sceneMenu(); },'#1a7f37');
   button('au','PROVA AUDIO',0,-0.2,D,0.6,0.12,function(){ sceneAudio(sceneHome); },'#4a5568');
@@ -1016,13 +1206,13 @@ function sceneMenu(){
   button('ex','ESCI DALLA VR',0,-0.58,D,0.6,0.13,function(){ if(xrSession) xrSession.end(); },'#8a2d2d');
   button('hm','I GIOCHI',0,-0.86,D,0.6,0.11,function(){ sceneHome(); },'#4a5568'); }
 function sceneMenu1(){
-  setScene('menu1'); var D=-DEF.uiD, dom=SET.mano==='L'?'sinistra':'destra', non=SET.mano==='L'?'destra':'sinistra';
-  panel(['APE ROSSA','Palloncini blu: mano '+dom+'.  Ape: mano '+non+', solo quando diventa ROSSA.'],0,0.78,D,1.3,0.24);
-  panel(setTxt1().concat(['Le impostazioni si cambiano nella pagina, fuori dalla VR.']),0,0.38,D,1.4,0.2,{bg:'rgba(30,34,44,0.7)',bold:false});
-  button('go1','GIOCA',0,0.02,D,0.6,0.13,function(){ h1Start(); },'#1a7f37');
-  button('au','PROVA AUDIO',0,-0.26,D,0.6,0.13,function(){ sceneAudio(sceneMenu1); },'#4a5568');
-  button('hm','I GIOCHI',0,-0.54,D,0.6,0.12,function(){ sceneHome(); },'#4a5568');
-  button('ex','ESCI DALLA VR',0,-0.8,D,0.6,0.12,function(){ if(xrSession) xrSession.end(); },'#444a5a'); }
+  setScene('menu1'); var D=-DEF.uiD, dom=SET.mano==='L'?'sinistra':'destra', non=SET.mano==='L'?'destra':'sinistra', blocked=ADV_DIRTY;
+  panel(inUseVR(),0,1.04,D,1.4,0.4,{bg:'rgba(30,34,44,0.82)',size:36});
+  panel(['APE ROSSA','Palloncini blu: mano '+dom+'.  Ape: mano '+non+', solo quando diventa ROSSA.'],0,0.44,D,1.3,0.14,{size:40});
+  button('go1',blocked?'Applica prima le modifiche':'GIOCA',0,0.12,D,0.6,0.13,function(){ if(ADV_DIRTY) return; h1Start(); },blocked?'#7a7f8a':'#1a7f37');
+  button('au','PROVA AUDIO',0,-0.16,D,0.6,0.12,function(){ sceneAudio(sceneMenu1); },'#4a5568');
+  button('hm','I GIOCHI',0,-0.42,D,0.6,0.12,function(){ sceneHome(); },'#4a5568');
+  button('ex','ESCI DALLA VR',0,-0.68,D,0.6,0.12,function(){ if(xrSession) xrSession.end(); },'#444a5a'); }
 // Prova audio in VR: pagina 0 = voci 01-07 (gioco 2), pagina 1 = voci 08-12 (gioco 1)
 function sceneAudio(back,page){
   if(back) AUD_BACK=back; AUD_PAGE=page||0; setScene('audio'); var D=-DEF.uiD, from=AUD_PAGE?7:0, to=AUD_PAGE?VO.length:7;
@@ -1039,7 +1229,7 @@ function sceneEnd(p){
   if(p){ panel(['FINE! Punti: '+p.punti,'Giusti '+p.giusti+' · troppo presto '+p.presto+' · sbagliati '+p.sbagliati+' · scoppi '+p.scoppi,
     'Combo massima '+p.combo_max+(p.nuovo_record?' · NUOVO RECORD!':(p.record_prima?' · record '+p.record_prima:'')),p.fine==='tempo'?'Tempo finito':'Partita interrotta'],0,0.45,D,1.3,0.34); }
   button('again','GIOCA ANCORA',0,-0.12,D,0.6,0.12,function(){ gStart(); },'#1a7f37');
-  button('mn','MENU',0,-0.38,D,0.6,0.12,function(){ sceneMenu(); });
+  button('mn','TORNA AL MENU',0,-0.38,D,0.6,0.12,function(){ sceneMenu(); });
   button('ex','ESCI DALLA VR',0,-0.64,D,0.6,0.12,function(){ if(xrSession) xrSession.end(); },'#8a2d2d'); }
 function sceneEnd1(p){
   setScene('end1',PAUSE_BG); var D=-DEF.uiD;
@@ -1050,7 +1240,7 @@ function sceneEnd1(p){
     ln.push((p.nuovo_record?'NUOVO RECORD!  ':(p.record_prima?'Record '+p.record_prima+'  ':''))+(p.fine==='tempo'?'Tempo finito':'Partita interrotta'));
     panel(ln,0,0.45,D,1.4,0.34); }
   button('again','GIOCA ANCORA',0,-0.12,D,0.6,0.12,function(){ h1Start(); },'#1a7f37');
-  button('mn','MENU',0,-0.36,D,0.6,0.12,function(){ sceneMenu1(); },'#4a5568');
+  button('mn','TORNA AL MENU',0,-0.36,D,0.6,0.12,function(){ sceneMenu1(); },'#4a5568');
   button('hm','I GIOCHI',0,-0.6,D,0.6,0.12,function(){ sceneHome(); },'#4a5568');
   button('ex','ESCI DALLA VR',0,-0.84,D,0.6,0.12,function(){ if(xrSession) xrSession.end(); },'#444a5a'); }
 
@@ -1078,16 +1268,17 @@ function sumTxt(p){
   L.push('Errore di tempo sul colpo giusto (dopo l’atterraggio dell’ape): '+(p.err_medio_ms==null?'-':(p.err_medio_ms+' ms medio'+(p.err_sd_ms!=null?', DS '+p.err_sd_ms:''))));
   L.push('Distanza dei palloncini colpiti: '+(p.dist_min_m==null?'-':(fmt(p.dist_min_m,2)+' - '+fmt(p.dist_max_m,2)+' m'))+' · distanza minima osservata di ogni oggetto: '+(p.dist_oss_min_m==null?'-':fmt(p.dist_oss_min_m,2)+' m'));
   L.push('Limite vicino '+fmt(p.limite_m,1)+' m ('+p.profilo+') · indizi '+p.indizi+' · facilitazione colore '+(p.colore_facilitazione?'sì':'no')+' · mano '+p.mano+' · sosta '+p.sosta_s+' s · volo '+p.volo_s+' s');
-  L.push('Durata '+durTxt(p.durata_s)+' di '+durTxt(p.durata_prevista_s)+' · fine: '+p.fine+' · voce '+p.voce+' ('+p.voci_decodificate+' file)'+(p.soglia_stereo_arcsec!=null?' · soglia stereo dal Visore '+p.soglia_stereo_arcsec+' secondi d’arco':''));
+  L.push('Durata '+durTxt(p.durata_s)+' di '+durTxt(p.durata_prevista_s)+' ('+Math.round(p.durata_prevista_s)+' s previsti) · fine: '+p.fine+(p.uscita_laterale?' (uscita col tasto laterale)':'')+' · voce '+p.voce+' ('+p.voci_decodificate+' file)'+(p.soglia_stereo_arcsec!=null?' · soglia stereo dal Visore '+p.soglia_stereo_arcsec+' secondi d’arco':''));
   return L.join('\n'); }
 function sumTxt1(p){
   var b=p.palloncini, a=p.ape, L=[], sn=function(v){ return v?'sì':'no'; };
   L.push('Partita APE ROSSA '+new Date(p.ts).toLocaleString('it-IT')+(p.sogg?', giocatore '+p.sogg:'')+' ('+p.ver+')');
   L.push('Punti '+p.punti+(p.nuovo_record?' · NUOVO RECORD':'')+' · compiti '+p.compiti+' · palloncini '+b.modalita+' · mani: palloncini '+(p.mano_palloncini||'-')+', ape '+(p.mano_ape||'-')+(p.una_mano||p.una_mano_effettiva?' (una mano sola)':'')+' · indizi '+p.indizi);
-  L.push('Limite vicino '+fmt(p.limite_m,1)+' m ('+p.profilo+') · durata '+durTxt(p.durata_s)+' di '+durTxt(p.durata_prevista_s)+' · fine: '+p.fine+' · voce '+p.voce+' ('+p.voci_decodificate+' file) · suoni: esito '+sn(p.suoni.esito)+', apparizione '+sn(p.suoni.apparizione)+', segnale '+sn(p.suoni.segnale)+(p.soglia_stereo_arcsec!=null?' · soglia stereo dal Visore '+p.soglia_stereo_arcsec+' secondi d’arco':''));
+  L.push('Limite vicino '+fmt(p.limite_m,1)+' m ('+p.profilo+') · durata '+durTxt(p.durata_s)+' di '+durTxt(p.durata_prevista_s)+' ('+Math.round(p.durata_prevista_s)+' s previsti) · fine: '+p.fine+(p.uscita_laterale?' (uscita col tasto laterale)':'')+' · voce '+p.voce+' ('+p.voci_decodificate+' file) · suoni: esito '+sn(p.suoni.esito)+', apparizione '+sn(p.suoni.apparizione)+', segnale '+sn(p.suoni.segnale)+(p.soglia_stereo_arcsec!=null?' · soglia stereo dal Visore '+p.soglia_stereo_arcsec+' secondi d’arco':''));
   if(p.compiti!=='solo ape'){
     L.push('PALLONCINI: colpiti '+b.colpiti+', a terra '+b.a_terra+', mancati '+b.mancati+' · tempo dalla comparsa al colpo '+(b.tempo_medio_ms==null?'-':b.tempo_medio_ms+' ms medio'+(b.tempo_sd_ms!=null?', DS '+b.tempo_sd_ms:''))+' · profondità dei colpiti '+(b.prof_colpiti_min_m==null?'-':fmt(b.prof_colpiti_min_m,2)+' - '+fmt(b.prof_colpiti_max_m,2)+' m'));
-    if(b.modalita==='caduta') L.push('Velocità: iniziale e tetto '+fmt(b.v_iniziale_ms,2)+' m/s · adattiva '+sn(b.adattiva)+' · raggiunta (media ultimo minuto) '+fmt(b.vel_raggiunta_ms,2)+' · finale '+fmt(b.vel_finale_ms,2)+' · cambi '+b.cambi_velocita.length+(b.adattiva?'':' (la velocità adattiva confronta le sedute solo se uguale)'));
+    L.push('Palloncini insieme: impostati '+b.n_insieme_impostato+', effettivi '+b.n_insieme_effettivo+(b.n_insieme_effettivo<b.n_insieme_impostato?' (uno o più in meno perché non ci stavano)':'')+' · fattore di riduzione '+Math.round((b.fattore_riduzione==null?1:b.fattore_riduzione)*100)+'% (massima impostata '+b.riduzione_max_pct+'%)');
+    if(b.modalita==='caduta') L.push('Velocità: partenza V0 '+fmt(b.v_iniziale_ms,2)+' m/s · tetto '+b.tetto+' (massima impostata '+fmt(b.vel_max_impostata_ms,2)+', tetto effettivo '+fmt(b.tetto_ms,2)+') · massima raggiunta '+fmt(b.vel_max_raggiunta_ms,2)+' · media ultimo minuto '+fmt(b.vel_raggiunta_ms,2)+' · finale '+fmt(b.vel_finale_ms,2)+' · adattiva '+sn(b.adattiva)+(b.adattiva?': gradino '+b.passo_pct+'% · sale dopo '+b.n_colpiti_di_fila_su+' colpiti di fila · scende dopo '+b.m_a_terra_di_fila_giu+' a terra di fila · minimo '+b.minimo_pct+'%':' (la velocità adattiva confronta le sedute solo se uguale)')+' · cambi di velocità '+b.cambi_velocita.length+(b.cambi_velocita.length?' ('+b.cambi_velocita.slice(0,12).map(function(c){ return fmt(c.t,0)+'s '+fmt(c.da,2)+'>'+fmt(c.a,2); }).join(', ')+(b.cambi_velocita.length>12?', ...':'')+')':''));
     if(p.compiti!=='solo palloncini') L.push('Palloncini a terra mentre c’era l’ape: '+b.a_terra_con_ape+' (nella finestra rossa: '+b.a_terra_in_finestra+')'); }
   if(p.compiti!=='solo palloncini'){
     L.push('APE ('+a.tipo_ape+', '+fmt(a.v_nominale_ms,2)+' m/s, finestra '+a.finestra_s+' s): passaggi '+a.passaggi+', giusti '+a.giusti+', anticipi (troppo presto) '+a.anticipi+', omissioni '+a.omissioni+' · tempo di reazione dopo il rosso '+(a.rt_medio_ms==null?'-':a.rt_medio_ms+' ms medio'+(a.rt_sd_ms!=null?', DS '+a.rt_sd_ms:''))); }
