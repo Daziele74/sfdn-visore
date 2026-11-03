@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SFDN Gioco v0.1</title>
+<title>SFDN Gioco v0.2</title>
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--ink:#1d2330;--mut:#667085;--acc:#1f6feb;--ok:#1a7f37;--bad:#cf222e;--line:#d0d7de;--warn:#fff4d6}
 *{box-sizing:border-box}
@@ -26,70 +26,128 @@ select,input{font-size:19px;padding:8px}
 .hint{font-size:16px;color:var(--mut)}
 pre{white-space:pre-wrap;background:#f6f8fa;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px}
 #xrCanvas{display:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+.game{border:2px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:12px;background:#fafbff}
+.game h3{margin:0 0 6px;font-size:21px}
+.g1t{color:#1f6feb}.g2t{color:#1a7f37}
+details.adv{border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin-top:10px;background:#f6f8fa}
+details.adv summary{cursor:pointer;font-weight:bold;font-size:20px}
+fieldset{border:1px solid var(--line);border-radius:10px;margin:8px 0;padding:8px 14px}
+legend{font-weight:bold;padding:0 6px}
+label.row{display:block;margin:7px 0}
 </style>
 </head>
 <body>
-<header><h1>SFDN &middot; Gioco <small>v0.1 &middot; Ape e palloncini (sperimentale)</small></h1></header>
+<header><h1>SFDN &middot; Gioco <small>v0.2 &middot; due giochi (sperimentale)</small></h1></header>
 <main>
  <div class="card warn">
   <h2>Prima di cominciare</h2>
-  <p><b>Sperimentale: non &egrave; un trattamento validato.</b> Sessioni brevi e <b>con supervisione</b>. <b>Interrompi subito</b> se compaiono disagio, mal di testa o visione doppia (B o Y tenuto 2 secondi, oppure togli il visore).</p>
-  <p class="hint">Per la prima prova: indizi <b>facili</b>, limite vicino <b>medio (1,5 m)</b>, <b>3 minuti</b>. L&rsquo;operatore resta accanto al giocatore e guarda la partita.</p>
+  <p><b>Sperimentale: non è un trattamento validato.</b> Sessioni brevi e <b>con supervisione</b>. <b>Interrompi subito</b> se compaiono disagio, mal di testa o visione doppia (B o Y tenuto 2 secondi, oppure togli il visore).</p>
+  <p class="hint">Per la prima prova: indizi <b>facili</b>, limite vicino <b>medio (1,5 m)</b>, <b>3 minuti</b>. L’operatore resta accanto al giocatore e guarda la partita.</p>
  </div>
 
  <div class="card">
-  <h2>1. Giocatore</h2>
+  <h2>I due giochi</h2>
+  <div class="grid2">
+   <div class="game"><h3 class="g1t">1 &middot; APE ROSSA</h3>
+    <p class="hint">Palloncini <b>blu</b> che cadono (o restano fermi) a distanze diverse: si colpiscono con la mano che usi di più. Ogni tanto arriva l’<b>ape</b>: quando diventa <b>ROSSA</b> e pulsa, va colpita subito con l’altra mano. Il rosso vuol dire sempre «colpisci ora».</p></div>
+   <div class="game"><h3 class="g2t">2 &middot; APE E PALLONCINO</h3>
+    <p class="hint">Cinque palloncini a distanze diverse. L’ape vola verso il più vicino e si posa: va colpito quando l’ape è sopra (è la versione 0.1, invariata).</p></div>
+  </div>
+  <p class="hint">Nella VR il primo menu fa scegliere il gioco. Le impostazioni qui sotto si cambiano fuori dalla VR.</p>
+ </div>
+
+ <div class="card">
+  <h2>1. Giocatore e impostazioni comuni (valgono per i due giochi)</h2>
   <p>Nome o codice <input id="sNome" placeholder="nome o codice" style="width:260px"> <span id="visInfo" class="hint"></span></p>
-  <p>Mano che colpisce <select id="sMano"><option value="R">destra (predefinita)</option><option value="L">sinistra</option></select> <span class="hint">(si usa una sola mano; se in VR c&rsquo;&egrave; un solo controller vale quello)</span></p>
- </div>
-
- <div class="card">
-  <h2>2. Impostazioni della partita</h2>
-  <p>Limite vicino <select id="sProfilo"><option value="comodo">comodo (2,5 m)</option><option value="medio">medio (1,5 m, predefinito)</option><option value="impegnativo">impegnativo (0,8 m)</option><option value="libero">valore libero</option></select>
+  <p>Mano dominante <select id="sMano"><option value="R">destra (predefinita)</option><option value="L">sinistra</option></select> <span class="hint">Gioco 1: palloncini con la mano dominante, ape con l’altra. Gioco 2: colpisce la mano dominante. Per i mancini basta scegliere sinistra.</span></p>
+  <p>Limite vicino <select id="sProfilo"><option value="comodo">facile (2,5 m)</option><option value="medio">medio (1,5 m, predefinito)</option><option value="impegnativo">impegnativo (0,8 m)</option><option value="libero">valore libero</option></select>
    <input type="number" id="sNear" min="0.4" max="6" step="0.1" style="width:90px"> m (da 0,4 a 6) <br><span id="nearHint" class="hint"></span></p>
   <p>Durata <input type="number" id="sDur" min="1" max="10" step="1" style="width:80px"> minuti (da 1 a 10)</p>
-  <p>Indizi di profondit&agrave; <select id="sIndizi"><option value="facile">facili: ombra, grandezza prospettica, pavimento a punti (predefinito)</option><option value="difficile">difficili: grandezza angolare costante, niente ombre n&eacute; pavimento</option></select></p>
-  <p>Facilitazione colore <select id="sColore"><option value="off">spenta: tutti i palloncini rossi (predefinita)</option><option value="on">accesa: il palloncino pi&ugrave; vicino &egrave; azzurro</option></select></p>
-  <p>Sosta dell&rsquo;ape sul palloncino <input type="number" id="sStay" min="0.5" max="5" step="0.5" style="width:80px"> s &middot; volo dell&rsquo;ape <input type="number" id="sFlight" min="2" max="8" step="0.5" style="width:80px"> s</p>
-  <p>Voce <select id="sVoce"><option value="on">s&igrave; (se i file audio ci sono; altrimenti solo toni)</option><option value="off">no, solo toni</option></select></p>
-  <p>Email dei risultati <input id="sMail" placeholder="vuoto = quella del Visore, se c'&egrave;" style="width:340px"><br><span class="hint">L&rsquo;indirizzo resta solo su questo dispositivo e non &egrave; scritto nel programma.</span></p>
+  <p>Indizi di profondità <select id="sIndizi"><option value="facile">facili: ombra, grandezza prospettica, pavimento a punti (predefinito)</option><option value="difficile">difficili: grandezza angolare costante, niente ombre né pavimento</option></select></p>
+  <p>Voce <select id="sVoce"><option value="on">sì (se i file audio ci sono; altrimenti solo toni)</option><option value="off">no, solo toni</option></select></p>
+  <p>Email dei risultati <input id="sMail" placeholder="vuoto = quella del Visore, se c'è" style="width:340px"><br><span class="hint">L’indirizzo resta solo su questo dispositivo e non è scritto nel programma.</span></p>
  </div>
 
  <div class="card">
-  <h2>3. Prova audio</h2>
-  <p class="hint">Premi &#9654; e <b>ascolta</b>: la frase che senti deve essere quella scritta. Il gioco funziona anche se le voci mancano (restano i toni).</p>
+  <h2 class="g1t">2. Gioco 1 &middot; APE ROSSA</h2>
+  <fieldset><legend>BASE</legend>
+   <label class="row">Compiti <select id="sCompito"><option value="both">palloncini + ape (predefinito)</option><option value="balloons">solo palloncini</option><option value="ape">solo ape</option></select></label>
+   <label class="row">Palloncini <select id="sBaMode"><option value="caduta">a caduta: scendono, vanno colpiti prima del terreno (predefinito)</option><option value="fermi">fermi: restano finché colpiti</option></select></label>
+   <label class="row">Velocità dei palloncini <select id="sAdatt"><option value="on">adattiva: scende se ne cadono troppi, risale se li colpisci (predefinita)</option><option value="off">costante</option></select></label>
+   <p class="hint" style="margin:2px 0 6px">Profilo del limite vicino, mano dominante, durata e indizi: nelle impostazioni comuni qui sopra.</p>
+   <p style="margin:6px 0 2px"><b>Suoni</b> (separati, toni WebAudio)</p>
+   <label class="row">Suoni di esito (giusto, troppo presto, mancata, palloncino) <select id="sEsito"><option value="on">accesi (predefinito)</option><option value="off">spenti</option></select></label>
+   <label class="row">Suono di apparizione dell’ape <select id="sAppar"><option value="off">spento (predefinito)</option><option value="on">acceso</option></select></label>
+   <label class="row">Suono del segnale rosso <select id="sSegn"><option value="off">spento (predefinito)</option><option value="on">acceso</option></select> <span class="hint">se acceso, il giocatore può rispondere al suono senza guardare l’ape</span></label>
+  </fieldset>
+  <details class="adv" id="adv"><summary>AVANZATE (tutti gli altri parametri)</summary>
+   <fieldset><legend>Palloncini</legend>
+    <label class="row">Palloncini insieme <input type="number" id="sNBal" min="3" max="5" step="1" style="width:70px"> (da 3 a 5)</label>
+    <label class="row">Velocità di caduta V0 (anche tetto) <input type="number" id="sV0" min="0.05" max="1.5" step="0.05" style="width:90px"> m/s (lenta = 0,25)</label>
+    <label class="row">Gradino di velocità <input type="number" id="sVStep" min="5" max="40" step="1" style="width:80px"> % di V0 (circa 15)</label>
+    <label class="row">Scende dopo <input type="number" id="sNDown" min="1" max="20" step="1" style="width:70px"> palloncini a terra · risale dopo <input type="number" id="sNUp" min="1" max="30" step="1" style="width:70px"> colpiti</label>
+    <label class="row">Velocità minima <input type="number" id="sVMin" min="10" max="90" step="5" style="width:80px"> % di V0</label>
+    <label class="row">Velocità sul tabellone (per l’operatore) <select id="sShowV"><option value="on">sì, in piccolo (predefinito)</option><option value="off">no, il giocatore non la vede</option></select></label>
+   </fieldset>
+   <fieldset><legend>Ape</legend>
+    <label class="row">Compare ogni <input type="number" id="sApeMin" min="2" max="60" step="1" style="width:70px"> - <input type="number" id="sApeMax" min="2" max="90" step="1" style="width:70px"> secondi (a caso)</label>
+    <label class="row">Velocità di avvicinamento <input type="number" id="sApeVel" min="0.1" max="2" step="0.1" style="width:80px"> m/s · variazione casuale <input type="number" id="sApeVar" min="0" max="40" step="5" style="width:70px"> % (di velocità e di distanza di partenza)</label>
+    <label class="row">Finestra rossa <input type="number" id="sApeWin" min="0.5" max="6" step="0.5" style="width:80px"> s</label>
+    <label class="row">Area di colpo minima dell’ape <input type="number" id="sApeAng" min="1" max="5" step="0.5" style="width:80px"> gradi</label>
+    <label class="row">Campo comodo: orizzontale ± <input type="number" id="sFAz" min="10" max="45" step="5" style="width:70px"> gradi, verticale ± <input type="number" id="sFEl" min="5" max="30" step="5" style="width:70px"> gradi</label>
+    <label class="row">Settori: <input type="number" id="sSecAz" min="1" max="8" step="1" style="width:60px"> in orizzontale per <input type="number" id="sSecEl" min="1" max="4" step="1" style="width:60px"> in verticale</label>
+   </fieldset>
+   <fieldset><legend>Mani</legend>
+    <label class="row">Una mano sola <select id="sUna"><option value="off">no: due mani (predefinito)</option><option value="on">sì: un raggio colpisce palloncini e ape</option></select></label>
+   </fieldset>
+  </details>
+ </div>
+
+ <div class="card">
+  <h2 class="g2t">3. Gioco 2 &middot; APE E PALLONCINO</h2>
+  <p>Facilitazione colore <select id="sColore"><option value="off">spenta: tutti i palloncini rossi (predefinita)</option><option value="on">accesa: il palloncino più vicino è azzurro</option></select></p>
+  <p>Sosta dell’ape sul palloncino <input type="number" id="sStay" min="0.5" max="5" step="0.5" style="width:80px"> s &middot; volo dell’ape <input type="number" id="sFlight" min="2" max="8" step="0.5" style="width:80px"> s</p>
+ </div>
+
+ <div class="card">
+  <h2>4. Prova audio (12 voci)</h2>
+  <p class="hint">Premi &#9654; e <b>ascolta</b>: la frase che senti deve essere quella scritta. Voci 01-07: gioco 2. Voci 08-12: gioco 1. Il gioco funziona anche se le voci mancano (restano i toni).</p>
   <table id="audTab"></table>
   <p><span id="audSum" class="hint"></span> <button class="small" id="btnAudReload">Ricarica i file</button></p>
  </div>
 
  <div class="card">
-  <h2>4. Entra nel gioco</h2>
+  <h2>5. Entra nel gioco</h2>
   <p><button class="primary big" id="btnVR">ENTRA IN VR</button></p>
   <p id="vrMsg" class="hint"></p>
-  <h3 style="margin:10px 0 4px">Istruzioni per l&rsquo;operatore</h3>
+  <h3 style="margin:10px 0 4px">Istruzioni per l’operatore</h3>
   <ul class="hint">
-   <li><b>Come si gioca:</b> 5 palloncini sospesi a distanze diverse. L&rsquo;ape arriva da lontano, vola verso il palloncino <b>pi&ugrave; vicino</b> e si posa. Il giocatore lo colpisce con il raggio e il <b>grilletto</b> quando l&rsquo;ape &egrave; sopra. Se non lo colpisce in tempo, l&rsquo;ape lo fa scoppiare (si perde un punto).</li>
-   <li><b>Errori:</b> colpire con l&rsquo;ape ancora in volo = &laquo;troppo presto&raquo;; colpire un altro palloncino = errore.</li>
+   <li><b>Gioco 1, APE ROSSA:</b> palloncini blu a distanze diverse (cadono; vanno colpiti prima che tocchino il terreno). Con la mano dominante si colpiscono i palloncini. L’ape arriva da lontano e al limite vicino diventa <b>ROSSA e pulsa</b>: solo allora va colpita, con l’altra mano. Colpo prima del rosso = «troppo presto»; nessun colpo nella finestra = omissione (-1 punto). Un colpo sul tipo sbagliato di bersaglio è ignorato e registrato.</li>
+   <li><b>Gioco 2, APE E PALLONCINO:</b> 5 palloncini sospesi. L’ape vola verso il più vicino e si posa. Il giocatore lo colpisce con il raggio e il <b>grilletto</b> quando l’ape è sopra. Se non lo colpisce in tempo, l’ape lo fa scoppiare (si perde un punto). Colpo con l’ape ancora in volo = «troppo presto»; altro palloncino = errore.</li>
    <li><b>Tasti:</b> grilletto = colpire &middot; <b>A o X</b> = pausa e ripresa &middot; <b>B o Y tenuto 2 secondi</b> = ferma la partita.</li>
-   <li>Niente palloncini o api pi&ugrave; vicini del limite scelto. Nessuna vibrazione (non disponibile nel visore).</li>
+   <li>Niente oggetti più vicini del limite scelto. Nessuna vibrazione (non disponibile nel visore).</li>
+   <li><b>Suono del segnale rosso:</b> è spento di proposito. Se lo accendi, il giocatore può rispondere al suono senza guardare l’ape: il tempo di reazione non misura più la vista.</li>
+   <li><b>Cosa misura il gioco 1:</b> inseguimento di vergenza e tempismo. Il raggio colpisce per direzione, quindi la profondità non è necessaria per centrare i bersagli. L’ape con la mano non dominante può avere tempi più lenti per motivi motori e non solo visivi. La velocità adattiva rende le sedute confrontabili solo con la velocità costante.</li>
    <li>Dopo la partita i risultati compaiono qui sotto; si possono mandare per email.</li>
   </ul>
  </div>
 
  <div class="card">
-  <h2>5. Risultati</h2>
+  <h2>6. Risultati</h2>
   <div id="res"><p class="mut">Ancora nessuna partita.</p></div>
   <p><button class="primary" id="btnMail">Invia i risultati per email</button> <button id="btnCopy">Copia il riepilogo</button> <button id="btnDl">Scarica i risultati (.json)</button> <button id="btnClr">Cancella le partite salvate</button></p>
-  <p class="hint">&laquo;Invia&raquo; apre Gmail nel browser con la mail gi&agrave; scritta: controlla e premi <b>Invia</b> (serve internet). <b>Cancella</b> toglie solo l&rsquo;elenco delle partite; i record personali restano. <span id="mailMsg"></span></p>
+  <p class="hint">«Invia» apre Gmail nel browser con la mail già scritta: controlla e premi <b>Invia</b> (serve internet). <b>Cancella</b> toglie solo l’elenco delle partite; i record personali restano. <span id="mailMsg"></span></p>
   <pre id="sum"></pre>
  </div>
 </main>
 <canvas id="xrCanvas"></canvas>
 <script>
 "use strict";
-// SFDN Gioco v0.1 "Ape e palloncini". Un solo file, offline, nessuna libreria.
+// SFDN Gioco v0.2: gioco 1 "Ape rossa" e gioco 2 "Ape e palloncino" (il v0.1, invariato). Un solo file, offline, nessuna libreria.
 // Codice adattato dal Visore v0.6.2 (vedi references/lineage.md nel workspace del gioco). Sperimentale, non validato.
-var VERSION='SFDN Gioco v0.1';
+var VERSION='SFDN Gioco v0.2';
 var $=function(id){return document.getElementById(id);};
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function deg(a){ return a*Math.PI/180; }
@@ -110,10 +168,16 @@ var DEF={
   stopHoldMs:2000, resultMs:900, firstMs:1500, quasiMs:500,
   pts:10, bonus:5, bonusMax:25, burst:1,
   tone:0.15, voiceGain:1.0, voiceCool:4000,
-  profiles:{comodo:2.5,medio:1.5,impegnativo:0.8}
+  profiles:{comodo:2.5,medio:1.5,impegnativo:0.8},
+  g1:{pulseAmp:0.15, pulseHz:2.5, faceDeg:15, hardRefD:4, groundEl:-12, elTopMin:8, firstApeS:5, respawnS:0.5, fadeS:0.4, leaveS:0.4,
+      ptsBall:1, ptsApe:5, ptsOmis:1, floorClear:0.35, freezeS:1.0, startFreezeS:1.5, apeStartExtra:2, apeGapEnd:2, bobAmp:0.02}
 };
 // impostazioni modificabili dall'utente (pagina 2D)
-var SETDEF={nome:'',mano:'R',profilo:'medio',near:1.5,durMin:3,indizi:'facile',colore:'off',stay:2,flight:4,voce:'on',mailTo:''};
+var SETDEF={nome:'',mano:'R',profilo:'medio',near:1.5,durMin:3,indizi:'facile',colore:'off',stay:2,flight:4,voce:'on',mailTo:'',
+  // gioco 1 "Ape rossa": base
+  compito:'both',baMode:'caduta',adatt:'on',snEsito:'on',snAppar:'off',snSegn:'off',
+  // gioco 1: avanzate
+  v0:0.25,vStep:15,nDown:4,nUp:8,vMin:30,nBal:4,apeMin:10,apeMax:20,apeVel:0.5,apeVar:20,apeWin:2.5,apeAng:2,fAz:30,fEl:20,secAz:4,secEl:2,una:'off',showV:'on'};
 var SET={}; (function(){ for(var k in SETDEF) SET[k]=SETDEF[k]; })();
 var KEY='SFDN_gioco_visore', KEY_IMP='SFDN_gioco_visore_imp', VKEY='SFDN_test_visore';   // VKEY: Visore, SOLA LETTURA
 var STORE=true;
@@ -121,7 +185,8 @@ try{ var _s=JSON.parse(localStorage.getItem(KEY_IMP)||'null'); if(_s) for(var _k
 var DB={v:1,prove:[],record:{}};
 try{ var _r=localStorage.getItem(KEY); if(_r){ var _o=JSON.parse(_r); if(_o&&_o.prove) DB=_o; if(!DB.record) DB.record={}; } else localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){ STORE=false; }
 function saveSET(){ try{ localStorage.setItem(KEY_IMP,JSON.stringify(SET)); }catch(e){} }
-function saveDB(){ try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){} }
+// ogni partita porta l'id del gioco: il gioco 1 lo scrive da solo ('ape_rossa'); le partite del gioco 2 (v0.1, codice invariato) lo ricevono qui
+function saveDB(){ try{ DB.prove.forEach(function(p){ if(!p.gioco) p.gioco='ape_e_palloncino'; }); localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){} }
 
 function num(v,d){ var x=parseFloat(String(v).replace(',','.')); return isFinite(x)?x:d; }
 function normSET(){
@@ -136,6 +201,27 @@ function normSET(){
   SET.flight=clamp(num(SET.flight,4),2,8);
   SET.voce=(SET.voce==='off')?'off':'on';
   SET.nome=String(SET.nome||'').slice(0,60); SET.mailTo=String(SET.mailTo||'').trim().slice(0,120);
+  // gioco 1
+  SET.compito=(SET.compito==='balloons'||SET.compito==='ape')?SET.compito:'both';
+  SET.baMode=(SET.baMode==='fermi')?'fermi':'caduta';
+  ['adatt','snEsito','snAppar','snSegn','una','showV'].forEach(function(k){ SET[k]=(SET[k]==='on')?'on':(SET[k]==='off'?'off':SETDEF[k]); });
+  SET.v0=clamp(num(SET.v0,0.25),0.05,1.5);
+  SET.vStep=clamp(num(SET.vStep,15),5,40);
+  SET.nDown=clamp(Math.round(num(SET.nDown,4)),1,20);
+  SET.nUp=clamp(Math.round(num(SET.nUp,8)),1,30);
+  SET.vMin=clamp(num(SET.vMin,30),10,90);
+  SET.nBal=clamp(Math.round(num(SET.nBal,4)),3,5);
+  SET.apeMin=clamp(num(SET.apeMin,10),2,60);
+  SET.apeMax=clamp(num(SET.apeMax,20),SET.apeMin,90);
+  SET.apeVel=clamp(num(SET.apeVel,0.5),0.1,2);
+  SET.apeVar=clamp(num(SET.apeVar,20),0,40);
+  SET.apeWin=clamp(num(SET.apeWin,2.5),0.5,6);
+  SET.apeAng=clamp(num(SET.apeAng,2),1,5);
+  SET.fAz=clamp(num(SET.fAz,30),10,45);
+  SET.fEl=clamp(num(SET.fEl,20),5,30);
+  SET.secAz=clamp(Math.round(num(SET.secAz,4)),1,8);
+  SET.secEl=clamp(Math.round(num(SET.secEl,2)),1,4);
+  if(SET.secAz*SET.secEl<2) SET.secAz=2;
 }
 
 // ---------------- lettura del Visore (SOLA LETTURA: non si scrive mai in SFDN_test_visore) ----------------
@@ -157,11 +243,15 @@ function nomeEff(){ return (SET.nome||'').trim()||VIS.nome||''; }
 function mailEff(){ return (SET.mailTo||'').trim()||VIS.mail||''; }
 
 // ---------------- pagina 2D: impostazioni ----------------
+// campi della pagina: [id, chiave di SET]. Valgono per i due giochi; i campi del gioco 1 sono nel riquadro BASE e AVANZATE.
+var FIELDS=[['sNome','nome'],['sMano','mano'],['sIndizi','indizi'],['sColore','colore'],['sDur','durMin'],['sStay','stay'],['sFlight','flight'],['sVoce','voce'],['sMail','mailTo'],['sNear','near'],
+  ['sCompito','compito'],['sBaMode','baMode'],['sAdatt','adatt'],['sEsito','snEsito'],['sAppar','snAppar'],['sSegn','snSegn'],
+  ['sV0','v0'],['sVStep','vStep'],['sNDown','nDown'],['sNUp','nUp'],['sVMin','vMin'],['sNBal','nBal'],['sApeMin','apeMin'],['sApeMax','apeMax'],['sApeVel','apeVel'],['sApeVar','apeVar'],['sApeWin','apeWin'],['sApeAng','apeAng'],
+  ['sFAz','fAz'],['sFEl','fEl'],['sSecAz','secAz'],['sSecEl','secEl'],['sUna','una'],['sShowV','showV']];
 function applySettings(){
   normSET();
-  $('sNome').value=SET.nome; $('sMano').value=SET.mano; $('sProfilo').value=SET.profilo; $('sNear').value=SET.near;
-  $('sDur').value=SET.durMin; $('sIndizi').value=SET.indizi; $('sColore').value=SET.colore; $('sStay').value=SET.stay; $('sFlight').value=SET.flight;
-  $('sVoce').value=SET.voce; $('sMail').value=SET.mailTo; nearHint();
+  FIELDS.forEach(function(f){ var e=$(f[0]); if(e) e.value=SET[f[1]]; });
+  $('sProfilo').value=SET.profilo; nearHint();
 }
 function nearHint(){
   var t='';
@@ -171,9 +261,7 @@ function nearHint(){
   $('nearHint').textContent=t;
 }
 function readSettings(){
-  SET.nome=$('sNome').value; SET.mano=$('sMano').value; SET.indizi=$('sIndizi').value; SET.colore=$('sColore').value;
-  SET.durMin=$('sDur').value; SET.stay=$('sStay').value; SET.flight=$('sFlight').value; SET.voce=$('sVoce').value; SET.mailTo=$('sMail').value;
-  SET.near=$('sNear').value;
+  FIELDS.forEach(function(f){ var e=$(f[0]); if(e) SET[f[1]]=e.value; });
   normSET(); saveSET(); applySettings();
 }
 $('sProfilo').addEventListener('change',function(){ var p=$('sProfilo').value; if(p in DEF.profiles) $('sNear').value=DEF.profiles[p]; readSettings(); });
@@ -181,8 +269,8 @@ $('sNear').addEventListener('change',function(){
   var v=parseFloat(String($('sNear').value).replace(',','.')); var m=null;
   for(var k in DEF.profiles) if(Math.abs(DEF.profiles[k]-v)<1e-9) m=k;
   $('sProfilo').value=m||'libero'; readSettings(); });
-['sNome','sMano','sDur','sIndizi','sColore','sStay','sFlight','sVoce','sMail'].forEach(function(id){ $(id).addEventListener('change',readSettings); });
-// ================= AUDIO: toni (WebAudio) e voci (file 01-07) =================
+FIELDS.forEach(function(f){ if(f[0]!=='sNear') $(f[0]).addEventListener('change',readSettings); });
+// ================= AUDIO: toni (WebAudio) e voci (file 01-12: 01-07 gioco 2, 08-12 gioco 1) =================
 // I toni funzionano gia' nel Pico (Visore rfBeep). Le voci sono opzionali: se i file mancano o non si decodificano, restano i toni.
 var AUD=null;
 function ac(){ try{ if(!AUD){ var C=window.AudioContext||window.webkitAudioContext; if(!C) return null; AUD=new C(); } if(AUD.state==='suspended') AUD.resume(); return AUD; }catch(e){ return null; } }
@@ -211,10 +299,20 @@ function snd(name){ (window.__gSnd=window.__gSnd||[]).push(name);
   else if(name==='combo'){ [523,659,784,1046].forEach(function(f,i){ tone(f,0.08,{at:0.12+i*0.07}); }); }
   else if(name==='fine'){ [784,659,523,392].forEach(function(f,i){ tone(f,0.16,{at:i*0.14}); }); }
   else if(name==='pausa'){ tone(440,0.1); tone(330,0.14,{at:0.1}); }
-  else if(name==='via'){ tone(520,0.1); tone(780,0.16,{at:0.1}); } }
+  else if(name==='via'){ tone(520,0.1); tone(780,0.16,{at:0.1}); }
+  // gioco 1 "Ape rossa": suoni distinti
+  else if(name==='g1_giusto'){ tone(784,0.08); tone(1047,0.1,{at:0.08}); tone(1319,0.16,{at:0.18}); }
+  else if(name==='g1_presto'){ tone(180,0.2,{type:'triangle',vol:1.4}); tone(140,0.2,{type:'triangle',at:0.2,vol:1.2}); }
+  else if(name==='g1_omissione'){ tone(392,0.14,{type:'triangle'}); tone(294,0.14,{type:'triangle',at:0.15}); tone(220,0.22,{type:'triangle',at:0.3}); }
+  else if(name==='g1_mancato'){ tone(170,0.06,{vol:0.6}); }
+  else if(name==='g1_apparizione'){ tone(520,0.12,{f2:700,vol:0.8}); tone(700,0.1,{at:0.12,vol:0.8}); }
+  else if(name==='g1_segnale'){ tone(1250,0.09,{vol:1.2}); tone(1250,0.09,{at:0.14,vol:1.2}); }
+  else if(name==='g1_pop'){ noise(0.1,{lp:3200,vol:0.8}); tone(500,0.05,{vol:0.5}); }
+  else if(name==='g1_terra'){ tone(110,0.14,{type:'triangle',f2:70,vol:1.2}); } }
 
 // ---------------- voci ----------------
-var AUDTXT=["Benvenuto! Colpisci il palloncino quando l’ape ci si posa sopra.","Bravo!","Quasi!","Troppo presto, aspetta l’ape.","Pausa. Riposa gli occhi.","Il gioco è finito. Bravo!","Questa è una prova della voce."];
+var AUDTXT=["Benvenuto! Colpisci il palloncino quando l’ape ci si posa sopra.","Bravo!","Quasi!","Troppo presto, aspetta l’ape.","Pausa. Riposa gli occhi.","Il gioco è finito. Bravo!","Questa è una prova della voce.",
+  "Ape rossa. Colpisci i palloncini con la mano che usi di più, e l’ape con l’altra mano, ma solo quando diventa rossa.","Rossa! Colpiscila!","Troppo presto, aspetta che diventi rossa.","Peccato, l’ape è passata.","Bravo, ape colpita!"];
 var AUDDIR='../audio/';
 var VO=AUDTXT.map(function(t,i){ return {n:i+1,txt:t,url:AUDDIR+('0'+(i+1)).slice(-2)+'.wav',stato:'in attesa',loaded:null,decoded:null,dur:null,bytes:null,err:'',buf:null}; });
 var VOICE={busyUntil:0,cur:0,src:null,last:{}};
@@ -237,9 +335,9 @@ function audioRender(){
   VO.forEach(function(v,i){ h+='<tr><td>'+('0'+v.n).slice(-2)+'</td><td>'+esc(v.txt)+'</td><td class="'+(v.loaded===true?'ok':(v.loaded===false?'bad':''))+'">'+sn(v.loaded)+'</td><td class="'+(v.decoded===true?'ok':(v.decoded===false?'bad':''))+'">'+sn(v.decoded)+'</td><td>'+(v.dur!=null?fmt(v.dur,1)+' s':'-')+'</td><td class="mut">'+esc(v.err||'')+'</td><td><button class="small" data-i="'+i+'"'+(v.buf?'':' disabled')+'>▶</button></td></tr>'; });
   t.innerHTML=h;
   Array.prototype.forEach.call(t.querySelectorAll('button[data-i]'),function(b){ b.onclick=function(){ say(+b.getAttribute('data-i')+1,{force:true}); }; });
-  var n=voPronte(); $('audSum').textContent='Voci pronte: '+n+' su 7'+(n<7?' (le altre sono sostituite dai toni)':'')+'.';
+  var n=voPronte(); $('audSum').textContent='Voci pronte: '+n+' su '+VO.length+(n<VO.length?' (le altre sono sostituite dai toni)':'')+'.';
 }
-// riproduce la voce i (1-7). Una voce non parte sopra un'altra (salvo force o interrupt: la pausa e la fine tagliano la voce in corso). Ritorna true se e' partita.
+// riproduce la voce i (1-12). Una voce non parte sopra un'altra (salvo force o interrupt: la pausa e la fine tagliano la voce in corso). Ritorna true se e' partita.
 function say(i,o){ o=o||{}; var now=performance.now(), v=VO[i-1];
   if(!v||!v.buf) return false;
   if(!o.force&&SET.voce!=='on') return false;
@@ -320,7 +418,8 @@ function hitTest(ray){   // pannelli piani (menu): piano z = costante
     if(Math.abs(x-o.x)<=o.w&&Math.abs(y-o.y)<=o.h&&(!best||t<best.t)) best={o:o,t:t,x:x,y:y}; });
   return best;
 }
-function rayEnd(r){ if(VRS.scene==='play'&&typeof rayBalloon==='function'){ var b=rayBalloon(r,1); return b?{t:b.t,hit:true}:{t:6,hit:false}; } var h=hitTest(r); return h?{t:h.t,hit:true}:{t:3,hit:false}; }
+function rayEnd(r,k){ if(VRS.rayEnd) return VRS.rayEnd(r,k); if(VRS.scene==='play'&&typeof rayBalloon==='function'){ var b=rayBalloon(r,1); return b?{t:b.t,hit:true}:{t:6,hit:false}; } var h=hitTest(r); return h?{t:h.t,hit:true}:{t:3,hit:false}; }
+function onSelectStart(ev){ if(VRS.noSel&&performance.now()<VRS.noSel) return; if(VRS.onTriggerStart) VRS.onTriggerStart(ev); }      // pressione del grilletto (solo gioco 1: misura del tempo di reazione)
 function onSelect(ev){ if(VRS.noSel&&performance.now()<VRS.noSel) return;
   if(VRS.onTrigger){ VRS.onTrigger(ev); return; }
   var r=RAYS[ev.inputSource.handedness||'x']; if(!r) return; var h=hitTest(r); if(h&&h.o.click) h.o.click(); }
@@ -343,7 +442,7 @@ function drawObj(o,Vm){
 }
 function bindQuad(){ gl.bindBuffer(gl.ARRAY_BUFFER,quadBuf); gl.enableVertexAttribArray(U.p); gl.vertexAttribPointer(U.p,3,gl.FLOAT,false,20,0); gl.enableVertexAttribArray(U.uv); gl.vertexAttribPointer(U.uv,2,gl.FLOAT,false,20,12); }
 function drawRays(){ if(VRS.noRay) return;
-  Object.keys(RAYS).forEach(function(k){ var r=RAYS[k], e0=rayEnd(r), len=e0.t, e=[r.o[0]+r.d[0]*len,r.o[1]+r.d[1]*len,r.o[2]+r.d[2]*len], col=e0.hit?[1,0.85,0.2,1]:[0.95,0.97,1,1];
+  Object.keys(RAYS).forEach(function(k){ var r=RAYS[k], e0=rayEnd(r,k), len=e0.t, e=[r.o[0]+r.d[0]*len,r.o[1]+r.d[1]*len,r.o[2]+r.d[2]*len], col=VRS.rayCol?VRS.rayCol(k,e0.hit):(e0.hit?[1,0.85,0.2,1]:[0.95,0.97,1,1]);
     gl.bindBuffer(gl.ARRAY_BUFFER,lineBuf); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([r.o[0],r.o[1],r.o[2],0,0,e[0],e[1],e[2],0,0]),gl.DYNAMIC_DRAW);
     gl.vertexAttribPointer(U.p,3,gl.FLOAT,false,20,0); gl.vertexAttribPointer(U.uv,2,gl.FLOAT,false,20,12);
     gl.uniformMatrix4fv(U.M,false,ID); gl.uniform1i(U.mode,0); gl.uniform4fv(U.col,col); gl.drawArrays(gl.LINES,0,2);
@@ -595,23 +694,346 @@ function gFinish(why){
   if(!G||G.state==='end') return; G.state='end'; VRS.tick=null; VRS.onTrigger=null;
   var p=gSave(why); snd('fine'); say(6,{interrupt:true}); sceneEnd(p); }
 function gPartial(){ if(G&&G.state!=='end'&&!G.saved&&G.rows.length){ G.state='end'; gSave('uscita VR'); } else if(G){ G.state='end'; } }
-// ================= SCENE VR (menu, Prova audio, fine) e pagina 2D =================
-function setScene(name,clear){ VRS.tok=(VRS.tok||0)+1; VRS.scene=name; clearScene(); VRS.clear=clear||MENU_BG; VRS.tick=null; VRS.onTrigger=null; VRS.noRay=false; VRS.reS=true; VRS.noSel=performance.now()+600; }
-function setTxt(){ return 'Limite vicino '+fmt(SET.near,1)+' m ('+SET.profilo+') · '+SET.durMin+' min · indizi '+SET.indizi+' · mano '+(SET.mano==='L'?'sinistra':'destra')+' · colore '+(SET.colore==='on'?'sì':'no')+' · voce '+(SET.voce==='on'?(voPronte()+'/7'):'no'); }
+// ================= GIOCO 1 "APE ROSSA" =================
+// Palloncini BLU (cadono o restano fermi) colpiti con la mano dominante; ogni 10-20 s arriva l'ape, che al limite vicino diventa ROSSA e pulsa:
+// solo allora va colpita, con l'altra mano. Il rosso e' riservato all'ape e significa sempre "colpisci ora".
+// Stato della partita in H (il gioco 2 usa G e non viene toccato). Misure in metri, coordinate di SCENA (vedi VRS.SS).
+var BLUE1=[0.1,0.42,1,1];
+var RAYCOL={B:[0.78,0.45,1,1],A:[0.45,0.95,0.3,1]};      // raggio dei palloncini: viola; raggio dell'ape: verde chiaro (mai rossi, diversi dal blu e dal giallo/rosso dell'ape)
+var GROUNDCOL=[0.3,0.58,0.3,1];
+var H=null;
+function r3(v){ return Math.round(v*1000)/1000; }
+
+// ---------------- texture dell'ape: gialla (quella del gioco 2) oppure rossa per il segnale ----------------
+function apeDraw(k,body,head,stripe){ var c=document.createElement('canvas'); c.width=c.height=256; var x=c.getContext('2d'); x.lineJoin='round'; x.lineCap='round';
+  function wing(cx,cy,rx,ry,rot){ x.save(); x.translate(cx,cy); x.rotate(rot); x.beginPath(); x.ellipse(0,0,rx,ry,0,0,Math.PI*2); x.fillStyle='rgba(215,238,255,0.92)'; x.fill(); x.lineWidth=5; x.strokeStyle='#27415f'; x.stroke(); x.restore(); }
+  if(k===0){ wing(140,70,26,50,-0.5); wing(170,78,24,44,-0.2); }
+  else if(k===1){ wing(138,92,50,22,-1.0); wing(172,98,46,20,-0.7); }
+  else { wing(150,112,62,16,0.12); }
+  x.beginPath(); x.moveTo(222,128); x.lineTo(252,128); x.lineWidth=9; x.strokeStyle='#111'; x.stroke();
+  x.beginPath(); x.ellipse(135,132,92,58,0,0,Math.PI*2); x.fillStyle=body; x.fill();
+  x.save(); x.beginPath(); x.ellipse(135,132,92,58,0,0,Math.PI*2); x.clip(); x.fillStyle=stripe; [112,152,192].forEach(function(px){ x.fillRect(px,60,18,150); }); x.restore();
+  x.beginPath(); x.ellipse(135,132,92,58,0,0,Math.PI*2); x.lineWidth=8; x.strokeStyle='#111'; x.stroke();
+  x.beginPath(); x.arc(58,132,40,0,Math.PI*2); x.fillStyle=head; x.fill(); x.lineWidth=8; x.strokeStyle='#111'; x.stroke();
+  x.fillStyle='#fff'; x.beginPath(); x.arc(46,122,11,0,Math.PI*2); x.fill(); x.beginPath(); x.arc(72,122,11,0,Math.PI*2); x.fill();
+  x.fillStyle='#111'; x.beginPath(); x.arc(44,124,5,0,Math.PI*2); x.fill(); x.beginPath(); x.arc(70,124,5,0,Math.PI*2); x.fill();
+  x.lineWidth=5; x.strokeStyle='#111'; x.beginPath(); x.arc(58,142,14,0.2,Math.PI-0.2); x.stroke();
+  x.beginPath(); x.moveTo(44,96); x.quadraticCurveTo(34,70,22,66); x.moveTo(72,96); x.quadraticCurveTo(80,70,92,64); x.stroke();
+  return c; }
+function apeTexG(k,tone){ if(tone==='y') return apeTex(k); var key='g1ape'+tone+k; if(TEXC[key]) return TEXC[key];
+  var cols=(tone==='r1')?['#e8101c','#ff4d4d','#4a0008']:['#a30010','#d93030','#2a0004'];
+  return TEXC[key]=texCanvas(apeDraw(k,cols[0],cols[1],cols[2]),false); }
+
+// ---------------- configurazione della partita ----------------
+function h1Cfg(){
+  var near=SET.near, dmin=minCenter(near+DEF.margin), dmax=Math.max(DEF.farMin,near+DEF.farExtra), n=SET.nBal, step=(dmax-dmin)/n, V0=SET.v0, fall=SET.baMode==='caduta', G1=DEF.g1;
+  return {near:near,dmin:dmin,dmax:dmax,DMIN:dmin,n:n,step:step,gapMin:DEF.gapStep*step,easy:easy(),fall:fall,
+    V0:V0,vMin:V0*SET.vMin/100,vStep:V0*SET.vStep/100,nDown:SET.nDown,nUp:SET.nUp,ad:fall&&SET.adatt==='on',
+    balls:SET.compito!=='ape',ape:SET.compito!=='balloons',apeMin:SET.apeMin,apeMax:SET.apeMax,apeVel:SET.apeVel,apeVar:SET.apeVar/100,win:SET.apeWin,apeAng:SET.apeAng,
+    far:Math.max(DEF.farMin,near+2),fAz:SET.fAz,fEl:SET.fEl,secAz:SET.secAz,secEl:SET.secEl,una:SET.una==='on',showV:SET.showV==='on',
+    snE:SET.snEsito==='on',snA:SET.snAppar==='on',snS:SET.snSegn==='on',durS:(window.__test&&window.__test.durS)||SET.durMin*60,
+    touchEl:function(az){ return Math.atan(Math.tan(deg(G1.groundEl))*Math.cos(deg(az)))*180/Math.PI+DEF.hardAng; } };    // difficile: elevazione del centro a cui il palloncino tocca la fascia di terreno
+}
+function h1Handed(){ return SET.mano==='L'?'left':'right'; }
+// ruolo di una mano ('left'/'right'/altro): 'balloon' (palloncini), 'ape', 'both' (una mano sola o un solo controller) oppure null (mano da ignorare)
+function h1Role(hand){
+  var C=H.cfg, wantB=h1Handed(), wantA=(wantB==='left')?'right':'left', has={left:false,right:false};
+  if(xrSession) for(var i=0;i<xrSession.inputSources.length;i++){ var hh=xrSession.inputSources[i].handedness; if(hh in has) has[hh]=true; }
+  if(C.una){ if(has[wantB]) return hand===wantB?'both':null; H.unaEff=true; return 'both'; }
+  if(has[wantB]&&has[wantA]) return hand===wantB?'balloon':(hand===wantA?'ape':null);
+  H.unaEff=true; return 'both'; }
+
+// ---------------- palloncini ----------------
+function h1MkBalloon(initial){
+  var C=H.cfg, G1=DEF.g1, live=H.balloons.filter(function(b){ return b.state==='live'; }), best=null, bs=-1e9;
+  for(var k=0;k<80;k++){ var d=C.dmin+Math.random()*(C.dmax-C.dmin), az=(Math.random()*2-1)*C.fAz, gap=1e9, sep=1e9;
+    live.forEach(function(b){ gap=Math.min(gap,Math.abs(b.d0-d)); sep=Math.min(sep,Math.abs(b.az-az)); });
+    var sc=(gap>=C.gapMin?1000:gap*100)+Math.min(sep,40); if(sc>bs){ bs=sc; best={d:d,az:az}; } }
+  var d=best.d, az=best.az, b={id:++H.bid,d0:d,az:az,ph:Math.random()*6.28,state:'live',tSpawn:H.elapsed,fadeFrom:initial?-9:H.elapsed,v0:C.fall?H.v:null,ape:H.ape?H.ape.phase!=='idle':false};
+  if(C.fall){
+    var elTop=G1.elTopMin+Math.random()*Math.max(0,C.fEl-G1.elTopMin), prog=initial?Math.random()*0.6:0;
+    b.r=brad(d);
+    if(C.easy){ var yTop=d*Math.tan(deg(elTop)), yEnd=DEF.floorY+b.r; b.y=yTop-prog*(yTop-yEnd); b.x=Math.sin(deg(az))*d; b.z=-Math.cos(deg(az))*d; b.el=Math.atan2(b.y,d)*180/Math.PI; }
+    else { b.el=elTop-prog*(elTop-C.touchEl(az)); var u=dirOf(az,b.el); b.x=u[0]*d; b.y=u[1]*d; b.z=u[2]*d; }
+  } else {
+    var el=DEF.elMin+Math.random()*(DEF.elMax-DEF.elMin), P=balloonPos(d,az,el); b.r=P.r; b.x=P.x; b.y=P.y; b.z=P.z; b.el=P.el;
+  }
+  b.obj=add({kind:'sphere',x:b.x,y:b.y,z:b.z,w:b.r,h:b.r,col:[BLUE1[0],BLUE1[1],BLUE1[2],0]});
+  if(C.easy) b.sh=add({kind:'blob',M:[b.r*1.6,0,0,0, 0,0,-b.r*0.7,0, 0,1,0,0, b.x,DEF.floorY+0.003,b.z,1],x:b.x,y:DEF.floorY,z:b.z,w:b.r,h:b.r,col:[0,0,0,0]});
+  H.balloons.push(b); return b; }
+function h1Dist(b){ return Math.hypot(b.obj.x,b.obj.y,b.obj.z); }
+function h1RayBalloon(ray,scale){
+  if(!H) return null; var best=null;
+  H.balloons.forEach(function(b){ if(b.state!=='live'||b.obj.col[3]<0.6) return; var R=b.r*(scale||DEF.hitScale), o=b.obj, cx=o.x-ray.o[0], cy=o.y-ray.o[1], cz=o.z-ray.o[2];
+    var t=cx*ray.d[0]+cy*ray.d[1]+cz*ray.d[2]; if(t<0) return; var d2=cx*cx+cy*cy+cz*cz-t*t; if(d2>R*R) return;
+    var th=t-Math.sqrt(R*R-d2); if(!best||th<best.t) best={b:b,t:th}; });
+  return best; }
+function h1Row(b,e,extra){ var C=H.cfg, d3=h1Dist(b), row={n:b.id,e:e,t_ms:Math.round((H.elapsed-b.tSpawn)*1000),v:C.fall?r3(H.v):null,v_comparsa:b.v0==null?null:r3(b.v0),d:r2(d3),rho:r2(Math.hypot(b.obj.x,b.obj.z)),az:Math.round(b.az),t:r1(H.elapsed),ape:H.ape.phase!=='idle'?1:0,fin:H.ape.phase==='red'?1:0};
+  if(extra) for(var k in extra) row[k]=extra[k]; H.rows.push(row); return row; }
+function h1Pop(b,now){
+  b.state='pop'; b.t0=now; b.tLast=now; var o=b.obj, n=Math.hypot(o.x,o.y,o.z)||1, u=[o.x/n,o.y/n,o.z/n], e1=[u[2],0,-u[0]], l=Math.hypot(e1[0],e1[2])||1; e1=[e1[0]/l,0,e1[2]/l];
+  var e2=[u[1]*e1[2]-u[2]*e1[1],u[2]*e1[0]-u[0]*e1[2],u[0]*e1[1]-u[1]*e1[0]];
+  b.frags=[]; for(var i=0;i<9;i++){ var ph=Math.PI*2*i/9+Math.random()*0.5, sp=0.8+Math.random()*0.5;
+    var v=[(Math.cos(ph)*e1[0]+Math.sin(ph)*e2[0])*sp+u[0]*0.25,(Math.cos(ph)*e1[1]+Math.sin(ph)*e2[1])*sp+u[1]*0.25,(Math.cos(ph)*e1[2]+Math.sin(ph)*e2[2])*sp+u[2]*0.25];
+    b.frags.push({o:add({kind:'sphere',x:o.x,y:o.y,z:o.z,w:0.03,h:0.03,col:[BLUE1[0],BLUE1[1],BLUE1[2],1]}),v:v}); }
+  if(b.sh){ dropObj(b.sh); b.sh=null; } }
+function h1Done(b){ if(b.frags) b.frags.forEach(function(f){ dropObj(f.o); }); dropObj(b.obj); if(b.sh) dropObj(b.sh); var k=H.balloons.indexOf(b); if(k>=0) H.balloons.splice(k,1); }
+function h1HitBalloon(b,now){
+  var C=H.cfg; h1Row(b,'colpito'); H.cnt.colpiti++; H.score+=DEF.g1.ptsBall; h1Pop(b,now); H.nextSpawn=Math.max(H.nextSpawn,H.elapsed+0.4);
+  if(C.snE) snd('g1_pop'); h1Count('colpito'); h1Board(true); }
+function h1Land(b,now){
+  var C=H.cfg; b.state='land'; b.tLand=now; if(C.easy){ b.y=DEF.floorY+b.r; b.obj.y=b.y; }
+  h1Row(b,'terra'); H.cnt.terra++; H.nextSpawn=Math.max(H.nextSpawn,H.elapsed+0.4);
+  if(H.pass&&H.ape.phase!=='idle'){ H.pass.terraApe++; H.cnt.terra_ape++; if(H.ape.phase==='red'){ H.pass.terraWin++; H.cnt.terra_finestra++; } }
+  if(C.snE) snd('g1_terra'); h1Count('terra'); h1Board(true); }
+
+// ---------------- velocita' adattiva (solo palloncini a caduta) ----------------
+function h1SetSpeed(nv,why){ var C=H.cfg, old=H.v; H.v=nv; H.vHist.push([H.elapsed,nv]);
+  H.vChanges.push({t:r1(H.elapsed),da:r3(old),a:r3(nv),motivo:why,a_terra:H.nT,colpiti:H.nC}); H.nT=0; H.nC=0; }
+function h1Count(kind){
+  var C=H.cfg; if(!C.fall||!C.ad) return;
+  if(kind==='terra'){ H.nT++; if(H.nT>=C.nDown&&H.v>C.vMin+1e-9) h1SetSpeed(Math.max(C.vMin,H.v-C.vStep),'scende'); }
+  else { H.nC++; if(H.nC>=C.nUp&&H.v<C.V0-1e-9) h1SetSpeed(Math.min(C.V0,H.v+C.vStep),'sale'); } }
+function h1VelAvg(){ var hist=H.vHist, end=H.elapsed, a=Math.max(0,end-60); if(end<=a+1e-9) return H.v; var s=0;
+  for(var i=0;i<hist.length;i++){ var t0=hist[i][0], t1=(i+1<hist.length)?hist[i+1][0]:end, lo=Math.max(t0,a), hi=Math.min(t1,end); if(hi>lo) s+=hist[i][1]*(hi-lo); }
+  return s/(end-a); }
+
+function h1BalloonTick(b,dt,now){
+  var C=H.cfg;
+  if(b.state==='pop'){ var t=now-b.t0, d2=Math.min(0.1,(now-b.tLast)/1000); b.tLast=now;
+    if(t<180){ var kk=1+t/180*0.35; b.obj.w=b.obj.h=b.r*kk; b.obj.col[3]=1-t/180; } else b.obj.hide=true;
+    b.frags.forEach(function(f){ var o=f.o; o.x+=f.v[0]*d2; o.y+=f.v[1]*d2; o.z+=f.v[2]*d2; o.col[3]=Math.max(0,1-t/500); });
+    if(t>=520) h1Done(b); return; }
+  if(b.state==='land'){ var k=Math.min(1,(now-b.tLand)/350); b.obj.h=b.r*(1-0.45*k); b.obj.w=b.r*(1+0.25*k); b.obj.col[3]=1-k; if(b.sh) b.sh.col[3]=0.45*(1-k); if(k>=1) h1Done(b); return; }
+  var al=Math.min(1,Math.max(0,(H.elapsed-b.fadeFrom)/DEF.g1.fadeS));
+  if(C.fall){
+    if(C.easy){ b.y-=H.v*dt; b.obj.y=b.y; b.el=Math.atan2(b.y,b.d0)*180/Math.PI; if(b.y<=DEF.floorY+b.r){ h1Land(b,now); return; } }
+    else { b.el-=(H.v/DEF.g1.hardRefD)*180/Math.PI*dt; var u=dirOf(b.az,b.el); b.obj.x=b.x=u[0]*b.d0; b.obj.y=b.y=u[1]*b.d0; b.obj.z=b.z=u[2]*b.d0; if(b.el<=C.touchEl(b.az)){ h1Land(b,now); return; } }
+  } else b.obj.y=b.y+bobY(b,now);
+  b.alpha=al; b.obj.col[3]=al; if(b.sh) b.sh.col[3]=0.45*al; }
+function h1Refill(){ var C=H.cfg; if(!C.balls) return; var live=H.balloons.filter(function(b){ return b.state==='live'; }).length;
+  if(live<C.n&&H.elapsed>=H.nextSpawn){ h1MkBalloon(false); H.nextSpawn=H.elapsed+DEF.g1.respawnS; } }
+
+// ---------------- ape: settori, percorso, rosso ----------------
+function h1Sector(idx){ var C=H.cfg, i=idx%C.secAz, j=Math.floor(idx/C.secAz), w=2*C.fAz/C.secAz, h=2*C.fEl/C.secEl; return {az:-C.fAz+(i+0.5)*w,el:-C.fEl+(j+0.5)*h,w:w,h:h,i:i,j:j}; }
+function h1SectorPoint(idx,d){ var s=h1Sector(idx), az=s.az+(Math.random()*2-1)*0.35*s.w, el=s.el+(Math.random()*2-1)*0.35*s.h, minY=DEF.floorY+DEF.g1.floorClear;
+  if(H.cfg.easy&&d*Math.sin(deg(el))<minY) el=Math.asin(clamp(minY/d,-1,1))*180/Math.PI;
+  var u=dirOf(az,el); return [u[0]*d,u[1]*d,u[2]*d]; }
+// percorso rettilineo S -> A: distanza minima su TUTTO il tragitto e angolo rispetto al viso (la direzione del moto non deve puntare alla testa)
+function h1PathCheck(S,A){ var C=H.cfg, v=[A[0]-S[0],A[1]-S[1],A[2]-S[2]], vv=v[0]*v[0]+v[1]*v[1]+v[2]*v[2]||1e-12;
+  var tt=clamp(-(S[0]*v[0]+S[1]*v[1]+S[2]*v[2])/vv,0,1), min=Math.hypot(S[0]+v[0]*tt,S[1]+v[1]*tt,S[2]+v[2]*tt);      // punto ESATTO del segmento piu' vicino alla testa (non per campioni)
+  var nv=Math.hypot(v[0],v[1],v[2])||1, na=Math.hypot(A[0],A[1],A[2])||1, cs=(-(v[0]*A[0]+v[1]*A[1]+v[2]*A[2]))/(nv*na), face=Math.acos(clamp(cs,-1,1))*180/Math.PI;
+  return {ok:min>=C.DMIN-1e-9&&face>=DEF.g1.faceDeg,min:min,face:face}; }
+function h1Pick(dS){
+  var C=H.cfg, N=C.secAz*C.secEl, dA=C.DMIN, mem=H.mem.slice(-2), levels=[mem,mem.slice(-1),[]], li, i, j, tries=0;
+  for(li=0;li<levels.length;li++){
+    var ex={}; levels[li].forEach(function(m){ ex[m.s]=1; ex[m.a]=1; });
+    var pairs=[]; for(i=0;i<N;i++) for(j=0;j<N;j++) if(i!==j&&!ex[i]&&!ex[j]) pairs.push([i,j]);
+    shuffle(pairs);
+    for(var q=0;q<pairs.length;q++) for(var k=0;k<4;k++){ var S=h1SectorPoint(pairs[q][0],dS), A=h1SectorPoint(pairs[q][1],dA), chk=h1PathCheck(S,A); tries++;
+      if(chk.ok) return {s:pairs[q][0],a:pairs[q][1],S:S,A:A,min:chk.min,face:chk.face,level:li,tries:tries,fallback:false}; } }
+  var s=Math.floor(Math.random()*N), S0=h1SectorPoint(s,dS), n0=Math.hypot(S0[0],S0[1],S0[2]), A0=[S0[0]/n0*dA,S0[1]/n0*dA,S0[2]/n0*dA];   // ultima risorsa: percorso radiale (sempre sicuro per la distanza)
+  return {s:s,a:s,S:S0,A:A0,min:dA,face:0,level:3,tries:tries,fallback:true}; }
+function h1StartPass(now){
+  var C=H.cfg, a=H.ape, rnd=function(){ return Math.random()*2-1; }, dA=C.DMIN, dS=Math.max(C.far*(1+C.apeVar*rnd()),dA+DEF.g1.apeGapEnd), v=C.apeVel*(1+C.apeVar*rnd());
+  var sel=h1Pick(dS), L=Math.hypot(sel.A[0]-sel.S[0],sel.A[1]-sel.S[1],sel.A[2]-sel.S[2]);
+  H.pass={n:++H.pn,tipo:'avvicinamento',v_nominale:C.apeVel,v:v,dS:dS,dA:dA,sS:sel.s,sA:sel.a,S:sel.S,A:sel.A,L:L,T:L/v,t:0,tw:0,tl:0,tStart:H.elapsed,presto:0,vuoti:0,rt:null,esito:null,tRedNow:null,terraApe:0,terraWin:0,minPath:sel.min,faceDeg:sel.face,fallback:sel.fallback,sign:1};
+  a.phase='approach'; a.alpha=0; a.obj.hide=false; if(a.sh) a.sh.hide=false; a.pos=null;
+  h1ApePlace(sel.S,0,'y',1,0);
+  if(C.snA) snd('g1_apparizione'); }
+function h1ApePlace(P,frame,tone,scale,al){
+  var a=H.ape, p=H.pass, C=H.cfg, n=Math.hypot(P[0],P[1],P[2]);
+  if(n<C.DMIN){ var kk=C.DMIN/Math.max(n,1e-6); P=[P[0]*kk,P[1]*kk,P[2]*kk]; n=C.DMIN; }          // rete di sicurezza: mai piu' vicina del limite
+  var hw=apeHW(n); if(a.pos){ var dx=P[0]-a.pos[0]; if(Math.abs(dx)>0.0005) p.sign=dx>0?-1:1; }
+  a.pos=P; a.hw=hw; a.dist=n; a.alpha=al;
+  var o=a.obj; o.x=P[0]; o.y=P[1]; o.z=P[2]; o.w=p.sign*1.28*hw*scale; o.h=1.28*hw*scale; o.tex=apeTexG(frame,tone); o.col[3]=al;
+  if(a.sh){ a.sh.M=[hw*1.4,0,0,0, 0,0,-hw*0.55,0, 0,1,0,0, P[0],DEF.floorY+0.004,P[2],1]; a.sh.z=P[2]; a.sh.x=P[0]; a.sh.col[3]=0.4*al*Math.max(0,1-Math.max(0,P[1]-DEF.floorY)/6); } }
+function h1ApeHide(){ var a=H.ape; a.phase='idle'; a.obj.hide=true; if(a.sh) a.sh.hide=true; a.pos=null; }
+function h1EndPass(){ var p=H.pass; if(p) H.mem.push({s:p.sS,a:p.sA}); h1ApeHide(); H.pass=null; var C=H.cfg; H.nextApe=H.elapsed+C.apeMin+Math.random()*(C.apeMax-C.apeMin); }
+function h1ApeTick(dt,now){
+  var C=H.cfg, a=H.ape; if(!C.ape) return;
+  if(a.phase==='idle'){ if(H.elapsed>=H.nextApe) h1StartPass(now); return; }
+  var p=H.pass, G1=DEF.g1;
+  if(a.phase==='approach'){ p.t+=dt; var f=Math.min(1,p.t/p.T), P=[p.S[0]+(p.A[0]-p.S[0])*f,p.S[1]+(p.A[1]-p.S[1])*f+G1.bobAmp*Math.sin(now/1000*7),p.S[2]+(p.A[2]-p.S[2])*f];
+    h1ApePlace(P,Math.floor(now/60)%2,'y',1,Math.min(1,(H.elapsed-p.tStart)/G1.fadeS));
+    if(f>=1) h1GoRed(now); }
+  else if(a.phase==='red'){ p.tw+=dt; var ph=Math.sin(2*Math.PI*G1.pulseHz*p.tw), P2=[p.A[0],p.A[1]+G1.bobAmp*Math.sin(now/1000*5),p.A[2]];
+    h1ApePlace(P2,Math.floor(now/60)%2,ph>=0?'r1':'r2',1+G1.pulseAmp*ph,1);
+    if(p.tw>=C.win) h1Omit(now); }
+  else if(a.phase==='leave'){ p.tl+=dt; var k=Math.min(1,p.tl/G1.leaveS); a.alpha=1-k; a.obj.col[3]=1-k; if(a.sh) a.sh.col[3]=(a.shLeave||0)*(1-k);
+    if(k>=1) h1EndPass(); } }
+function h1GoRed(now){ var p=H.pass, C=H.cfg; H.ape.phase='red'; p.tw=0; p.tRedNow=now; p.tRed=r1(H.elapsed);
+  h1ApePlace(p.A,0,'r1',1,1);
+  if(C.snS){ snd('g1_segnale'); say(9,{interrupt:true}); } }
+function h1Esito(name,vox,interrupt){ var C=H.cfg; if(!C.snE) return; snd(name); if(vox) say(vox,{interrupt:!!interrupt}); }
+function h1Omit(now){ var p=H.pass; p.esito='omissione'; H.cnt.omissioni++; H.score=Math.max(0,H.score-DEF.g1.ptsOmis); H.passes.push(p);
+  h1Esito('g1_omissione',11,true); H.ape.phase='leave'; H.ape.shLeave=H.ape.sh?H.ape.sh.col[3]:0; p.tl=0; h1Board(true); }
+function h1ApeHit(now){ var p=H.pass; p.esito='giusto'; p.rt=Math.round(now-p.tRedNow); H.cnt.giusti++; H.score+=DEF.g1.ptsApe; H.passes.push(p);
+  h1Esito('g1_giusto',12,true); H.ape.phase='leave'; H.ape.shLeave=H.ape.sh?H.ape.sh.col[3]:0; p.tl=0; h1Board(true); }
+function h1RayApe(ray,scale){
+  if(!H||!H.cfg.ape) return null; var a=H.ape; if(a.phase!=='approach'&&a.phase!=='red') return null; if(a.obj.col[3]<0.5) return null;
+  var R=Math.max(DEF.hitScale*a.hw,a.dist*Math.tan(deg(H.cfg.apeAng)))*(scale||1), cx=a.pos[0]-ray.o[0], cy=a.pos[1]-ray.o[1], cz=a.pos[2]-ray.o[2];
+  var t=cx*ray.d[0]+cy*ray.d[1]+cz*ray.d[2]; if(t<0) return null; var d2=cx*cx+cy*cy+cz*cz-t*t; if(d2>R*R) return null;
+  return {t:t-Math.sqrt(R*R-d2)}; }
+
+// ---------------- colpi ----------------
+// Il colpo si registra alla PRESSIONE del grilletto (selectstart): cosi' il tempo di reazione non comprende la durata della pressione.
+// Se il visore non manda selectstart, vale il rilascio (select). Una pressione e il suo rilascio contano una volta sola.
+function h1OnStart(ev){ if(!H) return; var hand=(ev.inputSource&&ev.inputSource.handedness)||'x'; H.startSeen[hand]=true; h1OnTrigger(ev); }
+function h1OnSelect(ev){ if(!H) return; var hand=(ev.inputSource&&ev.inputSource.handedness)||'x'; if(H.startSeen[hand]){ H.startSeen[hand]=false; return; } h1OnTrigger(ev); }
+function h1OnTrigger(ev){
+  if(!H||H.state!=='run'||H.freeze>0) return;
+  var src=ev.inputSource, hand=src&&src.handedness, role=h1Role(hand); if(!role) return;
+  var ray=RAYS[hand]||RAYS[Object.keys(RAYS)[0]]; if(!ray) return;
+  var now=performance.now(), C=H.cfg, a=H.ape, hb=C.balls?h1RayBalloon(ray,DEF.hitScale):null, ha=h1RayApe(ray,1);
+  if(role==='balloon'){
+    if(!C.balls){ H.ign.mano_inattiva++; return; }
+    if(ha&&!hb){ H.ign.ape_con_mano_palloncini++; return; }                 // l'ape con la mano dei palloncini: ignorato e registrato, senza penalita'
+    if(hb) h1HitBalloon(hb.b,now); else { H.cnt.mancato_pall++; if(C.snE) snd('g1_mancato'); }
+    return; }
+  if(role==='ape'){
+    if(!C.ape){ H.ign.mano_inattiva++; return; }
+    if(hb&&!ha){ H.ign.palloncino_con_mano_ape++; return; }                 // un palloncino con la mano dell'ape: ignorato e registrato
+    h1ApeTrigger(ha,true,now); return; }
+  if(ha){ h1ApeTrigger(ha,false,now); return; }                             // una mano sola: l'ape ha la precedenza se il raggio la tocca
+  if(hb){ h1HitBalloon(hb.b,now); return; }
+  H.cnt.mancato_pall++; if(C.snE) snd('g1_mancato'); }
+function h1ApeTrigger(ha,strict,now){
+  var a=H.ape, p=H.pass;
+  if(a.phase==='idle'||!p){ H.ign.ape_senza_ape++; return; }
+  if(a.phase==='approach'){ p.presto++; H.cnt.presto++; h1Esito('g1_presto',10,false); h1Board(true); return; }
+  if(a.phase==='red'){ if(ha) h1ApeHit(now); else { p.vuoti++; H.cnt.mancato_ape++; if(H.cfg.snE) snd('g1_mancato'); } return; }
+  H.ign.dopo_finestra++; }
+function h1RayEnd(r,k){
+  if(!H) return {t:3,hit:false}; var role=h1Role(k); if(!role) return {t:0.001,hit:false}; var best=null;
+  if(role==='balloon'||role==='both'){ var hb=h1RayBalloon(r,1); if(hb) best=hb.t; }
+  if(role==='ape'||role==='both'){ var ha=h1RayApe(r,1); if(ha&&(best==null||ha.t<best)) best=ha.t; }
+  return best!=null?{t:best,hit:true}:{t:6,hit:false}; }
+function h1RayCol(k,hit){ var role=H?h1Role(k):'both', c=(role==='ape')?RAYCOL.A:RAYCOL.B; return hit?[Math.min(1,c[0]+0.3),Math.min(1,c[1]+0.3),Math.min(1,c[2]+0.3),1]:c; }
+
+// ---------------- avvio, tabellone, ciclo ----------------
+function h1Start(){
+  readSettings(); var now=performance.now(), first=!(H&&H.sessions);
+  setScene('play1',SKY); VRS.onTrigger=h1OnSelect; VRS.onTriggerStart=h1OnStart; VRS.tick=h1Tick; VRS.noSel=now+500; VRS.rayEnd=h1RayEnd; VRS.rayCol=h1RayCol;
+  var C=h1Cfg(), G1=DEF.g1;
+  H={cfg:C,state:'run',last:now,elapsed:0,durS:C.durS,freeze:G1.startFreezeS,balloons:[],bid:0,rows:[],passes:[],pn:0,discarded:0,v:C.V0,nT:0,nC:0,vHist:[[0,C.V0]],vChanges:[],unaEff:false,
+    cnt:{colpiti:0,terra:0,terra_ape:0,terra_finestra:0,presto:0,giusti:0,omissioni:0,mancato_pall:0,mancato_ape:0},
+    ign:{ape_con_mano_palloncini:0,palloncino_con_mano_ape:0,mano_inattiva:0,ape_senza_ape:0,dopo_finestra:0},
+    score:0,minObs:1e9,aPrev:GP.a,bT:0,saved:false,boardKey:'',sessions:(H&&H.sessions||0)+1,mem:[],startSeen:{},nextApe:G1.firstApeS,nextSpawn:0,pass:null,ape:null};
+  if(C.easy) add({kind:'tex4',bg:true,M:[60,0,0,0, 0,0,-60,0, 0,1,0,0, 0,DEF.floorY,-58,1],tex:dotsTex(),uvs:[40,40],x:0,y:DEF.floorY,z:-58,w:60,h:60});
+  else if(C.fall){ var wz=-40, wTop=wz*Math.tan(deg(G1.groundEl)); add({kind:'flat',bg:true,M:[160,0,0,0, 0,60,0,0, 0,0,1,0, 0,wTop-60,wz,1],x:0,y:wTop-60,z:wz,w:160,h:60,col:GROUNDCOL.slice()}); }   // terreno uniforme a elevazione fissa (nessun indizio di profondita')
+  var a={phase:'idle',alpha:0,pos:null,hw:0.2,dist:C.far};
+  a.obj=add({kind:'text',face:true,x:0,y:0,z:-C.far,w:0.2,h:0.2,tex:apeTex(0),col:[1,1,1,0]}); a.obj.hide=true;
+  if(C.easy){ a.sh=add({kind:'blob',M:ID.slice(),x:0,y:DEF.floorY,z:-C.far,w:0.2,h:0.2,col:[0,0,0,0]}); a.sh.hide=true; }
+  H.ape=a;
+  if(C.balls) for(var i=0;i<C.n;i++) h1MkBalloon(true);
+  var bd=Math.max(DEF.boardD,C.dmax+3), bw=Math.tan(deg(12))*bd, bh=Math.tan(deg(3.4))*bd;
+  H.board=add({kind:'text',x:0,y:Math.tan(deg(24))*bd,z:-bd,w:bw,h:bh,tex:null}); H.boardGeo={w:bw,h:bh};
+  h1Board(true);
+  if(first&&C.balls&&C.ape) say(8); }
+function h1Board(force){
+  if(!H||!H.board) return; var left=Math.max(0,Math.ceil(H.durS-H.elapsed)), m=Math.floor(left/60), s=left%60, C=H.cfg, sv=(C.showV&&C.balls&&C.fall)?fmt(H.v,2)+' m/s':'';
+  var key=H.score+'|'+left+'|'+sv+'|'+H.cnt.colpiti; if(!force&&key===H.boardKey) return; H.boardKey=key;
+  if(H.board.tex) gl.deleteTexture(H.board.tex);
+  var lines=['PUNTI '+H.score+'    '+m+':'+('0'+s).slice(-2)]; if(sv) lines.push('velocità '+sv);
+  H.board.tex=texFromLines(lines,1024,Math.round(1024*H.boardGeo.h/H.boardGeo.w),{bg:'rgba(20,45,100,0.72)',size:Math.round(1024*H.boardGeo.h/H.boardGeo.w*(sv?0.36:0.5))}); }
+function h1Tick(now){
+  if(!H) return;
+  if(GP.a&&!H.aPrev&&H.state!=='end'){ H.aPrev=GP.a; h1TogglePause(now); return; } H.aPrev=GP.a;
+  if(GP.b&&H.state!=='end'){ if(!H.bT) H.bT=now; else if(now-H.bT>=DEF.stopHoldMs){ H.bT=0; h1Finish('interrotta'); return; } } else H.bT=0;
+  if(H.state==='pause'||H.state==='end') return;
+  var dt=Math.min(0.1,(now-H.last)/1000); H.last=now;
+  if(H.freeze>0){ H.freeze-=dt; H.balloons.forEach(function(b){ if(b.state==='live'){ b.obj.col[3]=Math.min(1,Math.max(0,(H.elapsed-b.fadeFrom)/DEF.g1.fadeS)); if(b.sh) b.sh.col[3]=0.45*b.obj.col[3]; } }); return; }
+  H.elapsed+=dt; if(H.elapsed>=H.durS){ h1Finish('tempo'); return; }
+  H.balloons.slice().forEach(function(b){ h1BalloonTick(b,dt,now); });
+  h1Refill(); h1ApeTick(dt,now);
+  var h=headNow(), m=1e9;                                                      // distanza minima osservata (superficie) di ogni oggetto dalla testa
+  H.balloons.forEach(function(b){ if(b.state==='pop') return; var o=b.obj; m=Math.min(m,Math.hypot(o.x-h[0],o.y-h[1],o.z-h[2])-b.r); });
+  if(H.ape.phase!=='idle'&&H.ape.pos) m=Math.min(m,Math.hypot(H.ape.pos[0]-h[0],H.ape.pos[1]-h[1],H.ape.pos[2]-h[2])-H.ape.hw);
+  if(m<H.minObs) H.minObs=m;
+  h1Board(false); }
+
+// ---------------- pausa ----------------
+function h1TogglePause(now){ if(H.state==='pause') h1Resume(now); else if(H.state!=='end') h1PauseOn(now); }
+function h1PauseOn(now){
+  H.prevState=H.state; H.state='pause'; H.world=OBJ; OBJ=[]; H.SSgame=VRS.SS; VRS.reS=true; VRS.clear=PAUSE_BG; VRS.onTrigger=null; VRS.onTriggerStart=null; VRS.noSel=now+500; VRS.noRay=false; VRS.rayEnd=null; VRS.rayCol=null;
+  var D=-DEF.uiD; panel(['PAUSA','Riposa gli occhi'],0,0.5,D,0.9,0.22);
+  button('rs','RIPRENDI',0,0.05,D,0.6,0.12,function(){ h1Resume(performance.now()); });
+  button('fin','TERMINA LA PARTITA',0,-0.22,D,0.6,0.12,function(){ h1Finish('interrotta'); },'#444a5a');
+  snd('pausa'); say(5,{interrupt:true}); }
+function h1Resume(now){
+  if(H.state!=='pause') return;
+  OBJ.forEach(function(o){ if(o.tex&&!o.tex.keep) gl.deleteTexture(o.tex); }); OBJ=H.world; H.world=null; VRS.SS=H.SSgame; VRS.reS=false; VRS.clear=SKY;
+  VRS.onTrigger=h1OnSelect; VRS.onTriggerStart=h1OnStart; VRS.noSel=now+400; VRS.rayEnd=h1RayEnd; VRS.rayCol=h1RayCol; H.last=now; H.aPrev=GP.a; H.bT=0;
+  if(H.pass){ var ended=(H.pass.esito!=null); if(!ended) H.discarded++; h1ApeHide(); if(ended) H.mem.push({s:H.pass.sS,a:H.pass.sA}); H.pass=null; H.nextApe=H.elapsed+(ended?H.cfg.apeMin:3); }   // il passaggio interrotto non conta
+  H.freeze=DEF.g1.freezeS; H.state='run'; }
+
+// ---------------- fine e salvataggio ----------------
+function h1Save(why){
+  if(!H||H.saved) return null; H.saved=true; var C=H.cfg, nome=nomeEff(), E=H.elapsed, dom=(SET.mano==='L')?'sinistra':'destra', non=(SET.mano==='L')?'destra':'sinistra';
+  var comp=SET.compito==='both'?'palloncini+ape':(SET.compito==='balloons'?'solo palloncini':'solo ape');
+  var hits=H.rows.filter(function(r){ return r.e==='colpito'; }), tms=hits.map(function(r){ return r.t_ms; }), dh=hits.map(function(r){ return r.d; }), rts=H.passes.filter(function(q){ return q.esito==='giusto'; }).map(function(q){ return q.rt; });
+  var key=['ape_rossa',nome,C.fall?'caduta':'fermi',comp,SET.indizi,C.near,SET.durMin,C.ad?'adattiva':'costante'].join('|'), prima=DB.record[key]||0;
+  var passes=H.passes.map(function(q){ return {n:q.n,tipo:q.tipo,esito:q.esito,rt_ms:q.rt,anticipi:q.presto,colpi_vuoti_finestra:q.vuoti,v_avvicinamento_ms:r3(q.v),v_radiale_ms:r3((q.dS-q.dA)/q.T),dist_partenza_m:r2(q.dS),dist_arrivo_m:r2(q.dA),
+    settore_partenza:q.sS,settore_arrivo:q.sA,t_inizio_s:r1(q.tStart),t_rosso_s:q.tRed==null?null:q.tRed,a_terra_comparsa:q.terraApe,a_terra_finestra:q.terraWin,min_percorso_m:r2(q.minPath),angolo_viso_gradi:Math.round(q.faceDeg),percorso_radiale:!!q.fallback}; });
+  var p={id:'g'+Date.now().toString(36),ts:new Date().toISOString(),ver:VERSION,gioco:'ape_rossa',sogg:nome,scheda_visore:VIS.scheda,soglia_stereo_arcsec:VIS.thr,soglia_affidabilita:VIS.thrLiv||null,
+    modalita:C.fall?'caduta':'fermi',compiti:comp,mano_dominante:dom,mano_palloncini:C.balls?dom:null,mano_ape:C.ape?(C.una?dom:non):null,una_mano:C.una,una_mano_effettiva:!!H.unaEff,
+    indizi:SET.indizi,limite_m:C.near,profilo:SET.profilo,durata_prevista_s:Math.round(C.durS),durata_s:r1(E),voce:SET.voce,voci_decodificate:voPronte(),
+    suoni:{esito:C.snE,apparizione:C.snA,segnale:C.snS},punti:H.score,
+    palloncini:{modalita:C.fall?'caduta':'fermi',v_iniziale_ms:C.fall?r3(C.V0):null,tetto_ms:C.fall?r3(C.V0):null,adattiva:C.ad,passo_pct:C.ad?SET.vStep:null,n_giu:C.ad?C.nDown:null,n_su:C.ad?C.nUp:null,minimo_pct:C.ad?SET.vMin:null,
+      comparsi:H.bid,colpiti:H.cnt.colpiti,a_terra:H.cnt.terra,mancati:H.cnt.mancato_pall,tempo_medio_ms:tms.length?Math.round(mean(tms)):null,tempo_sd_ms:tms.length>2?Math.round(sd(tms)):null,
+      prof_colpiti_min_m:dh.length?Math.min.apply(null,dh):null,prof_colpiti_max_m:dh.length?Math.max.apply(null,dh):null,prof_colpiti_media_m:dh.length?r2(mean(dh)):null,
+      vel_raggiunta_ms:C.fall?r3(h1VelAvg()):null,vel_finale_ms:C.fall?r3(H.v):null,cambi_velocita:H.vChanges,a_terra_con_ape:H.cnt.terra_ape,a_terra_in_finestra:H.cnt.terra_finestra},
+    ape:{tipo_ape:'avvicinamento',v_nominale_ms:C.ape?C.apeVel:null,variazione_pct:C.ape?SET.apeVar:null,finestra_s:C.ape?C.win:null,area_colpo_gradi:C.ape?C.apeAng:null,
+      passaggi:H.passes.length,scartati:H.discarded,giusti:H.cnt.giusti,omissioni:H.cnt.omissioni,anticipi:H.cnt.presto,colpi_vuoti_finestra:H.cnt.mancato_ape,rt_medio_ms:rts.length?Math.round(mean(rts)):null,rt_sd_ms:rts.length>2?Math.round(sd(rts)):null},
+    ignorati:H.ign,dist_oss_min_m:H.minObs<1e8?r2(H.minObs):null,fine:why,record_prima:prima,nuovo_record:H.score>prima&&H.score>0,righe_palloncini:H.rows,righe_ape:passes};
+  if(p.nuovo_record) DB.record[key]=H.score;
+  DB.prove.push(p); saveDB(); renderRes(); return p; }
+function h1Finish(why){
+  if(!H||H.state==='end') return; H.state='end'; VRS.tick=null; VRS.onTrigger=null; VRS.onTriggerStart=null;
+  var p=h1Save(why); snd('fine'); say(6,{interrupt:true}); sceneEnd1(p); }
+function h1Partial(){ if(H&&H.state!=='end'&&!H.saved&&(H.rows.length||H.passes.length||H.cnt.mancato_pall||H.cnt.presto)){ H.state='end'; h1Save('uscita VR'); } else if(H&&H.state!=='end'){ H.state='end'; } }
+// ================= SCENE VR (home, menu dei giochi, Prova audio, fine) e pagina 2D =================
+function setScene(name,clear){ VRS.tok=(VRS.tok||0)+1; VRS.scene=name; clearScene(); VRS.clear=clear||MENU_BG; VRS.tick=null; VRS.onTrigger=null; VRS.onTriggerStart=null; VRS.noRay=false; VRS.rayEnd=null; VRS.rayCol=null; VRS.reS=true; VRS.noSel=performance.now()+600; }
+function setTxt(){ return 'Limite vicino '+fmt(SET.near,1)+' m ('+SET.profilo+') · '+SET.durMin+' min · indizi '+SET.indizi+' · mano '+(SET.mano==='L'?'sinistra':'destra')+' · colore '+(SET.colore==='on'?'sì':'no')+' · voce '+(SET.voce==='on'?(voPronte()+'/'+VO.length):'no'); }
+function setTxt1(){ return ['Limite vicino '+fmt(SET.near,1)+' m ('+SET.profilo+') · '+SET.durMin+' min · indizi '+SET.indizi,'palloncini '+(SET.baMode==='fermi'?'fermi':'a caduta')+' · '+(SET.compito==='both'?'palloncini + ape':(SET.compito==='balloons'?'solo palloncini':'solo ape'))+(SET.baMode==='caduta'&&SET.compito!=='ape'?' · velocità '+(SET.adatt==='on'?'adattiva':'costante'):'')]; }
+var AUD_BACK=null, AUD_PAGE=0;
+// scena iniziale: i due giochi
+function sceneHome(){
+  setScene('home'); var D=-DEF.uiD;
+  panel(['SFDN Gioco · scegli il gioco','Sperimentale, non validato. Supervisione sempre.'],0,0.82,D,1.3,0.2);
+  button('g1','1  APE ROSSA',0,0.4,D,0.75,0.14,function(){ sceneMenu1(); },'#1f6feb');
+  button('g2','2  APE E PALLONCINO',0,0.12,D,0.75,0.14,function(){ sceneMenu(); },'#1a7f37');
+  button('au','PROVA AUDIO',0,-0.2,D,0.6,0.12,function(){ sceneAudio(sceneHome); },'#4a5568');
+  button('ex','ESCI DALLA VR',0,-0.46,D,0.6,0.12,function(){ if(xrSession) xrSession.end(); },'#444a5a'); }
+// gioco 2 (v0.1, invariato) + un pulsante per tornare ai giochi
 function sceneMenu(){
   setScene('menu'); var D=-DEF.uiD;
   panel(['SFDN Gioco · Ape e palloncini','Sperimentale, non validato. Supervisione sempre.'],0,0.72,D,1.2,0.2);
   panel([setTxt(),'Le impostazioni si cambiano nella pagina, fuori dalla VR.'],0,0.34,D,1.3,0.16,{bg:'rgba(30,34,44,0.7)',bold:false});
   button('go','GIOCA',0,-0.02,D,0.6,0.13,function(){ gStart(); },'#1a7f37');
-  button('au','PROVA AUDIO',0,-0.3,D,0.6,0.13,function(){ sceneAudio(); });
-  button('ex','ESCI DALLA VR',0,-0.58,D,0.6,0.13,function(){ if(xrSession) xrSession.end(); },'#8a2d2d'); }
-function sceneAudio(){
-  setScene('audio'); var D=-DEF.uiD;
-  panel(['Prova audio','Premi ▶ e ascolta: la frase deve essere quella scritta.'],0,0.98,D,1.2,0.17);
-  VO.forEach(function(v,i){ var y=0.74-i*0.24, st=(v.loaded===false?'file non caricato':(v.decoded===false?'caricato ma non decodificato':(v.buf?'caricato e decodificato, '+fmt(v.dur,1)+' s':'in attesa')));
-    panel([('0'+v.n).slice(-2)+'  '+v.txt,st+(v.err?' ('+v.err+')':'')],-0.3,y,D,1.0,0.1,{align:'left',bg:v.buf?'rgba(30,60,40,0.9)':'rgba(70,35,35,0.9)',size:42});
+  button('au','PROVA AUDIO',0,-0.3,D,0.6,0.13,function(){ sceneAudio(sceneMenu); });
+  button('ex','ESCI DALLA VR',0,-0.58,D,0.6,0.13,function(){ if(xrSession) xrSession.end(); },'#8a2d2d');
+  button('hm','I GIOCHI',0,-0.86,D,0.6,0.11,function(){ sceneHome(); },'#4a5568'); }
+function sceneMenu1(){
+  setScene('menu1'); var D=-DEF.uiD, dom=SET.mano==='L'?'sinistra':'destra', non=SET.mano==='L'?'destra':'sinistra';
+  panel(['APE ROSSA','Palloncini blu: mano '+dom+'.  Ape: mano '+non+', solo quando diventa ROSSA.'],0,0.78,D,1.3,0.24);
+  panel(setTxt1().concat(['Le impostazioni si cambiano nella pagina, fuori dalla VR.']),0,0.38,D,1.4,0.2,{bg:'rgba(30,34,44,0.7)',bold:false});
+  button('go1','GIOCA',0,0.02,D,0.6,0.13,function(){ h1Start(); },'#1a7f37');
+  button('au','PROVA AUDIO',0,-0.26,D,0.6,0.13,function(){ sceneAudio(sceneMenu1); },'#4a5568');
+  button('hm','I GIOCHI',0,-0.54,D,0.6,0.12,function(){ sceneHome(); },'#4a5568');
+  button('ex','ESCI DALLA VR',0,-0.8,D,0.6,0.12,function(){ if(xrSession) xrSession.end(); },'#444a5a'); }
+// Prova audio in VR: pagina 0 = voci 01-07 (gioco 2), pagina 1 = voci 08-12 (gioco 1)
+function sceneAudio(back,page){
+  if(back) AUD_BACK=back; AUD_PAGE=page||0; setScene('audio'); var D=-DEF.uiD, from=AUD_PAGE?7:0, to=AUD_PAGE?VO.length:7;
+  panel(['Prova audio'+(AUD_PAGE?' · gioco 1':' · gioco 2'),'Premi ▶ e ascolta: la frase deve essere quella scritta.'],0,1.0,D,1.2,0.15);
+  VO.slice(from,to).forEach(function(v,i){ var y=0.70-i*0.24, st=(v.loaded===false?'file non caricato':(v.decoded===false?'caricato ma non decodificato':(v.buf?'caricato e decodificato, '+fmt(v.dur,1)+' s':'in attesa'))), tx=('0'+v.n).slice(-2)+'  '+v.txt, ln=[tx];
+    if(tx.length>56){ var m=tx.indexOf(' ',Math.floor(tx.length/2)-6); if(m<0) m=tx.lastIndexOf(' '); ln=[tx.slice(0,m),tx.slice(m+1)]; }      // frase lunga: due righe, per leggerla
+    ln.push(st+(v.err?' ('+v.err+')':''));
+    panel(ln,-0.3,y,D,1.0,ln.length>2?0.12:0.1,{align:'left',bg:v.buf?'rgba(30,60,40,0.9)':'rgba(70,35,35,0.9)',size:ln.length>2?28:42});
     button('pl'+v.n,v.buf?'▶':'-',1.0,y,D,0.2,0.1,function(){ say(v.n,{force:true}); },v.buf?'#1f6feb':'#555'); });
-  button('bk','INDIETRO',0,-0.96,D,0.5,0.11,function(){ sceneMenu(); }); }
+  button('bk','INDIETRO',-0.5,-1.0,D,0.38,0.11,function(){ (AUD_BACK||sceneMenu)(); });
+  button('pgn',AUD_PAGE?'◂ VOCI 01-07':'VOCI 08-12 ▸',0.4,-1.0,D,0.45,0.11,function(){ sceneAudio(null,AUD_PAGE?0:1); },'#4a5568'); }
 function sceneEnd(p){
   setScene('end',PAUSE_BG); var D=-DEF.uiD, C=G.cfg;
   if(p){ panel(['FINE! Punti: '+p.punti,'Giusti '+p.giusti+' · troppo presto '+p.presto+' · sbagliati '+p.sbagliati+' · scoppi '+p.scoppi,
@@ -619,6 +1041,18 @@ function sceneEnd(p){
   button('again','GIOCA ANCORA',0,-0.12,D,0.6,0.12,function(){ gStart(); },'#1a7f37');
   button('mn','MENU',0,-0.38,D,0.6,0.12,function(){ sceneMenu(); });
   button('ex','ESCI DALLA VR',0,-0.64,D,0.6,0.12,function(){ if(xrSession) xrSession.end(); },'#8a2d2d'); }
+function sceneEnd1(p){
+  setScene('end1',PAUSE_BG); var D=-DEF.uiD;
+  if(p){ var b=p.palloncini, a=p.ape;
+    var ln=['FINE! Punti: '+p.punti];
+    if(p.compiti!=='solo ape') ln.push('Palloncini colpiti '+b.colpiti+' · a terra '+b.a_terra);
+    if(p.compiti!=='solo palloncini') ln.push('Ape giusta '+a.giusti+' · omissioni '+a.omissioni+' · troppo presto '+a.anticipi);
+    ln.push((p.nuovo_record?'NUOVO RECORD!  ':(p.record_prima?'Record '+p.record_prima+'  ':''))+(p.fine==='tempo'?'Tempo finito':'Partita interrotta'));
+    panel(ln,0,0.45,D,1.4,0.34); }
+  button('again','GIOCA ANCORA',0,-0.12,D,0.6,0.12,function(){ h1Start(); },'#1a7f37');
+  button('mn','MENU',0,-0.36,D,0.6,0.12,function(){ sceneMenu1(); },'#4a5568');
+  button('hm','I GIOCHI',0,-0.6,D,0.6,0.12,function(){ sceneHome(); },'#4a5568');
+  button('ex','ESCI DALLA VR',0,-0.84,D,0.6,0.12,function(){ if(xrSession) xrSession.end(); },'#444a5a'); }
 
 // ---------------- avvio e uscita VR ----------------
 function startVR(){
@@ -628,9 +1062,9 @@ function startVR(){
     xrSession=s; if(!gl) initGL();
     var p=gl.makeXRCompatible?gl.makeXRCompatible():Promise.resolve();
     return p.then(function(){ s.updateRenderState({baseLayer:new XRWebGLLayer(s,gl)}); return s.requestReferenceSpace('local'); }).then(function(r){
-      refSpace=r; s.addEventListener('select',onSelect);
-      s.addEventListener('end',function(){ try{ gPartial(); }catch(e){} xrSession=null; VRS.tick=null; if(gl) clearScene(); $('vrMsg').textContent='Sei uscito dalla VR. I risultati sono qui sotto.'; renderRes(); });
-      VRS.fps={n:0,t0:0,val:null}; VRS.SS=null; sceneMenu(); s.requestAnimationFrame(onXRFrame); $('vrMsg').textContent='VR avviata.'; });
+      refSpace=r; s.addEventListener('select',onSelect); s.addEventListener('selectstart',onSelectStart);
+      s.addEventListener('end',function(){ try{ gPartial(); }catch(e){} try{ h1Partial(); }catch(e){} xrSession=null; VRS.tick=null; if(gl) clearScene(); $('vrMsg').textContent='Sei uscito dalla VR. I risultati sono qui sotto.'; renderRes(); });
+      VRS.fps={n:0,t0:0,val:null}; VRS.SS=null; sceneHome(); s.requestAnimationFrame(onXRFrame); $('vrMsg').textContent='VR avviata.'; });
   }).catch(function(e){ $('vrMsg').innerHTML='<span class="bad">Non riesco ad avviare la VR: '+esc(e.message||e)+'</span>'; });
 }
 $('btnVR').addEventListener('click',startVR);
@@ -638,20 +1072,40 @@ $('btnVR').addEventListener('click',startVR);
 // ---------------- risultati nella pagina, mail, copia, scarico ----------------
 function durTxt(s){ s=Math.round(s); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
 function sumTxt(p){
-  var L=[]; L.push('Partita '+new Date(p.ts).toLocaleString('it-IT')+(p.sogg?', giocatore '+p.sogg:'')+' ('+p.ver+')');
+  if(p.gioco==='ape_rossa') return sumTxt1(p);
+  var L=[]; L.push('Partita Ape e palloncino '+new Date(p.ts).toLocaleString('it-IT')+(p.sogg?', giocatore '+p.sogg:'')+' ('+p.ver+')');
   L.push('Punti '+p.punti+' · giusti '+p.giusti+' · troppo presto '+p.presto+' · sbagliati '+p.sbagliati+' · scoppi '+p.scoppi+' · mancati '+p.mancati+' · combo massima '+p.combo_max+(p.nuovo_record?' · NUOVO RECORD':''));
   L.push('Errore di tempo sul colpo giusto (dopo l’atterraggio dell’ape): '+(p.err_medio_ms==null?'-':(p.err_medio_ms+' ms medio'+(p.err_sd_ms!=null?', DS '+p.err_sd_ms:''))));
   L.push('Distanza dei palloncini colpiti: '+(p.dist_min_m==null?'-':(fmt(p.dist_min_m,2)+' - '+fmt(p.dist_max_m,2)+' m'))+' · distanza minima osservata di ogni oggetto: '+(p.dist_oss_min_m==null?'-':fmt(p.dist_oss_min_m,2)+' m'));
   L.push('Limite vicino '+fmt(p.limite_m,1)+' m ('+p.profilo+') · indizi '+p.indizi+' · facilitazione colore '+(p.colore_facilitazione?'sì':'no')+' · mano '+p.mano+' · sosta '+p.sosta_s+' s · volo '+p.volo_s+' s');
-  L.push('Durata '+durTxt(p.durata_s)+' di '+durTxt(p.durata_prevista_s)+' · fine: '+p.fine+' · voce '+p.voce+' ('+p.voci_decodificate+'/7 file)'+(p.soglia_stereo_arcsec!=null?' · soglia stereo dal Visore '+p.soglia_stereo_arcsec+' secondi d’arco':''));
+  L.push('Durata '+durTxt(p.durata_s)+' di '+durTxt(p.durata_prevista_s)+' · fine: '+p.fine+' · voce '+p.voce+' ('+p.voci_decodificate+' file)'+(p.soglia_stereo_arcsec!=null?' · soglia stereo dal Visore '+p.soglia_stereo_arcsec+' secondi d’arco':''));
+  return L.join('\n'); }
+function sumTxt1(p){
+  var b=p.palloncini, a=p.ape, L=[], sn=function(v){ return v?'sì':'no'; };
+  L.push('Partita APE ROSSA '+new Date(p.ts).toLocaleString('it-IT')+(p.sogg?', giocatore '+p.sogg:'')+' ('+p.ver+')');
+  L.push('Punti '+p.punti+(p.nuovo_record?' · NUOVO RECORD':'')+' · compiti '+p.compiti+' · palloncini '+b.modalita+' · mani: palloncini '+(p.mano_palloncini||'-')+', ape '+(p.mano_ape||'-')+(p.una_mano||p.una_mano_effettiva?' (una mano sola)':'')+' · indizi '+p.indizi);
+  L.push('Limite vicino '+fmt(p.limite_m,1)+' m ('+p.profilo+') · durata '+durTxt(p.durata_s)+' di '+durTxt(p.durata_prevista_s)+' · fine: '+p.fine+' · voce '+p.voce+' ('+p.voci_decodificate+' file) · suoni: esito '+sn(p.suoni.esito)+', apparizione '+sn(p.suoni.apparizione)+', segnale '+sn(p.suoni.segnale)+(p.soglia_stereo_arcsec!=null?' · soglia stereo dal Visore '+p.soglia_stereo_arcsec+' secondi d’arco':''));
+  if(p.compiti!=='solo ape'){
+    L.push('PALLONCINI: colpiti '+b.colpiti+', a terra '+b.a_terra+', mancati '+b.mancati+' · tempo dalla comparsa al colpo '+(b.tempo_medio_ms==null?'-':b.tempo_medio_ms+' ms medio'+(b.tempo_sd_ms!=null?', DS '+b.tempo_sd_ms:''))+' · profondità dei colpiti '+(b.prof_colpiti_min_m==null?'-':fmt(b.prof_colpiti_min_m,2)+' - '+fmt(b.prof_colpiti_max_m,2)+' m'));
+    if(b.modalita==='caduta') L.push('Velocità: iniziale e tetto '+fmt(b.v_iniziale_ms,2)+' m/s · adattiva '+sn(b.adattiva)+' · raggiunta (media ultimo minuto) '+fmt(b.vel_raggiunta_ms,2)+' · finale '+fmt(b.vel_finale_ms,2)+' · cambi '+b.cambi_velocita.length+(b.adattiva?'':' (la velocità adattiva confronta le sedute solo se uguale)'));
+    if(p.compiti!=='solo palloncini') L.push('Palloncini a terra mentre c’era l’ape: '+b.a_terra_con_ape+' (nella finestra rossa: '+b.a_terra_in_finestra+')'); }
+  if(p.compiti!=='solo palloncini'){
+    L.push('APE ('+a.tipo_ape+', '+fmt(a.v_nominale_ms,2)+' m/s, finestra '+a.finestra_s+' s): passaggi '+a.passaggi+', giusti '+a.giusti+', anticipi (troppo presto) '+a.anticipi+', omissioni '+a.omissioni+' · tempo di reazione dopo il rosso '+(a.rt_medio_ms==null?'-':a.rt_medio_ms+' ms medio'+(a.rt_sd_ms!=null?', DS '+a.rt_sd_ms:''))); }
+  L.push('Colpi ignorati (tipo sbagliato): ape con la mano dei palloncini '+p.ignorati.ape_con_mano_palloncini+', palloncino con la mano dell’ape '+p.ignorati.palloncino_con_mano_ape+' · distanza minima osservata di ogni oggetto: '+(p.dist_oss_min_m==null?'-':fmt(p.dist_oss_min_m,2)+' m'));
   return L.join('\n'); }
 function renderRes(){
   var P=DB.prove.slice().reverse(), h='';
   if(!P.length){ $('res').innerHTML='<p class="mut">Ancora nessuna partita.</p>'; $('sum').textContent=''; return; }
-  h+='<h3 style="margin:0 0 4px">Ultima partita</h3><pre>'+esc(sumTxt(P[0]))+'</pre>';
-  h+='<table><tr><th>Data</th><th>Giocatore</th><th>Punti</th><th>G</th><th>TP</th><th>S</th><th>Sc</th><th>Err. medio</th><th>Limite</th><th>Indizi</th><th>Durata</th><th>Fine</th></tr>';
-  P.slice(0,12).forEach(function(p){ h+='<tr><td>'+esc(new Date(p.ts).toLocaleString('it-IT'))+'</td><td>'+esc(p.sogg||'-')+'</td><td>'+p.punti+'</td><td>'+p.giusti+'</td><td>'+p.presto+'</td><td>'+p.sbagliati+'</td><td>'+p.scoppi+'</td><td>'+(p.err_medio_ms==null?'-':p.err_medio_ms+' ms')+'</td><td>'+fmt(p.limite_m,1)+' m</td><td>'+esc(p.indizi)+'</td><td>'+durTxt(p.durata_s)+'</td><td>'+esc(p.fine)+'</td></tr>'; });
-  h+='</table><p class="hint">G giusti, TP troppo presto, S sbagliati, Sc scoppi.</p>';
+  var P1=P.filter(function(p){ return p.gioco==='ape_rossa'; }), P2=P.filter(function(p){ return p.gioco!=='ape_rossa'; });
+  h+='<h3 style="margin:0 0 4px">Ultima partita ('+(P[0].gioco==='ape_rossa'?'1 Ape rossa':'2 Ape e palloncino')+')</h3><pre>'+esc(sumTxt(P[0]))+'</pre>';
+  if(P1.length){
+    h+='<h3 style="margin:10px 0 4px">Gioco 1 · Ape rossa</h3><table><tr><th>Data</th><th>Giocatore</th><th>Punti</th><th>Pall. colpiti</th><th>A terra</th><th>Ape G</th><th>TP</th><th>Om</th><th>Tempo di reazione</th><th>Palloncini</th><th>Limite</th><th>Durata</th><th>Fine</th></tr>';
+    P1.slice(0,12).forEach(function(p){ h+='<tr><td>'+esc(new Date(p.ts).toLocaleString('it-IT'))+'</td><td>'+esc(p.sogg||'-')+'</td><td>'+p.punti+'</td><td>'+p.palloncini.colpiti+'</td><td>'+p.palloncini.a_terra+'</td><td>'+p.ape.giusti+'</td><td>'+p.ape.anticipi+'</td><td>'+p.ape.omissioni+'</td><td>'+(p.ape.rt_medio_ms==null?'-':p.ape.rt_medio_ms+' ms')+'</td><td>'+esc(p.palloncini.modalita)+(p.palloncini.adattiva?' adattiva':'')+'</td><td>'+fmt(p.limite_m,1)+' m</td><td>'+durTxt(p.durata_s)+'</td><td>'+esc(p.fine)+'</td></tr>'; });
+    h+='</table><p class="hint">G giusti, TP troppo presto (anticipi), Om omissioni.</p>'; }
+  if(P2.length){
+    h+='<h3 style="margin:10px 0 4px">Gioco 2 · Ape e palloncino</h3><table><tr><th>Data</th><th>Giocatore</th><th>Punti</th><th>G</th><th>TP</th><th>S</th><th>Sc</th><th>Err. medio</th><th>Limite</th><th>Indizi</th><th>Durata</th><th>Fine</th></tr>';
+    P2.slice(0,12).forEach(function(p){ h+='<tr><td>'+esc(new Date(p.ts).toLocaleString('it-IT'))+'</td><td>'+esc(p.sogg||'-')+'</td><td>'+p.punti+'</td><td>'+p.giusti+'</td><td>'+p.presto+'</td><td>'+p.sbagliati+'</td><td>'+p.scoppi+'</td><td>'+(p.err_medio_ms==null?'-':p.err_medio_ms+' ms')+'</td><td>'+fmt(p.limite_m,1)+' m</td><td>'+esc(p.indizi)+'</td><td>'+durTxt(p.durata_s)+'</td><td>'+esc(p.fine)+'</td></tr>'; });
+    h+='</table><p class="hint">G giusti, TP troppo presto, S sbagliati, Sc scoppi.</p>'; }
   $('res').innerHTML=h; $('sum').textContent=P.slice(0,3).map(sumTxt).join('\n\n'); }
 function mailBody(){ var P=DB.prove.slice(-5).reverse(); var t='Risultati '+VERSION+' - '+new Date().toLocaleString('it-IT')+'\n\n'+(P.length?P.map(sumTxt).join('\n\n'):'Nessuna partita.')+'\n';
   return t.length>4800?t.slice(0,4800)+'\n[...]':t; }
